@@ -237,6 +237,10 @@ export function Navigator() {
       if (isTyping) {
         return;
       }
+      // Leave browser shortcuts alone: Cmd or Alt with an arrow goes back a page.
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
@@ -426,7 +430,7 @@ export function Navigator() {
                     visibleMonth={visibleMonth}
                     selectedHour={selectedHour}
                     isPlaying={isPlaying}
-                    onTogglePlay={() => setIsPlaying(!isPlaying)}
+                    onTogglePlay={() => setIsPlaying((playing) => !playing)}
                     onChangeHour={setSelectedHour}
                   />
                 )}
