@@ -56,9 +56,6 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         <p className="font-mono tabular-nums text-muted-foreground">
           {formatHour(selectedHour)}
         </p>
-        {row.isCustom && (
-          <p className="text-muted-foreground">Flat horizon, no terrain.</p>
-        )}
       </div>
 
       {hourly === null && !hourlyFailed && (
@@ -71,32 +68,33 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
       )}
 
       {hourly !== null && (
-        <>
+        // Sun and Earth side by side: height above the terrain, raw
+        // elevation, and the countdown to the next change.
+        <div className="grid grid-cols-2 gap-x-4">
+          <p className="col-span-2 text-muted-foreground">Above terrain</p>
           <div>
-            <p className="text-muted-foreground">Sun above terrain</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-power">
               {sunClearance.toFixed(2)}°
             </p>
             <p className="font-mono text-xs tabular-nums text-muted-foreground">
-              elevation {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
+              Sun elev. {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono tabular-nums text-foreground">
+            <p className="font-mono text-[13px] tabular-nums text-foreground">
               {countdownText(hourly.sun_visible, selectedHour, "Sunset", "Sunrise")}
             </p>
           </div>
           <div>
-            <p className="text-muted-foreground">Earth above terrain</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-comms">
               {earthClearance.toFixed(2)}°
             </p>
             <p className="font-mono text-xs tabular-nums text-muted-foreground">
-              elevation {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
+              Earth elev. {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono tabular-nums text-foreground">
+            <p className="font-mono text-[13px] tabular-nums text-foreground">
               {countdownText(hourly.earth_visible, selectedHour, "Earthset", "Earthrise")}
             </p>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

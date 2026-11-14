@@ -48,7 +48,8 @@ type Tooltip = {
 };
 
 // The three columns of every row: name, the day cells, the month totals.
-const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_7.5rem] items-center gap-x-3";
+// leading-tight lets rows shrink to 17.5 px, so 21 rows still fit one screen.
+const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_7.5rem] items-center gap-x-3 leading-tight";
 
 // The two month totals, Sun then Earth, in fixed columns so the numbers line up.
 const TOTAL_COLUMNS = "grid grid-cols-2 gap-x-2 text-right";
@@ -164,7 +165,7 @@ export function SitesGrid({
         </span>
       </div>
 
-      <ul className="flex min-h-0 flex-1 flex-col gap-[3px] overflow-y-auto">
+      <ul className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto">
         {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
@@ -189,10 +190,18 @@ export function SitesGrid({
           const isFirstCustom = row.isCustom && (rowIndex === 0 || !rows[rowIndex - 1].isCustom);
 
           return (
-            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-4 max-h-[26px] flex-1 basis-0")}>
+            <li
+              key={site.id}
+              className={cn(
+                ROW_COLUMNS,
+                // Rows share the height. The first custom row also holds the
+                // divider, so it takes its own full height instead.
+                isFirstCustom ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
+              )}
+            >
               {/* The divider spans all three columns, above the first custom row. */}
               {isFirstCustom && (
-                <div className="col-span-3 mt-1 mb-1 border-t border-line pt-1.5 text-xs text-muted-foreground">
+                <div className="col-span-3 mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
                   Custom points: no terrain
                 </div>
               )}
@@ -204,7 +213,7 @@ export function SitesGrid({
                   title={site.name}
                   onClick={() => onSelect(site.id, selectedHour)}
                   className={cn(
-                    "block min-w-0 truncate rounded-sm text-left text-sm",
+                    "block min-w-0 truncate rounded-sm text-left text-sm leading-tight",
                     // A custom point is named by its numbers, which use the mono font.
                     row.isCustom && "font-mono tabular-nums",
                     isSelected && "font-medium text-bright",
@@ -223,7 +232,7 @@ export function SitesGrid({
                     {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
                     {row.isCustom && (
                       <>
-                        <span className="rounded-sm border border-line px-1">no terrain</span>
+                        <span className="rounded-sm border border-line px-1 leading-none py-px">no terrain</span>
                         <button
                           type="button"
                           aria-label={"Remove " + site.name}

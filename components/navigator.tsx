@@ -12,6 +12,7 @@ import { MonthChips } from "@/components/month-chips";
 import { SelectedSite } from "@/components/selected-site";
 import { SitesGrid } from "@/components/sites-grid";
 import { SortControl } from "@/components/sort-control";
+import { MapOverlay } from "@/components/map-overlay";
 import { SouthPoleMap } from "@/components/south-pole-map";
 import {
   MAX_CUSTOM_SITES,
@@ -82,6 +83,8 @@ export function Navigator() {
   const [selectedHour, setSelectedHour] = useState(0);
   const [visibleMonth, setVisibleMonth] = useState(0);
   const [sortKey, setSortKey] = useState<SortKey>("power");
+  // The big zoomable map is open.
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   // Things to remember that should not redraw the page when they change.
   const requestedHourlyIds = useRef<Set<string>>(new Set());
@@ -322,7 +325,7 @@ export function Navigator() {
               about the same site and hour. */}
           <Panel title="Selected site">
             {/* Numbers on the left, the month's clearance charts on the right. */}
-            <div className="grid grid-cols-[15rem_minmax(0,1fr)] gap-6">
+            <div className="grid grid-cols-[23rem_minmax(0,1fr)] gap-6">
               <SelectedSite
                 row={selectedRow}
                 hourly={selectedHourly}
@@ -343,13 +346,25 @@ export function Navigator() {
         <div className="flex min-h-0 flex-col gap-3">
 
           <Panel title="South pole" className="flex min-h-0 flex-1 flex-col">
-            <SouthPoleMap
-              rows={rows}
-              selectedSiteId={selectedSiteId}
-              pickedPoint={pickedPoint}
-              onSelectSite={selectSite}
-              onPickPoint={(lat, lon) => setPickedPoint({ lat: lat, lon: lon })}
-            />
+            {/* The small map is a locator: pins select, anything else opens
+                the big map, where points are picked. */}
+            <div className="relative min-h-0 flex-1 cursor-zoom-in">
+              <SouthPoleMap
+                rows={rows}
+                selectedSiteId={selectedSiteId}
+                pickedPoint={pickedPoint}
+                onSelectSite={selectSite}
+                onEmptyClick={() => setIsMapOpen(true)}
+                emptyClickHint="Click empty ground to open the big map and pick a point."
+              />
+              <button
+                type="button"
+                onClick={() => setIsMapOpen(true)}
+                className="absolute top-0 right-0 rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+              >
+                Zoom in
+              </button>
+            </div>
           </Panel>
 
           <Panel title="Custom point">
@@ -362,6 +377,22 @@ export function Navigator() {
           </Panel>
         </div>
       </main>
+
+      {isMapOpen && (
+        <MapOverlay
+          rows={rows}
+          selectedSiteId={selectedSiteId}
+          pickedPoint={pickedPoint}
+          isCustomFull={customSites.length >= MAX_CUSTOM_SITES}
+          onSelectSite={selectSite}
+          onPickPoint={(lat, lon) => setPickedPoint({ lat: lat, lon: lon })}
+          onAddPoint={(lat, lon) => {
+            addCustomSite(lat, lon);
+            setIsMapOpen(false);
+          }}
+          onClose={() => setIsMapOpen(false)}
+        />
+      )}
     </div>
   );
 }
