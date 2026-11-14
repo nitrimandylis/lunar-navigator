@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { AboutOverlay } from "@/components/about-overlay";
 import { ClearanceCharts } from "@/components/clearance-charts";
 import { CustomSiteForm } from "@/components/custom-site-form";
 import { Legend } from "@/components/legend";
@@ -49,13 +50,16 @@ async function fetchJson(path: string): Promise<unknown> {
 // a lunar day (about 708 hours) takes a little under a minute.
 const PLAY_STEP_MS = 80;
 
-// A titled box. Every panel on the page uses it.
+// A titled box. Every panel on the page uses it. The caption is one plain
+// sentence, next to the title, that says what the panel shows.
 function Panel({
   title,
+  caption,
   className,
   children,
 }: {
   title: string;
+  caption: string;
   className?: string;
   children: React.ReactNode;
 }) {
@@ -64,7 +68,12 @@ function Panel({
       aria-label={title}
       className={cn("rounded-lg border border-line bg-panel px-4 py-3", className)}
     >
-      <h2 className="mb-1.5 text-sm font-medium text-bright">{title}</h2>
+      <div className="mb-1.5 flex items-baseline gap-3">
+        <h2 className="shrink-0 text-sm font-medium text-bright">{title}</h2>
+        <p className="min-w-0 truncate text-xs text-muted-foreground" title={caption}>
+          {caption}
+        </p>
+      </div>
       {children}
     </section>
   );
@@ -99,6 +108,8 @@ export function Navigator() {
   const [sortKey, setSortKey] = useState<SortKey>("power");
   // The big zoomable map is open.
   const [isMapOpen, setIsMapOpen] = useState(false);
+  // The About panel is open.
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   // Things to remember that should not redraw the page when they change.
   const requestedHourlyIds = useRef<Set<string>>(new Set());
@@ -374,8 +385,15 @@ export function Navigator() {
           />
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-4">
           <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
+          <button
+            type="button"
+            onClick={() => setIsAboutOpen(true)}
+            className="rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+          >
+            About
+          </button>
         </div>
       </header>
 
@@ -384,7 +402,11 @@ export function Navigator() {
           leave, so the rows and the map shrink instead of the page scrolling. */}
       <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_380px] grid-rows-[minmax(0,1fr)] gap-3 p-3">
         <div className="flex min-h-0 flex-col gap-3">
-          <Panel title="Sites" className="flex min-h-0 flex-1 flex-col">
+          <Panel
+            title="Sites"
+            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
+            className="flex min-h-0 flex-1 flex-col"
+          >
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
             )}
@@ -413,7 +435,10 @@ export function Navigator() {
 
           {/* The selected site's numbers sit next to its charts: both are
               about the same site and hour. */}
-          <Panel title="Selected site">
+          <Panel
+            title="Selected site"
+            caption="One place at one hour: where the Sun and Earth are, and how long they stay."
+          >
             {/* Numbers on the left, the sky and the charts on the right. */}
             <div className="grid grid-cols-[23rem_minmax(0,1fr)] gap-6">
               <SelectedSite
@@ -454,7 +479,11 @@ export function Navigator() {
 
         <div className="flex min-h-0 flex-col gap-3">
 
-          <Panel title="South pole" className="flex min-h-0 flex-1 flex-col">
+          <Panel
+            title="South pole"
+            caption="Seen from above. Earth is towards the top."
+            className="flex min-h-0 flex-1 flex-col"
+          >
             {/* The small map is a locator: pins select, anything else opens
                 the big map, where points are picked. */}
             <div className="relative min-h-0 flex-1 cursor-zoom-in">
@@ -476,7 +505,7 @@ export function Navigator() {
             </div>
           </Panel>
 
-          <Panel title="Custom point">
+          <Panel title="Custom point" caption="Try any place on the Moon.">
             <CustomSiteForm
               pickedPoint={pickedPoint}
               customCount={customSites.length}
@@ -486,6 +515,8 @@ export function Navigator() {
           </Panel>
         </div>
       </main>
+
+      {isAboutOpen && <AboutOverlay onClose={() => setIsAboutOpen(false)} />}
 
       {isMapOpen && (
         <MapOverlay
