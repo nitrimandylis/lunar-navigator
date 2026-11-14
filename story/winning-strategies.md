@@ -1,7 +1,13 @@
-# General judging and presentation strategies
+# Research and presentation strategies
 
 Reviewed: 14 November 2026.
 Purpose: practical lessons for making our actual work clear and persuasive. These improve preparation; none guarantees a prize.
+
+## Purpose of the reference research
+
+These are credited lessons about explaining and evaluating projects, drawn from NASA guidance, professional advice and participant accounts. They help us reflect on our own work; they are not instructions to copy another participant's solution or imitate a winning entry.
+
+Our proposed applications remain clearly labelled as our synthesis. Any substantive influence, adaptation or reused material must be identified, attributed and used under appropriate permissions. Final claims and evidence must describe what our team actually developed and checked.
 
 ## Authority comes first
 

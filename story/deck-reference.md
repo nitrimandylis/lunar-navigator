@@ -3,6 +3,12 @@
 Reviewed: 14 November 2026. Chosen official demo: an English deck of at most seven slides.
 This is presentation research and a proposed structure, not a claim that the planned features work.
 
+## How we use reference projects
+
+We study credited public examples to understand presentation choices: how a problem is introduced, how evidence is shown and how the user experience is explained. The analysis below identifies those observations and our own possible applications. Project-specific concepts, methods and results are attributed to the original teams; our own contributions and any adaptations should be described separately.
+
+Develop our narrative around the lunar challenge and our team's demonstrated work. Use reference projects as inspiration for communication principles. Cite any specific influence or adaptation, obtain appropriate rights for reused material, and never present an example project's results or screenshots as our own.
+
 ## Source priority
 
 Follow [NASA rules and rubric](nasa-rules-and-rubric.md) first. Exact source records, credibility and access limits are in [sources.md](sources.md).

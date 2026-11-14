@@ -3,12 +3,20 @@
 Reviewed: 14 November 2026. Maintainer: Nick / koum.
 This is the shared register for presentation research and project credits. It is not proof that a resource is implemented in the app. Source IDs are used throughout the guides.
 
+## Purpose and attribution
+
+The participant examples in this register are credited research and reference points. We analyze their communication choices and reflect on lessons that may inform our own presentation. They are not templates for copying another team's solution, content, images, results or identity.
+
+Original authors retain credit for the work described. Our summaries, observations and proposed applications are distinguished from their claims. If the project adapts an idea or reuses material, record the specific influence, source, permissions and actual use; do not present it as independently created by this team.
+
+Links to uploaded working copies in ChatGPT may require the contributor's account. The original public URLs are the reviewer-facing references. An inaccessible working-copy link is not a substitute for public source attribution.
+
 ## Navigation and precedence
 
 - [NASA requirements and rubric](nasa-rules-and-rubric.md)
 - [Submission deck reference](deck-reference.md)
 - [Submission page guide](submission-page-guide.md)
-- [General strategies and things to avoid](winning-strategies.md)
+- [Research and presentation strategies](winning-strategies.md)
 - [Start here](START-HERE.md)
 
 | Rank | Authority | Permitted use |
