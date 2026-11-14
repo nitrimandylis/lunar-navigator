@@ -35,7 +35,7 @@ export type SiteHourly = {
 };
 
 // One day of summary/<id>.json.
-export type SummaryDay = {
+export type DaySummary = {
   // "2027-01-01"
   date: string;
   sun_hours: number;
@@ -47,7 +47,7 @@ export type SummaryDay = {
 // summary/<id>.json: per-day totals for one site.
 export type SiteSummary = {
   id: string;
-  days: SummaryDay[];
+  days: DaySummary[];
 };
 
 // ephemeris.json: the same for every site, one value per hour.
@@ -71,7 +71,7 @@ export type MonthTotals = {
 
 // Adds up the hours of sunlight and of Earth visibility for each month.
 // Returns 12 entries, January first. A month with no days gives zeros.
-export function totalsByMonth(days: SummaryDay[]): MonthTotals[] {
+export function totalsByMonth(days: DaySummary[]): MonthTotals[] {
   const totals: MonthTotals[] = [];
   for (let month = 0; month < 12; month++) {
     totals.push({ sunHours: 0, earthHours: 0 });
