@@ -25,6 +25,14 @@ def lonlat_to_xy(lat_deg: float, lon_deg: float) -> tuple[float, float]:
     return rho * math.sin(lon), rho * math.cos(lon)
 
 
+def xy_to_lonlat(x: float, y: float) -> tuple[float, float]:
+    """Projection metres back to (lat, east lon in 0..360)."""
+    rho = math.hypot(x, y)
+    colat = 2.0 * math.atan(rho / (2.0 * MOON_RADIUS_M))
+    lon = math.degrees(math.atan2(x, y)) % 360.0
+    return -90.0 + math.degrees(colat), lon
+
+
 def scale_factor(lat_deg: float) -> float:
     """How much the map stretches distances at this latitude (1.0 at the pole)."""
     colat = math.radians(90.0 + lat_deg)
