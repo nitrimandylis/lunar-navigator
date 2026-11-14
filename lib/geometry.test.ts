@@ -178,3 +178,69 @@ test("bodyAngles matches JPL Horizons for Earth", () => {
     );
   }
 });
+
+// A second known-answer test, at a site away from longitude 0.
+//
+// At the pole site above, some parts of the formula are almost zero, so a
+// wrong sign there would go unnoticed. This site (near Nobile crater,
+// lon 53.27, lat -85.28) uses every part. Same six hours, same inputs.
+const NOBILE_LAT_DEG = -85.28;
+const NOBILE_LON_DEG = 53.27;
+
+test("bodyAngles matches JPL Horizons for the Sun at the Nobile site", () => {
+  // Source: JPL Horizons API, target Sun (10), centre Moon (301), saved in
+  // data/tests/fixtures/horizons_sun_nobile.json.
+  const horizonsAzDeg = [209.888046, 209.381012, 208.873942, 208.366838, 207.859699, 207.352526];
+  const horizonsElevDeg = [-3.079774, -3.101079, -3.12206, -3.142717, -3.163047, -3.18305];
+
+  for (let hour = 0; hour < 6; hour++) {
+    const angles = bodyAngles(
+      NOBILE_LAT_DEG,
+      NOBILE_LON_DEG,
+      SUB_SOLAR_LAT_DEG[hour],
+      SUB_SOLAR_LON_DEG[hour],
+      SUN_DISTANCE_KM,
+    );
+    assertClose(
+      angles.elevDeg,
+      horizonsElevDeg[hour],
+      ELEVATION_TOLERANCE_DEG,
+      "Sun elevation at hour " + hour,
+    );
+    assertAzimuthClose(
+      angles.azDeg,
+      horizonsAzDeg[hour],
+      AZIMUTH_TOLERANCE_DEG,
+      "Sun azimuth at hour " + hour,
+    );
+  }
+});
+
+test("bodyAngles matches JPL Horizons for Earth at the Nobile site", () => {
+  // Source: JPL Horizons API, target Earth (399), centre Moon (301), saved in
+  // data/tests/fixtures/horizons_earth_nobile.json.
+  const horizonsAzDeg = [314.174033, 314.154613, 314.134684, 314.11425, 314.093316, 314.071886];
+  const horizonsElevDeg = [-2.967003, -2.995996, -3.024483, -3.052465, -3.079941, -3.106909];
+
+  for (let hour = 0; hour < 6; hour++) {
+    const angles = bodyAngles(
+      NOBILE_LAT_DEG,
+      NOBILE_LON_DEG,
+      SUB_EARTH_LAT_DEG[hour],
+      SUB_EARTH_LON_DEG[hour],
+      EARTH_DISTANCE_KM[hour],
+    );
+    assertClose(
+      angles.elevDeg,
+      horizonsElevDeg[hour],
+      ELEVATION_TOLERANCE_DEG,
+      "Earth elevation at hour " + hour,
+    );
+    assertAzimuthClose(
+      angles.azDeg,
+      horizonsAzDeg[hour],
+      AZIMUTH_TOLERANCE_DEG,
+      "Earth azimuth at hour " + hour,
+    );
+  }
+});
