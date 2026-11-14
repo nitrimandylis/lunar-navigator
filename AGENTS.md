@@ -43,7 +43,94 @@ Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those 
 
 The data shapes passed between folders. Change only when both owners agree.
 
-FILL IN at kickoff (sites + hourly Sun/Earth elevation JSON).
+`data/build.py` writes the files below to `public/data/`. The app fetches them from `/data/...`.
+They cover calendar year 2027, one sample per hour: 8760 samples.
+
+Conventions:
+
+- Times are UTC, ISO 8601 (`2027-01-01T00:00:00Z`).
+- Angles are degrees. Longitude is east-positive.
+- Elevation is the angle above a smooth Moon (flat horizon = 0). Azimuth is clockwise from
+  north, 0 to 360.
+- Hourly series are plain arrays. Index `i` in every array is the hour
+  `start_utc + i * step_minutes`.
+- A body is visible at an hour when its centre is above the terrain horizon at its azimuth.
+  The Sun and Earth are treated as points, not discs.
+
+### `sites.json`: the list of sites
+
+```json
+[
+  {
+    "id": "shackleton-ridge",
+    "name": "Lit ridge near Shackleton (computed)",
+    "lat": -89.3277,
+    "lon": 116.8355,
+    "elevation_m": 1200,
+    "source": "where the coordinates came from"
+  }
+]
+```
+
+### `sites/<id>.json`: hourly series for one site
+
+```json
+{
+  "id": "shackleton-ridge",
+  "start_utc": "2027-01-01T00:00:00Z",
+  "step_minutes": 60,
+  "count": 8760,
+  "sun_elev_deg": [0.4, 0.6],
+  "sun_az_deg": [12.1, 13.0],
+  "earth_elev_deg": [3.2, 3.1],
+  "earth_az_deg": [201.5, 201.4],
+  "sun_visible": [1, 1],
+  "earth_visible": [1, 1],
+  "horizon": { "az_step_deg": 1, "elev_deg": [0.8, 0.7] }
+}
+```
+
+- `sun_visible` and `earth_visible` are 1 or 0, already compared against the terrain.
+- `horizon.elev_deg` has 360 values: the terrain angle at azimuth 0, 1, 2, ... 359.
+
+### `summary/<id>.json`: per-day totals for one site
+
+```json
+{
+  "id": "shackleton-ridge",
+  "days": [
+    {
+      "date": "2027-01-01",
+      "sun_hours": 18.0,
+      "earth_hours": 9.0,
+      "max_sun_elev_deg": 1.6,
+      "longest_sun_gap_hours": 4.0
+    }
+  ]
+}
+```
+
+365 days, each a UTC day. `longest_sun_gap_hours` is counted inside that day only: a gap
+that runs past midnight is cut there.
+
+### `ephemeris.json`: where the Sun and Earth are overhead, for custom points
+
+```json
+{
+  "start_utc": "2027-01-01T00:00:00Z",
+  "step_minutes": 60,
+  "count": 8760,
+  "sub_solar_lon_deg": [263.1159],
+  "sub_solar_lat_deg": [-1.0146],
+  "sub_earth_lon_deg": [7.1872],
+  "sub_earth_lat_deg": [5.996],
+  "earth_distance_km": [391461]
+}
+```
+
+- The sub-solar point is where the Sun is straight overhead. The sub-Earth point is the same
+  for Earth. Longitudes here run 0 to 360.
+- `earth_distance_km` is from the centre of the Earth to the centre of the Moon.
 
 ## How work lands
 
