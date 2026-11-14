@@ -1,0 +1,58 @@
+[
+  {
+    "lat": -83.95526729951568,
+    "lon": 99.94913119897365,
+    "sun_hours": 4280.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4280.0,
+    "crater": "amundsen"
+  },
+  {
+    "lat": -88.32411390675894,
+    "lon": 291.0783949823825,
+    "sun_hours": 4533.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4533.0,
+    "crater": "de-gerlache"
+  },
+  {
+    "lat": -88.07406570039123,
+    "lon": 71.91814912216876,
+    "sun_hours": 4764.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4764.0,
+    "crater": "faustini"
+  },
+  {
+    "lat": -85.91663168851738,
+    "lon": 355.9330280902003,
+    "sun_hours": 4828.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4828.0,
+    "crater": "haworth"
+  },
+  {
+    "lat": -85.72425550318502,
+    "lon": 3.7370378031953186,
+    "sun_hours": 4709.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4709.0,
+    "crater": "malapert"
+  },
+  {
+    "lat": -84.22732617303596,
+    "lon": 47.49172121008722,
+    "sun_hours": 4479.0,
+    "earth_hours": 8751.0,
+    "both_hours": 4479.0,
+    "crater": "nobile"
+  },
+  {
+    "lat": -89.77922716218586,
+    "lon": 50.72562330539524,
+    "sun_hours": 4654.0,
+    "earth_hours": 8760.0,
+    "both_hours": 4654.0,
+    "crater": "shackleton"
+  }
+]
