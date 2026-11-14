@@ -22,7 +22,8 @@ import horizons
 import terrain
 from horizon_mask import Horizon, visible_mask
 
-MAX_RANGE_M = 25_000.0  # how far out to look for terrain that blocks the sky
+MAX_RANGE_M = 25_000.0  # full-detail terrain search
+FAR_RANGE_M = 150_000.0  # coarser search beyond that: a 5 km peak is visible from ~130 km
 
 
 def pick_dem(lat: float, lon: float, dem5: str, dem30: str) -> str:
@@ -67,9 +68,13 @@ def daily_summary(
     return days
 
 
-def build_site(site: dict, dem_path: str, start: datetime, days: int, step_minutes: int) -> tuple[dict, dict]:
+def build_site(
+    site: dict, dem_path: str, start: datetime, days: int, step_minutes: int, far_dem_path: str | None = None
+) -> tuple[dict, dict]:
     count = days * 24 * 60 // step_minutes
-    horizon: Horizon = terrain.site_horizon(dem_path, site["lat"], site["lon"], max_range_m=MAX_RANGE_M)
+    horizon: Horizon = terrain.site_horizon(
+        dem_path, site["lat"], site["lon"], max_range_m=MAX_RANGE_M, far_dem_path=far_dem_path, far_range_m=FAR_RANGE_M
+    )
     sun = horizons.fetch_series(horizons.SUN, site["lon"], site["lat"], start, count, step_minutes)
     earth = horizons.fetch_series(horizons.EARTH, site["lon"], site["lat"], start, count, step_minutes)
 
@@ -127,7 +132,7 @@ def main() -> None:
             continue
         dem = pick_dem(site["lat"], site["lon"], args.dem5, args.dem30)
         print(f"{site['id']}: {Path(dem).name}", flush=True)
-        series, summary = build_site(site, dem, start, args.days, args.step_minutes)
+        series, summary = build_site(site, dem, start, args.days, args.step_minutes, far_dem_path=args.dem30)
         write_json(out / "sites" / f"{site['id']}.json", series)
         write_json(out / "summary" / f"{site['id']}.json", summary)
 

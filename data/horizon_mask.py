@@ -11,6 +11,7 @@ one pixel. Moon Trek's DEMs store radius, so the caller subtracts 1,737,400 m fi
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -44,6 +45,8 @@ def horizon_profile(
     max_range_m: float = 50_000.0,
     az_step_deg: float = 1.0,
     observer_height_m: float = 0.0,
+    min_range_m: float = 0.0,
+    site_height_m: float | None = None,
 ) -> Horizon:
     """Horizon around (row, col).
 
@@ -51,19 +54,25 @@ def horizon_profile(
     map with north at the top. In a polar map it differs from site to site.
     `observer_height_m` is how far above the ground the viewer is (for example a lander).
     A ray that leaves the grid stops there, so near an edge `reach_m` is short.
+    `min_range_m` skips terrain closer than that (a far-field pass uses it so a coarse grid
+    cannot invent ridges next to the site). `site_height_m` replaces the height read from the
+    grid at the site, for the same reason.
     """
     n_rows, n_cols = heights.shape
     if not (0 <= row <= n_rows - 1 and 0 <= col <= n_cols - 1):
         raise ValueError("site is outside the grid")
 
-    site = _bilinear(heights, np.array([min(row, n_rows - 1.000001)]), np.array([min(col, n_cols - 1.000001)]))[0]
+    if site_height_m is None:
+        site = _bilinear(heights, np.array([min(row, n_rows - 1.000001)]), np.array([min(col, n_cols - 1.000001)]))[0]
+    else:
+        site = site_height_m
     r_obs = MOON_RADIUS_M + site + observer_height_m
 
     azimuths = np.arange(0.0, 360.0, az_step_deg)
     elev = np.full(azimuths.shape, -90.0)
     reach = np.zeros(azimuths.shape)
 
-    steps = np.arange(1, int(max_range_m / pixel_m) + 1)
+    steps = np.arange(max(1, int(math.ceil(min_range_m / pixel_m))), int(max_range_m / pixel_m) + 1)
     dist = steps * pixel_m
     theta = dist / MOON_RADIUS_M
 

@@ -85,3 +85,21 @@ def test_window_is_clipped_at_the_dem_edge(tmp_path):
     h = terrain.site_horizon(path, -89.0, 90.0, max_range_m=1500)
     assert h.reach_m[0] < 600  # north (+x) hits the edge
     assert h.reach_m[180] > 1000
+
+
+def test_far_peak_is_seen_only_with_the_far_pass(tmp_path):
+    # A 5000 m wall 100 km north of a site at 89 S, lon 90 (north is +x there).
+    # Geometry: angle = atan(H / D) minus the curvature drop D / (2 R)
+    #         = 2.862 deg - 1.649 deg = 1.21 deg. Within 25 km nothing is visible.
+    path = str(tmp_path / "dem.tif")
+    make_dem(path, left=30324.1 - 200_000, top=200_000.0, size=2000, res=200.0, wall=None)
+    with rasterio.open(path, "r+") as dem:
+        data = dem.read(1)
+        xs = dem.transform.c + (np.arange(2000) + 0.5) * 200.0
+        data[:, xs > 30324.1 + 100_000] = 5000.0
+        dem.write(data, 1)
+    near_only = terrain.site_horizon(path, -89.0, 90.0, max_range_m=25_000)
+    both = terrain.site_horizon(path, -89.0, 90.0, max_range_m=25_000, far_dem_path=path, far_range_m=150_000, far_factor=2)
+    assert elev_at(near_only, 0) < 0.0
+    assert elev_at(both, 0) == pytest.approx(1.21, abs=0.06)
+    assert elev_at(both, 180) < 0.0  # nothing to the south
