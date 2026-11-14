@@ -82,11 +82,20 @@ export function SouthPoleMap({
 }: SouthPoleMapProps) {
   // A click on the map that did not land on a pin.
   function handleMapClick(event: React.MouseEvent<SVGSVGElement>) {
-    // Turn screen pixels into SVG units. The SVG is square, so one scale works.
-    const box = event.currentTarget.getBoundingClientRect();
-    const scale = VIEW_SIZE / box.width;
-    const x = (event.clientX - box.left) * scale - VIEW_SIZE / 2;
-    const y = (event.clientY - box.top) * scale - VIEW_SIZE / 2;
+    // Turn screen pixels into SVG units. The browser centres the square
+    // drawing inside a box that is often taller or wider than it, so the
+    // box edges are not the drawing's edges. getScreenCTM is the browser's
+    // own SVG-to-screen mapping; its inverse undoes it exactly.
+    const svg = event.currentTarget;
+    const screenToSvg = svg.getScreenCTM();
+    if (screenToSvg === null) {
+      return;
+    }
+    const svgPoint = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+      screenToSvg.inverse(),
+    );
+    const x = svgPoint.x;
+    const y = svgPoint.y;
 
     // Clicks outside the edge circle do nothing.
     const distanceFromCentre = Math.sqrt(x * x + y * y);
