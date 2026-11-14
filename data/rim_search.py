@@ -8,6 +8,11 @@ Only the terrain horizon is computed per point.
 Scanning uses a quick 15 km horizon. Distant terrain can only block more sky, never less,
 so the best few points are then re-scored with the full 150 km horizon.
 
+Run order: the reference series is an hourly site file written by build.py. The default is
+public/data/sites/shackleton-ridge.json, which is committed, so it is there on a fresh clone.
+If it is missing or you changed the site list, run build.py first, or pass --reference with
+any hourly site file plus that site's --reference-lat and --reference-lon.
+
     python data/rim_search.py --dem30 <30 m DEM> --out x.json craters
     python data/rim_search.py --dem30 <30 m DEM> --out x.json pair --center-lat -89.67 --center-lon 129.78
 """

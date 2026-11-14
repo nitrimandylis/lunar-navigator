@@ -102,6 +102,10 @@ whole region (checked against Horizons at a second site, within 0.01 degrees for
 so only the terrain horizon is worked out per point. The best few points are then scored again
 with the full 150 km horizon.
 
+Both modes need an hourly site file for the Sun and Earth directions. By default that is
+`public/data/sites/shackleton-ridge.json`, which is committed. If it is missing or you changed the
+site list, run `build.py` first (or pass `--reference` and its `--reference-lat/--reference-lon`).
+
 ```bash
 # best point near each crater (about 10 minutes)
 data/.venv/Scripts/python data/rim_search.py --dem30 data/raw/LRO_LOLA_DEM_SPole75_30mp_v04.tif --out craters.json craters
