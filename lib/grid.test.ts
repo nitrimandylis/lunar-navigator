@@ -12,6 +12,7 @@ import {
   laneOpacity,
   monthLaneStrengths,
   pairLabel,
+  pairPartnerId,
 } from "./grid.ts";
 
 test("laneOpacity is the share of the hours, cut to 0 to 1", () => {
@@ -90,6 +91,40 @@ test("pairLabel gives the real Shackleton pair about 3.5 km apart", () => {
   };
   assert.equal(pairLabel(ridge, shadow), "pair · 3.5 km");
   assert.equal(pairLabel(shadow, ridge), "pair · 3.5 km");
+});
+
+test("pairLabel gives the real Sverdrup pair about 2.5 km apart", () => {
+  // From public/data/sites.json. Its source text says the pair is
+  // "about 2500 m apart".
+  const lit: Site = {
+    id: "sverdrup-pair-lit",
+    name: "Lit ground near Sverdrup (computed)",
+    lat: -88.8259,
+    lon: -158.662,
+    elevation_m: -258,
+    source: "test",
+  };
+  const shadow: Site = {
+    id: "sverdrup-pair-shadow",
+    name: "Shadowed ground near Sverdrup (computed)",
+    lat: -88.8053,
+    lon: -162.5642,
+    elevation_m: -272,
+    source: "test",
+  };
+  assert.equal(pairLabel(lit, shadow), "pair · 2.5 km");
+});
+
+test("pairPartnerId finds the other site of a pair, either way round", () => {
+  const pairs = [
+    ["shackleton-ridge", "shackleton-shadow"],
+    ["sverdrup-pair-lit", "sverdrup-pair-shadow"],
+  ];
+  assert.equal(pairPartnerId("shackleton-ridge", pairs), "shackleton-shadow");
+  assert.equal(pairPartnerId("shackleton-shadow", pairs), "shackleton-ridge");
+  assert.equal(pairPartnerId("sverdrup-pair-shadow", pairs), "sverdrup-pair-lit");
+  assert.equal(pairPartnerId("haworth-candidate", pairs), null);
+  assert.equal(pairPartnerId("shackleton-ridge", []), null);
 });
 
 test("monthLaneStrengths divides by the hours in that month", () => {

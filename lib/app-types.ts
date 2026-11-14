@@ -24,6 +24,10 @@ export type PickedPoint = {
 
 export const MAX_CUSTOM_SITES = 3;
 
-// Two curated sites a few km apart with very different lighting.
-// The grid tags them and the map joins them with a line.
-export const NEAR_PAIR_IDS = ["shackleton-ridge", "shackleton-shadow"];
+// Near pairs: two curated sites a few km apart with very different lighting.
+// Each inner list holds the two site ids of one pair. The grid tags both
+// sites of a pair and the map rings them with a callout.
+export const NEAR_PAIRS: string[][] = [
+  ["shackleton-ridge", "shackleton-shadow"],
+  ["sverdrup-pair-lit", "sverdrup-pair-shadow"],
+];

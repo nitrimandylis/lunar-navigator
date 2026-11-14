@@ -98,6 +98,20 @@ export function pairLabel(siteA: Site, siteB: Site): string {
   return "pair · " + km.toFixed(1) + " km";
 }
 
+// The id of the other site in a site's near pair, or null if the site is not
+// in any pair. pairs is a list of [idA, idB] lists, like NEAR_PAIRS.
+export function pairPartnerId(siteId: string, pairs: string[][]): string | null {
+  for (const pair of pairs) {
+    if (pair[0] === siteId) {
+      return pair[1];
+    }
+    if (pair[1] === siteId) {
+      return pair[0];
+    }
+  }
+  return null;
+}
+
 // How strong the two lanes of a month chip are: that month's hours divided
 // by all the hours in the month. month is 0 for January.
 export function monthLaneStrengths(
