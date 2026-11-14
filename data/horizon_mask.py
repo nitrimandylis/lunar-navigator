@@ -18,6 +18,34 @@ import numpy as np
 
 MOON_RADIUS_M = 1_737_400.0
 
+# Sizes of the bodies, so they can be treated as discs. Radii are the values JPL Horizons prints
+# for the Sun (695,700 km) and Earth (equatorial, 6,378.137 km). The Sun is taken at 1 au; its
+# apparent size changes by less than 2 percent over a year.
+SUN_RADIUS_KM = 695_700.0
+EARTH_RADIUS_KM = 6_378.137
+AU_KM = 149_597_870.7
+
+# Points that stand for a disc of radius 1: the centre, 16 on the rim and 8 halfway out.
+_ANGLES = np.arange(16) * (2 * math.pi / 16)
+_INNER = np.arange(8) * (2 * math.pi / 8)
+_DISC = np.vstack(
+    [
+        [0.0, 0.0],
+        np.column_stack([np.cos(_ANGLES), np.sin(_ANGLES)]),
+        0.5 * np.column_stack([np.cos(_INNER), np.sin(_INNER)]),
+    ]
+)
+
+
+def sun_angular_radius_deg() -> float:
+    """Apparent radius of the Sun's disc, seen from the Moon."""
+    return math.degrees(math.asin(SUN_RADIUS_KM / AU_KM))
+
+
+def earth_angular_radius_deg(distance_km):
+    """Apparent radius of Earth's disc for an Earth-Moon distance (one value or an array)."""
+    return np.degrees(np.arcsin(EARTH_RADIUS_KM / np.asarray(distance_km, dtype=float)))
+
 
 @dataclass(frozen=True)
 class Horizon:
@@ -102,6 +130,26 @@ def visible_mask(horizon: Horizon, az_deg: np.ndarray, elev_deg: np.ndarray) -> 
     step = horizon.az_deg[1] - horizon.az_deg[0]
     index = np.round(np.asarray(az_deg) / step).astype(int) % len(horizon.az_deg)
     return np.asarray(elev_deg) > horizon.elev_deg[index]
+
+
+def disc_visible_mask(
+    horizon: Horizon, az_deg: np.ndarray, elev_deg: np.ndarray, radius_deg
+) -> np.ndarray:
+    """True where any part of a disc is above the terrain horizon.
+
+    The disc is centred on (az, elev) with the given angular radius (one value, or one per
+    sample). This is how sunrise and sunset are defined: the top edge of the Sun, not its
+    centre, and it also lets a disc show above a ridge when the horizon dips beside it.
+    """
+    az = np.asarray(az_deg, dtype=float)[:, None]
+    el = np.asarray(elev_deg, dtype=float)[:, None]
+    r = np.broadcast_to(np.asarray(radius_deg, dtype=float), np.shape(az_deg))[:, None]
+    el2 = el + _DISC[None, :, 1] * r
+    cos_el = np.maximum(np.cos(np.radians(el2)), 0.01)  # azimuth lengths shrink near the zenith
+    az2 = (az + _DISC[None, :, 0] * r / cos_el) % 360.0
+    step = horizon.az_deg[1] - horizon.az_deg[0]
+    index = np.round(az2 / step).astype(int) % len(horizon.az_deg)
+    return (el2 > horizon.elev_deg[index]).any(axis=1)
 
 
 def is_visible(horizon: Horizon, az_deg: float, elev_deg: float) -> bool:
