@@ -139,7 +139,7 @@ export function SitesGrid({
   const hourColumns = { gridTemplateColumns: "repeat(" + HOURS_PER_DAY + ", minmax(0, 1fr))" };
 
   return (
-    <div ref={boxRef} className="relative" onMouseLeave={hideTooltip}>
+    <div ref={boxRef} className="relative flex min-h-0 flex-1 flex-col" onMouseLeave={hideTooltip}>
       {/* Header: day numbers above the day columns. Hidden from screen
           readers, because every cell's label already names its day. */}
       <div aria-hidden="true" className={cn(ROW_COLUMNS, "mb-1")}>
@@ -157,7 +157,7 @@ export function SitesGrid({
         <span className="text-right text-xs text-muted-foreground">Month hours</span>
       </div>
 
-      <ul className="flex flex-col gap-[5px]">
+      <ul className="flex min-h-0 flex-1 flex-col gap-[3px] overflow-y-auto">
         {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
@@ -182,7 +182,7 @@ export function SitesGrid({
           const isFirstCustom = row.isCustom && (rowIndex === 0 || !rows[rowIndex - 1].isCustom);
 
           return (
-            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-[26px]")}>
+            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-4 max-h-[26px] flex-1 basis-0")}>
               {/* The divider spans all three columns, above the first custom row. */}
               {isFirstCustom && (
                 <div className="col-span-3 mt-1 mb-1 border-t border-line pt-1.5 text-xs text-muted-foreground">
@@ -228,7 +228,7 @@ export function SitesGrid({
 
               {/* Middle: the days of the month, or one opened day as 24 hours. */}
               {!showHours && (
-                <div className="grid gap-px" style={dayColumns}>
+                <div className="grid h-full max-h-[22px] gap-px" style={dayColumns}>
                   {monthDays.map((dayOfYear) => {
                     const day = row.days[dayOfYear];
                     let sunHours = 0;
@@ -257,7 +257,7 @@ export function SitesGrid({
                         }
                         onBlur={hideTooltip}
                         className={cn(
-                          "flex h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
+                          "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
                           hasRing && "relative z-10 ring-2 ring-bright",
                         )}
                       >
@@ -287,7 +287,7 @@ export function SitesGrid({
                   )}
 
                   {hourly !== undefined && (
-                    <div className="grid gap-px" style={hourColumns}>
+                    <div className="grid h-full max-h-[22px] gap-px" style={hourColumns}>
                       {hoursOfDay(selectedDay).map((hourIndex) => {
                         const sunUp = hourly.sun_visible[hourIndex];
                         const earthUp = hourly.earth_visible[hourIndex];
@@ -307,7 +307,7 @@ export function SitesGrid({
                             }
                             onBlur={hideTooltip}
                             className={cn(
-                              "flex h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
+                              "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
                               hasRing && "relative z-10 ring-2 ring-bright",
                             )}
                           >
@@ -330,7 +330,7 @@ export function SitesGrid({
               )}
 
               {/* Right: this month's totals. */}
-              <div className="flex flex-col items-end font-mono text-xs leading-[13px] tabular-nums">
+              <div className="flex items-center justify-end gap-2 font-mono text-xs leading-none tabular-nums">
                 <span className="flex items-center gap-1.5">
                   <span aria-hidden="true" className="size-2 rounded-xs bg-power" />
                   <span className="sr-only">Power hours this month: </span>
