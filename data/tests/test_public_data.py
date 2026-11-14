@@ -102,9 +102,20 @@ def test_summary_file_shape(site_id):
         assert day["date"] == want, f"{name}: day {i} is {day['date']}, expected {want}"
         assert 0 <= day["sun_hours"] <= 24, f"{name}: {want} sun_hours {day['sun_hours']}"
         assert 0 <= day["earth_hours"] <= 24, f"{name}: {want} earth_hours {day['earth_hours']}"
+        assert 0 <= day["both_hours"] <= min(day["sun_hours"], day["earth_hours"]), f"{name}: {want} both_hours {day['both_hours']}"
         assert isinstance(day["max_sun_elev_deg"], (int, float)), f"{name}: {want} max_sun_elev_deg not a number"
         assert day["longest_sun_gap_hours"] >= 0, f"{name}: {want} longest_sun_gap_hours negative"
     assert days[-1]["date"] == "2027-12-31", f"{name}: last day is {days[-1]['date']}"
+
+
+@pytest.mark.parametrize("site_id", SITE_IDS)
+def test_summary_both_hours_match_hourly_visibility(site_id):
+    h = hourly(site_id)
+    both = [s & e for s, e in zip(h["sun_visible"], h["earth_visible"])]
+    for i, day in enumerate(summary(site_id)["days"]):
+        assert day["both_hours"] == sum(both[i * 24:(i + 1) * 24]), (
+            f"public/data/summary/{site_id}.json {day['date']}: both_hours {day['both_hours']} is wrong"
+        )
 
 
 @pytest.mark.parametrize("body", ["sun", "earth"])
@@ -142,3 +153,5 @@ def test_source_site_fields(site):
         assert key in site, f"{name}: missing key {key!r}"
     assert -90 <= site["lat"] <= -80, f"{name}: lat {site['lat']} not in -90..-80"
     assert -180 <= site["lon"] <= 180, f"{name}: lon {site['lon']} not in -180..180"
+    if "mission" in site:
+        assert isinstance(site["mission"], str) and site["mission"], f"{name}: mission must be a non-empty string"
