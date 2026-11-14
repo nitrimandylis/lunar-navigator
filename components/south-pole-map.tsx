@@ -1,13 +1,14 @@
-import { useState } from "react";
-
 import { NEAR_PAIR_IDS, type PickedPoint, type SiteRow } from "@/lib/app-types";
 import { distanceKm, projectSouthPole } from "@/lib/geometry";
-import { kmToMapPx, unprojectSouthPole } from "@/lib/map";
+import { clampLabelX, kmToMapPx, unprojectSouthPole } from "@/lib/map";
 
 export type SouthPoleMapProps = {
   // Every site to pin, curated and custom.
   rows: SiteRow[];
   selectedSiteId: string | null;
+  // The point the user clicked on the map and has not added yet, marked with a
+  // cross. null if none. The navigator clears it once the point is added.
+  pickedPoint: PickedPoint | null;
   // Select a site. The selected hour stays as it is.
   onSelectSite: (siteId: string) => void;
   // The user clicked empty ground: offer this point to the custom point form.
@@ -43,16 +44,13 @@ const CRATERS = [
 const PAIR_LABEL_X = 62;
 const PAIR_LABEL_Y = 62;
 
-// Picks a text anchor so a label near the left or right edge stays inside the map.
-function anchorForX(x: number): "start" | "middle" | "end" {
-  if (x > 40) {
-    return "end";
-  }
-  if (x < -40) {
-    return "start";
-  }
-  return "middle";
-}
+// The selected pin's label: font size and a rough width per letter, in SVG
+// units. Site names are long, so the label gets a solid box behind it. That
+// keeps it readable where it crosses crater names, lines and other pins.
+const PIN_LABEL_SIZE = 10;
+const SANS_LETTER_WIDTH = 5.4;
+const MONO_LETTER_WIDTH = 6.0;
+const PIN_LABEL_PADDING = 4;
 
 // Rounds to 2 decimals, for the picked point.
 function roundTo2(value: number): number {
@@ -62,12 +60,10 @@ function roundTo2(value: number): number {
 export function SouthPoleMap({
   rows,
   selectedSiteId,
+  pickedPoint,
   onSelectSite,
   onPickPoint,
 }: SouthPoleMapProps) {
-  // The last spot picked on the map, so it can be marked with a cross.
-  const [pickedSpot, setPickedSpot] = useState<PickedPoint | null>(null);
-
   // A click on the map that did not land on a pin.
   function handleMapClick(event: React.MouseEvent<SVGSVGElement>) {
     // Turn screen pixels into SVG units. The SVG is square, so one scale works.
@@ -85,7 +81,6 @@ export function SouthPoleMap({
     const point = unprojectSouthPole(x, y, MAP_RADIUS, EDGE_LAT);
     const lat = roundTo2(point.lat);
     const lon = roundTo2(point.lon);
-    setPickedSpot({ lat: lat, lon: lon });
     onPickPoint(lat, lon);
   }
 
@@ -177,8 +172,8 @@ export function SouthPoleMap({
   }
 
   let pickedCross: { x: number; y: number } | null = null;
-  if (pickedSpot !== null) {
-    pickedCross = projectSouthPole(pickedSpot.lat, pickedSpot.lon, MAP_RADIUS, EDGE_LAT);
+  if (pickedPoint !== null) {
+    pickedCross = projectSouthPole(pickedPoint.lat, pickedPoint.lon, MAP_RADIUS, EDGE_LAT);
   }
 
   return (
@@ -189,14 +184,23 @@ export function SouthPoleMap({
       aria-label="Map of the lunar south pole. Click empty ground to pick a custom point."
       onClick={handleMapClick}
     >
-      {/* Edge circle at latitude -80. */}
-      <circle cx={0} cy={0} r={MAP_RADIUS} className="fill-background stroke-line" strokeWidth={1} />
+      {/* Edge circle at latitude -80. Lines, rings and outlines are decoration,
+          so they are hidden from screen readers. */}
+      <circle
+        aria-hidden="true"
+        cx={0}
+        cy={0}
+        r={MAP_RADIUS}
+        className="fill-background stroke-line"
+        strokeWidth={1}
+      />
 
       {/* Longitude spokes. */}
       {SPOKE_LONGITUDES.map((lon) => {
         const end = projectSouthPole(EDGE_LAT, lon, MAP_RADIUS, EDGE_LAT);
         return (
           <line
+            aria-hidden="true"
             key={"spoke-" + lon}
             x1={0}
             y1={0}
@@ -213,7 +217,14 @@ export function SouthPoleMap({
         const ringRadius = projectSouthPole(lat, 180, MAP_RADIUS, EDGE_LAT).y;
         return (
           <g key={"ring-" + lat}>
-            <circle cx={0} cy={0} r={ringRadius} className="fill-none stroke-line" strokeWidth={0.5} />
+            <circle
+              aria-hidden="true"
+              cx={0}
+              cy={0}
+              r={ringRadius}
+              className="fill-none stroke-line"
+              strokeWidth={0.5}
+            />
             <text
               x={-3}
               y={ringRadius - 2}
@@ -229,6 +240,7 @@ export function SouthPoleMap({
 
       {/* Earth is straight up, above longitude 0. */}
       <path
+        aria-hidden="true"
         d={"M -4 " + (-MAP_RADIUS - 3) + " L 0 " + (-MAP_RADIUS - 10) + " L 4 " + (-MAP_RADIUS - 3) + " Z"}
         className="fill-muted-foreground"
       />
@@ -266,6 +278,7 @@ export function SouthPoleMap({
         return (
           <g key={"crater-" + crater.name}>
             <circle
+              aria-hidden="true"
               cx={centre.x}
               cy={centre.y}
               r={craterRadius}
@@ -311,9 +324,23 @@ export function SouthPoleMap({
         }
 
         // A custom point is named by its numbers, which use the mono font.
-        let labelClass = "fill-bright stroke-background font-medium";
+        let labelClass = "fill-bright font-medium";
+        let letterWidth = SANS_LETTER_WIDTH;
         if (row.isCustom) {
-          labelClass = "fill-bright stroke-background font-mono tabular-nums";
+          labelClass = "fill-bright font-mono tabular-nums";
+          letterWidth = MONO_LETTER_WIDTH;
+        }
+
+        // The label sits above the pin, centred on it, pushed inwards near the
+        // map's left and right edges.
+        const labelWidth = site.name.length * letterWidth + 2 * PIN_LABEL_PADDING;
+        const labelX = clampLabelX(spot.x, labelWidth, VIEW_SIZE / 2 - 2);
+        // Pins right by the pole get their label a little higher, so it clears
+        // the "de Gerlache" name that sits level with the pole.
+        let labelY = spot.y - 11;
+        const distanceFromPole = Math.sqrt(spot.x * spot.x + spot.y * spot.y);
+        if (distanceFromPole < 20) {
+          labelY = spot.y - 16;
         }
 
         function selectThisSite() {
@@ -363,20 +390,26 @@ export function SouthPoleMap({
               strokeWidth={1.25}
             />
             {isSelected && (
-              <text
-                x={spot.x}
-                y={spot.y - 11}
-                fontSize={10}
-                textAnchor={anchorForX(spot.x)}
-                // A dark outline behind the letters keeps the name readable
-                // where it crosses crater lines and other labels.
-                paintOrder="stroke"
-                strokeWidth={3}
-                strokeLinejoin="round"
-                className={labelClass}
-              >
-                {site.name}
-              </text>
+              <g aria-hidden="true">
+                <rect
+                  x={labelX - labelWidth / 2}
+                  y={labelY - PIN_LABEL_SIZE}
+                  width={labelWidth}
+                  height={PIN_LABEL_SIZE + 4}
+                  rx={2}
+                  className="fill-background stroke-line"
+                  strokeWidth={0.75}
+                />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  fontSize={PIN_LABEL_SIZE}
+                  textAnchor="middle"
+                  className={labelClass}
+                >
+                  {site.name}
+                </text>
+              </g>
             )}
           </g>
         );
@@ -384,7 +417,7 @@ export function SouthPoleMap({
 
       {/* A small cross where the user last clicked empty ground. */}
       {pickedCross !== null && (
-        <g className="pointer-events-none stroke-bright" strokeWidth={1.25}>
+        <g aria-hidden="true" className="pointer-events-none stroke-bright" strokeWidth={1.25}>
           <line x1={pickedCross.x - 4} y1={pickedCross.y - 4} x2={pickedCross.x + 4} y2={pickedCross.y + 4} />
           <line x1={pickedCross.x - 4} y1={pickedCross.y + 4} x2={pickedCross.x + 4} y2={pickedCross.y - 4} />
         </g>

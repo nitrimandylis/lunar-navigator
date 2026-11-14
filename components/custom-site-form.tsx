@@ -146,7 +146,12 @@ export function CustomSiteForm({
       )}
 
       <p className="text-xs text-muted-foreground">
-        Custom points use a flat horizon: no terrain.
+        Near the pole, terrain decides the light. A flat horizon gives about{" "}
+        <span className="font-mono tabular-nums">4,300</span> to{" "}
+        <span className="font-mono tabular-nums">4,450</span> Sun hours at every site we
+        tested, but the shadowed ground near Shackleton gets{" "}
+        <span className="font-mono tabular-nums">0</span> with real terrain. For
+        terrain-aware numbers, use the curated sites.
       </p>
     </form>
   );

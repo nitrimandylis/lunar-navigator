@@ -52,3 +52,27 @@ export function formatHour(hourIndex: number): string {
     dayOfMonth + 1 + " " + MONTH_NAMES[month] + " " + YEAR + ", " + hourText + ":00 UTC"
   );
 }
+
+// Moves an hour index into another month, keeping the day of the month and the
+// hour of the day. A day that the new month does not have becomes its last day:
+// 31 January 05:00, moved to February, gives 28 February 05:00.
+export function moveHourToMonth(hourIndex: number, month: number): number {
+  const dayOfYear = Math.floor(hourIndex / HOURS_PER_DAY);
+  const hourOfDay = hourIndex % HOURS_PER_DAY;
+
+  // Walk through the months until the day falls inside one (as in formatHour).
+  let oldMonth = 0;
+  let dayOfMonth = dayOfYear;
+  while (oldMonth < 11 && dayOfMonth >= DAYS_IN_MONTH[oldMonth]) {
+    dayOfMonth -= DAYS_IN_MONTH[oldMonth];
+    oldMonth += 1;
+  }
+
+  const lastDayOfNewMonth = DAYS_IN_MONTH[month] - 1;
+  if (dayOfMonth > lastDayOfNewMonth) {
+    dayOfMonth = lastDayOfNewMonth;
+  }
+
+  const newDayOfYear = firstDayOfMonth(month) + dayOfMonth;
+  return newDayOfYear * HOURS_PER_DAY + hourOfDay;
+}

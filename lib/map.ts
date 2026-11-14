@@ -46,3 +46,17 @@ export function kmToMapPx(
   const degrees = km / KM_PER_DEGREE;
   return degrees * pixelsPerDegree;
 }
+
+// Where to centre a label of the given width under a pin at pinX, so the whole
+// label stays between -limit and limit. Labels near the left or right edge get
+// pushed inwards; the rest sit centred on their pin.
+export function clampLabelX(pinX: number, labelWidth: number, limit: number): number {
+  const halfWidth = labelWidth / 2;
+  if (pinX + halfWidth > limit) {
+    return limit - halfWidth;
+  }
+  if (pinX - halfWidth < -limit) {
+    return -limit + halfWidth;
+  }
+  return pinX;
+}

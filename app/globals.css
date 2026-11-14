@@ -61,7 +61,9 @@
   --bright: #f2f2f2;
   --power: #fe7743;
   --comms: #4f8db0;
-  --neither: #1d2f3a;
+  /* Raised from #1d2f3a so empty cells still stand out from the panel on a
+     dim projector. Still darker than --line. */
+  --neither: #22384a;
 
   /* shadcn variables, mapped onto the palette so its components inherit the theme. */
   --background: #0f1a21;

@@ -13,6 +13,8 @@ export type ClearanceChartsProps = {
   row: SiteRow | null;
   // The selected site's hourly data, or null while it is still loading.
   hourly: Hourly | null;
+  // True when the selected site's hourly file failed to load.
+  hourlyFailed: boolean;
   // The month to show. 0 = January.
   visibleMonth: number;
   // Hour index counted from 2027-01-01 00:00 UTC.
@@ -22,11 +24,11 @@ export type ClearanceChartsProps = {
 // Size of the drawing in SVG units. The SVG stretches to the panel width and
 // keeps this shape, so one unit is about one screen pixel.
 const WIDTH = 1000;
-const HEIGHT = 150;
+const HEIGHT = 112;
 const LEFT = 44;
 const RIGHT = 8;
-const TOP = 8;
-const BOTTOM = 22;
+const TOP = 6;
+const BOTTOM = 18;
 const PLOT_WIDTH = WIDTH - LEFT - RIGHT;
 const PLOT_HEIGHT = HEIGHT - TOP - BOTTOM;
 
@@ -108,7 +110,7 @@ function ClearanceChart({
 
   return (
     <figure>
-      <figcaption className="mb-1 text-sm text-foreground">{title}</figcaption>
+      <figcaption className="text-sm text-foreground">{title}</figcaption>
       <svg
         viewBox={"0 0 " + WIDTH + " " + HEIGHT}
         className="h-auto w-full"
@@ -195,6 +197,7 @@ function ClearanceChart({
 export function ClearanceCharts({
   row,
   hourly,
+  hourlyFailed,
   visibleMonth,
   selectedHour,
 }: ClearanceChartsProps) {
@@ -205,12 +208,19 @@ export function ClearanceCharts({
       </p>
     );
   }
+  if (hourly === null && hourlyFailed) {
+    return (
+      <p role="alert" className="text-sm text-bright">
+        Could not load this site&apos;s hourly data. Select the site again to retry.
+      </p>
+    );
+  }
   if (hourly === null) {
     return <p className="text-sm text-muted-foreground">Loading hourly data.</p>;
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-1">
       <ClearanceChart
         title="Sun"
         body="sun"

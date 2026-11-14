@@ -27,17 +27,13 @@ export type SitesGridProps = {
   selectedHour: number;
   // Hourly data that has been loaded so far, by site id.
   hourlyBySite: Record<string, Hourly>;
+  // Sites whose hourly file failed to load.
+  failedHourlyIds: string[];
   // Select a site and an hour together.
   onSelect: (siteId: string, hour: number) => void;
   // Ask for a site's hourly data. It shows up in hourlyBySite when loaded.
   onRequestHourly: (siteId: string) => void;
   onRemoveCustom: (siteId: string) => void;
-};
-
-// The day that is opened into 24 hourly cells.
-type OpenDay = {
-  siteId: string;
-  dayOfYear: number;
 };
 
 // What the shared tooltip shows and where. left and top are pixels inside the
@@ -70,27 +66,32 @@ export function SitesGrid({
   selectedSiteId,
   selectedHour,
   hourlyBySite,
+  failedHourlyIds,
   onSelect,
   onRequestHourly,
   onRemoveCustom,
 }: SitesGridProps) {
-  const [openDay, setOpenDay] = useState<OpenDay | null>(null);
+  // When a day is open, it is always the selected site's selected day. So it
+  // follows the selection: another month keeps it open on the same day of the
+  // month, and another site opens the same day in that site's row.
+  const [isDayOpen, setIsDayOpen] = useState(false);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
   // While a day is open, Escape closes it.
   useEffect(() => {
-    if (openDay === null) {
+    if (!isDayOpen) {
       return;
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setOpenDay(null);
+        setIsDayOpen(false);
+        setTooltip(null);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [openDay]);
+  }, [isDayOpen]);
 
   const monthDays = daysOfMonth(visibleMonth);
   const selectedDay = Math.floor(selectedHour / HOURS_PER_DAY);
@@ -133,13 +134,13 @@ export function SitesGrid({
 
   function openDayCell(siteId: string, dayOfYear: number) {
     onSelect(siteId, dayOfYear * HOURS_PER_DAY);
-    setOpenDay({ siteId: siteId, dayOfYear: dayOfYear });
+    setIsDayOpen(true);
     onRequestHourly(siteId);
     hideTooltip();
   }
 
   function closeDay() {
-    setOpenDay(null);
+    setIsDayOpen(false);
     hideTooltip();
   }
 
@@ -149,8 +150,9 @@ export function SitesGrid({
 
   return (
     <div ref={boxRef} className="relative" onMouseLeave={hideTooltip}>
-      {/* Header: day numbers above the day columns. */}
-      <div className={cn(ROW_COLUMNS, "mb-1")}>
+      {/* Header: day numbers above the day columns. Hidden from screen
+          readers, because every cell's label already names its day. */}
+      <div aria-hidden="true" className={cn(ROW_COLUMNS, "mb-1")}>
         <span className="text-xs text-muted-foreground">Site</span>
         <div className="grid gap-px" style={dayColumns}>
           {monthDays.map((dayOfYear, index) => (
@@ -166,21 +168,29 @@ export function SitesGrid({
       </div>
 
       <ul className="flex flex-col gap-1">
-        {rows.map((row) => {
+        {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
           const isPairSite = pairText !== null && NEAR_PAIR_IDS.includes(site.id);
           const isPairPartner = isPairSite && isPairSelected && !isSelected;
           const monthTotals = totalsByMonth(row.days)[visibleMonth];
 
-          // This row shows 24 hourly cells if its open day is in the month on screen.
-          let isDayOpen = false;
-          if (openDay !== null && openDay.siteId === site.id) {
-            isDayOpen = monthDays.includes(openDay.dayOfYear);
-          }
+          // The selected row shows 24 hourly cells while a day is open.
+          const showHours = isDayOpen && isSelected;
+          const hourly = hourlyBySite[site.id];
+          const hourlyFailed = failedHourlyIds.includes(site.id);
+
+          // Custom rows sit below every curated row, under one divider.
+          const isFirstCustom = row.isCustom && (rowIndex === 0 || !rows[rowIndex - 1].isCustom);
 
           return (
-            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-10")}>
+            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-9")}>
+              {/* The divider spans all three columns, above the first custom row. */}
+              {isFirstCustom && (
+                <div className="col-span-3 mt-1 mb-1 border-t border-line pt-1.5 text-xs text-muted-foreground">
+                  Custom points: no terrain
+                </div>
+              )}
               {/* Name, with its tags on a second line. */}
               <div className="min-w-0">
                 <button
@@ -189,6 +199,8 @@ export function SitesGrid({
                   onClick={() => onSelect(site.id, selectedHour)}
                   className={cn(
                     "block max-w-full truncate rounded-sm text-left text-sm",
+                    // A custom point is named by its numbers, which use the mono font.
+                    row.isCustom && "font-mono tabular-nums",
                     isSelected && "font-medium text-bright",
                     isPairPartner && "outline-1 outline-offset-2 outline-bright outline-dashed",
                   )}
@@ -216,7 +228,7 @@ export function SitesGrid({
               </div>
 
               {/* Middle: the days of the month, or one opened day as 24 hours. */}
-              {!isDayOpen && (
+              {!showHours && (
                 <div className="grid gap-px" style={dayColumns}>
                   {monthDays.map((dayOfYear) => {
                     const day = row.days[dayOfYear];
@@ -246,7 +258,7 @@ export function SitesGrid({
                         }
                         onBlur={hideTooltip}
                         className={cn(
-                          "flex h-8 flex-col gap-px rounded-xs bg-neither p-px",
+                          "flex h-7 flex-col gap-px rounded-xs bg-neither p-px",
                           hasRing && "relative z-10 ring-2 ring-bright",
                         )}
                       >
@@ -260,20 +272,24 @@ export function SitesGrid({
                 </div>
               )}
 
-              {isDayOpen && openDay !== null && (
+              {showHours && (
                 <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
                   <span className="font-mono text-xs tabular-nums text-bright">
-                    {formatDay(openDay.dayOfYear)}
+                    {formatDay(selectedDay)}
                   </span>
 
-                  {hourlyBySite[site.id] === undefined && (
+                  {hourly === undefined && !hourlyFailed && (
                     <span className="text-xs text-muted-foreground">Loading hours.</span>
                   )}
+                  {hourly === undefined && hourlyFailed && (
+                    <span className="text-xs text-bright">
+                      Could not load the hours. Click the site name to retry.
+                    </span>
+                  )}
 
-                  {hourlyBySite[site.id] !== undefined && (
+                  {hourly !== undefined && (
                     <div className="grid gap-px" style={hourColumns}>
-                      {hoursOfDay(openDay.dayOfYear).map((hourIndex) => {
-                        const hourly = hourlyBySite[site.id];
+                      {hoursOfDay(selectedDay).map((hourIndex) => {
                         const sunUp = hourly.sun_visible[hourIndex];
                         const earthUp = hourly.earth_visible[hourIndex];
                         const stateText = hourStateText(sunUp, earthUp);
@@ -292,7 +308,7 @@ export function SitesGrid({
                             }
                             onBlur={hideTooltip}
                             className={cn(
-                              "flex h-8 flex-col gap-px rounded-xs bg-neither p-px",
+                              "flex h-7 flex-col gap-px rounded-xs bg-neither p-px",
                               hasRing && "relative z-10 ring-2 ring-bright",
                             )}
                           >
@@ -305,7 +321,7 @@ export function SitesGrid({
 
                   <button
                     type="button"
-                    aria-label={"Close " + formatDay(openDay.dayOfYear)}
+                    aria-label={"Close " + formatDay(selectedDay)}
                     onClick={closeDay}
                     className="rounded-sm px-1.5 text-sm leading-none text-muted-foreground hover:text-bright"
                   >

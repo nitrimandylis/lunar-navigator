@@ -4,6 +4,7 @@
 // its disc is above 0 degrees, the same rule as sunrise and sunset. That is the
 // rule data/build.py uses for the curated sites.
 
+import { SUN_RADIUS_DEG } from "./clearance.ts";
 import type { DaySummary } from "./data.ts";
 
 const MOON_RADIUS_KM = 1737.4;
@@ -12,13 +13,9 @@ const MOON_RADIUS_KM = 1737.4;
 // given day changes the answer by far less than 0.001 degrees.
 const SUN_DISTANCE_KM = 149_597_870.7;
 
-// Real sizes from JPL Horizons, the same ones data/horizon_mask.py uses.
-const SUN_RADIUS_KM = 695_700;
+// Earth's real radius from JPL Horizons, the same one data/horizon_mask.py uses.
+// The Sun's disc radius, SUN_RADIUS_DEG, lives in clearance.ts.
 const EARTH_RADIUS_KM = 6378.137;
-
-// How far the top edge of the Sun's disc is above its centre, in degrees:
-// about 0.2664. The Sun's distance barely changes, so one value is enough.
-const SUN_ANGULAR_RADIUS_DEG = (Math.asin(SUN_RADIUS_KM / SUN_DISTANCE_KM) * 180) / Math.PI;
 
 const HOURS_PER_DAY = 24;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -124,7 +121,7 @@ export function customSiteHourly(
     const earthRadiusDeg = toDegrees(
       Math.asin(EARTH_RADIUS_KM / subPoints.earth_distance_km[i]),
     );
-    const sunTopEdge = sunElevation + SUN_ANGULAR_RADIUS_DEG;
+    const sunTopEdge = sunElevation + SUN_RADIUS_DEG;
     const earthTopEdge = earthElevation + earthRadiusDeg;
 
     hourly.sun_elev_deg.push(roundTo3(sunElevation));
