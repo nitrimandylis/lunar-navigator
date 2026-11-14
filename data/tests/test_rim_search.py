@@ -58,3 +58,9 @@ def test_candidate_points_stay_inside_the_circle():
     assert (1000.0, 2000.0) in pts
     assert all(np.hypot(x - 1000.0, y - 2000.0) <= 5000.0 for x, y in pts)
     assert len(pts) == 81  # 11 x 11 grid minus the corners outside the circle: 97 - 16
+
+
+def test_crater_table_is_usable():
+    assert len(rs.CRATERS) == 7
+    for name, (lat, lon, radius) in rs.CRATERS.items():
+        assert -90 < lat < -83 and -180 <= lon <= 180 and 5_000 <= radius <= 100_000, name

@@ -172,15 +172,16 @@ def search_pair(pool, center_lat, center_lon, radius_m, spacing_m=700.0, min_sep
     return lit, dark_true, sep
 
 
-# Search areas (our own choice of how far from each crater centre to look, in metres).
-SEARCH_RADIUS_M = {
-    "shackleton": 12_000,
-    "de-gerlache": 20_000,
-    "haworth": 30_000,
-    "faustini": 25_000,
-    "malapert": 40_000,
-    "nobile": 40_000,
-    "amundsen": 60_000,
+# Crater centres (IAU Gazetteer of Planetary Nomenclature, via Wikipedia) and how far from each
+# centre to look, in metres (our own choice of search area): name -> (lat, lon, radius_m).
+CRATERS = {
+    "shackleton": (-89.67, 129.78, 12_000),
+    "de-gerlache": (-88.5, -87.1, 20_000),
+    "haworth": (-86.9, -4.0, 30_000),
+    "faustini": (-87.3, 77.0, 25_000),
+    "malapert": (-84.9, 12.9, 40_000),
+    "nobile": (-85.28, 53.27, 40_000),
+    "amundsen": (-84.5, 82.8, 60_000),
 }
 
 
@@ -202,7 +203,6 @@ def main() -> None:
     p.add_argument("--reference", default=str(here.parent / "public/data/sites/shackleton-ridge.json"))
     p.add_argument("--reference-lat", type=float, default=-89.3277)
     p.add_argument("--reference-lon", type=float, default=116.8355)
-    p.add_argument("--sites", default=str(here / "sites.json"))
     p.add_argument("--out", required=True)
     p.add_argument("--workers", type=int, default=6)
     sub = p.add_subparsers(dest="mode", required=True)
@@ -221,12 +221,11 @@ def main() -> None:
             result = {"lit": _round(lit), "dark": _round(dark), "separation_m": round(sep)}
         else:
             result = []
-            for site in json.loads(Path(args.sites).read_text()):
-                radius = SEARCH_RADIUS_M.get(site["id"])
-                if radius is None or (args.only and site["id"] != args.only):
+            for name, (lat, lon, radius) in CRATERS.items():
+                if args.only and name != args.only:
                     continue
-                best = search_crater(pool, site["lat"], site["lon"], radius)
-                result.append({"crater": site["id"], **_round(best)})
+                best = search_crater(pool, lat, lon, radius)
+                result.append({"crater": name, **_round(best)})
                 print(result[-1], flush=True)
     Path(args.out).write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
