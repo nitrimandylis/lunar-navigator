@@ -5,13 +5,14 @@ The app never calls Python at runtime.
 
 ## What it makes
 
-For the sites in `sites.json`, near the Moon's south pole, for every hour of 2027:
+For the 18 sites in `sites.json`, near the Moon's south pole, for every hour of 2027:
 
 - where the Sun and Earth are in the sky (azimuth and elevation),
 - the terrain horizon around the site, seen from 2 m above the ground (so we know when a hill hides them),
 - whether each one is visible (Sun = power, Earth = direct-to-Earth comms), counting any part of
   its disc above the horizon,
-- per-day totals for the site-by-day grid.
+- per-day totals for the site-by-day grid: hours of Sun, hours of Earth, hours of both at once
+  (`both_hours`), highest Sun, and the longest Sun gap. A day is a UTC day for all of them.
 
 It also writes `ephemeris.json`, so the app can work out the Sun and Earth for any custom
 point on the Moon.
@@ -55,11 +56,15 @@ Or leave them anywhere and pass `--dem5` and `--dem30`.
 Tests (no internet or terrain files needed; CI runs the same):
 
 ```bash
-data/.venv/Scripts/python -m pytest -q
+data/.venv/Scripts/python -m pytest data -q
 ```
 
-Rebuild all the JSON. It needs internet (Horizons) and the two terrain files, and takes about
-10 minutes (roughly one minute per site):
+`tests/test_public_data.py` also checks the committed files in `public/data/` against
+`sites.json` (one file per site, array lengths, `both_hours` matching the hourly visibility).
+So if you change `sites.json` and forget to rebuild, it fails.
+
+Rebuild all the JSON. It needs internet (Horizons) and the two terrain files, and takes
+roughly one minute per site:
 
 ```bash
 data/.venv/Scripts/python data/build.py
@@ -68,10 +73,11 @@ data/.venv/Scripts/python data/build.py
 Useful options: `--only <site id>` builds one site, `--out <folder>` writes somewhere else,
 `--start 2027-01-01 --days 365 --step-minutes 60` change the time range, and
 `--observer-height 2` (metres above the ground, the default) changes the viewer height. The app expects the
-defaults, so only change them to experiment. `--only` leaves `ephemeris.json` alone.
+defaults, so only change them to experiment. `--only` leaves `ephemeris.json` and the other sites' files alone. It still rewrites
+`sites.json` in the output folder, from the full list.
 
 Re-run `build.py` whenever `sites.json` or the horizon code changes, and commit the new files
-in `public/data/`.
+in `public/data/`. After adding or changing one site, `build.py --only <site id>` is enough.
 
 ## How the pieces fit
 
@@ -84,6 +90,9 @@ sites.json ──► build.py ──► public/data/sites/<id>.json    hourly se
                   ├── ephemeris.py      sub-solar and sub-Earth points, from Horizons
                   ├── terrain.py        lat/lon to map position, reads the terrain around a site
                   └── horizon_mask.py   terrain around a site -> horizon angle per compass direction
+
+rim_search.py, repick_pair.py   find points for sites.json (not run by build.py)
+tests/                          pytest checks, including test_public_data.py and test_known_answer.py
 ```
 
 - `horizon_mask.py` walks outward from the site in every direction and keeps the highest
@@ -100,29 +109,57 @@ sites.json ──► build.py ──► public/data/sites/<id>.json    hourly se
 
 ## Where the sites come from
 
-`sites.json` is not a NASA list of landing sites. We found the points ourselves with
-`rim_search.py`, so say so in the video and slides. The scan looks for points with the most
-hours of Sun and Earth near each crater, and for a lit point and a dark point a few km apart
-near Shackleton. The Sun and Earth directions are reused from one Horizons series for the
-whole region (checked against Horizons at a second site, within 0.01 degrees for the Sun),
-so only the terrain horizon is worked out per point. The best few points are then scored again
-with the full 150 km horizon.
+`sites.json` has three kinds of site. It is not a NASA list of landing sites.
+
+- **Computed points** (name ends in "(computed)"; the `de-gerlache-candidate`, `haworth-candidate`
+  and similar ones, the Shackleton and Sverdrup lit/dark pairs, `connecting-ridge`). We found these
+  ourselves by scanning the terrain with `rim_search.py` or `repick_pair.py`, so say so in the
+  video and slides. They have no `mission` field.
+- **Mission sites** with a `mission` string: `im2-mons-mouton` (`"IM-2"`) and the three Artemis III
+  candidate regions `artemis3-haworth`, `artemis3-malapert-massif`, `artemis3-nobile-rim-1`
+  (`"Artemis III candidate"`). The IM-2 point is the intended landing site from the LROC team
+  page (https://lroc.im-ldi.com/images/1401). The Artemis III points are the region centres on the
+  third-party Lunar Resources Registry map (https://lunarresourcesregistry.com/south-pole-map/),
+  not a NASA file, and a region centre is not a landing spot. Their `elevation_m` is read from the
+  terrain file.
+- **`connecting-ridge`**: the best-lit point we found by scanning within about 6 km of the
+  registry centre of the Connecting Ridge. `tests/test_known_answer.py` checks its sunlit share
+  for 2027 against Glaser et al. 2014 (92.27 percent at 2 m, over 19 years), with a loose
+  tolerance of 10 points. It is a plausibility check, not a replication: their exact point is
+  unknown.
+
+The scan looks for points with the most hours of Sun and Earth near each crater, and for a lit
+point and a dark point a few km apart. The Sun and Earth directions are reused from one Horizons
+series for the whole region (checked against Horizons at a second site, within 0.01 degrees for
+the Sun), so only the terrain horizon is worked out per point. The best few points are then
+scored again with the full 150 km horizon. The scans treat the Sun as a point at its centre, so
+their hour counts differ a little from `build.py`, which uses discs. The numbers in the app come
+from `build.py`.
 
 Both modes need an hourly site file for the Sun and Earth directions. By default that is
 `public/data/sites/shackleton-ridge.json`, which is committed. If it is missing or you changed the
 site list, run `build.py` first (or pass `--reference` and its `--reference-lat/--reference-lon`).
 
 ```bash
-# best point near each crater (about 10 minutes)
+# best point near each crater (about 10 minutes; --only <crater name> for one)
 data/.venv/Scripts/python data/rim_search.py --dem30 data/raw/LRO_LOLA_DEM_SPole75_30mp_v04.tif --out craters.json craters
 
 # a lit point and a dark point 2 to 6 km apart, near a given centre
 data/.venv/Scripts/python data/rim_search.py --dem30 data/raw/LRO_LOLA_DEM_SPole75_30mp_v04.tif --out pair.json pair --center-lat -89.67 --center-lon 129.78
 ```
 
-`rim_candidates.json` keeps the results behind the current `sites.json`. To change the site
-list, edit `sites.json` by hand (id, name, lat, lon, elevation, source), then run `build.py`.
-Read `elevation_m` from the terrain file.
+`repick_pair.py` repeats the Shackleton lit/dark pair (`shackleton-ridge` and `shackleton-shadow`)
+in more detail: a coarse scan, a re-score on the 5 m terrain, then a 50 m refinement. It needs both
+terrain files. It prints the pair and writes only `--out`. Command, from the repo root:
+
+```bash
+data/.venv/Scripts/python data/repick_pair.py --dem5 data/raw/LRO_LOLA_DEM_SPole875_5mp_v04.tif     --dem30 data/raw/LRO_LOLA_DEM_SPole75_30mp_v04.tif --out pair.json     --center-lat -89.43 --center-lon 222.5 --radius-m 3000     --workers 2 --fine-workers 2 --rescore-top 100 --refine-radius-m 1500
+```
+
+`rim_candidates.json` keeps the scan results behind the computed sites (its `note` says which
+were re-scanned). To change the site list, edit `sites.json` by hand (id, name, lat, lon,
+elevation, source, and `mission` for a real mission site, left out otherwise), then run
+`build.py`. Read `elevation_m` from the terrain file.
 
 ## Known simplifications
 
@@ -136,3 +173,4 @@ Read `elevation_m` from the terrain file.
 - Terrain is the LOLA data through September 2011. The viewer is a fixed 2 m above the ground (a stand-in for a lander's panel or antenna height); the
   lander itself, and any height other than the one set by `--observer-height`, is not modelled.
 - Custom points on the map get Sun and Earth from `ephemeris.json` but no terrain horizon.
+- Mission sites are a single point (the published landing site, or a region centre), not the whole region.
