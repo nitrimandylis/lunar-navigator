@@ -346,11 +346,42 @@ This section records **actual usage**, unlike the research register above.
 | Horizons Sun/Earth positions | Previously listed; implementation not verified in this documentation task | gio confirms exact query, observer, time conventions, output and use |
 | LOLA terrain | Background reviewed; actual processing not confirmed | Exact product/version/resolution, method, licence and output role |
 | Moon imagery/textures/site coordinates | Pending | Creator/mission/product, source URL, permissions and where used |
-| Other libraries/tools/icons/fonts/media | Pending whole-team inventory | Exact source and applicable attribution/licensing |
+| Other libraries/tools/icons/fonts/media | Fonts and crater outlines recorded below (A01 to A03); the rest pending whole-team inventory | Exact source and applicable attribution/licensing |
 | Screenshots/results | Pending final evidence | App revision, scenario, date, verifier and original capture |
 | AI/SI assistance | Codex used for research/synthesis, Markdown drafts and earlier setup | Whole team adds all actual tools/uses, media indicators and metadata as required |
 
 Do not promote a researched source into an implemented-data claim. Cite borrowed ideas/text/assets actually used; the final NASA references should accurately reflect project usage and any preparation material incorporated.
+
+### Confirmed in the app (interface)
+
+Recorded by trim on 14 November 2026 from the code on `main`. These three are in actual use.
+
+#### A01
+
+**Excon typeface.** Indian Type Foundry, distributed by Fontshare.
+
+- https://www.fontshare.com/fonts/excon
+- Loaded in `app/layout.tsx` from the Fontshare CSS link `https://api.fontshare.com/v2/css?f[]=excon@400,500,700&display=swap`. No font files are in the repository.
+- Used for all interface text.
+- Licence: ITF Free Font License, as listed on Fontshare. Re-read the licence page before hand-in.
+
+#### A02
+
+**JetBrains Mono typeface.** JetBrains, distributed by Google Fonts.
+
+- https://fonts.google.com/specimen/JetBrains+Mono
+- Loaded in `app/layout.tsx` from the Google Fonts CSS link `https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap`. No font files are in the repository.
+- Used for every number in the interface.
+- Licence: SIL Open Font License 1.1.
+
+#### A03
+
+**Gazetteer of Planetary Nomenclature.** IAU Working Group for Planetary System Nomenclature, hosted by USGS Astrogeology.
+
+- https://planetarynames.wr.usgs.gov
+- Location: Moon feature search results, read 14 November 2026.
+- Used for the names, centre coordinates and diameters of the craters outlined on the south pole locator map (`components/south-pole-map.tsx`).
+- Not used for landing site coordinates or for any Sun or Earth calculation.
 
 ## Earlier setup references retained for provenance
 
