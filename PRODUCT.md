@@ -18,6 +18,10 @@ Built now:
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
+- Sky panorama: the terrain horizon all the way round the selected site (north, east,
+  south, west, north), with the Sun and Earth at their real direction and height for the
+  selected hour, and the paths they take during the month. A body hidden by terrain is
+  drawn hollow.
 - Clearance charts: how far the Sun and Earth sit above the terrain horizon, every hour of
   the month, with the selected hour marked.
 - Selected-site numbers beside the charts: Sun and Earth height above the terrain (raw

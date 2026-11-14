@@ -11,6 +11,7 @@ import { Legend } from "@/components/legend";
 import { MonthChips } from "@/components/month-chips";
 import { SelectedSite } from "@/components/selected-site";
 import { SitesGrid } from "@/components/sites-grid";
+import { SkyPanorama } from "@/components/sky-panorama";
 import { SortControl } from "@/components/sort-control";
 import { MapOverlay } from "@/components/map-overlay";
 import { SouthPoleMap } from "@/components/south-pole-map";
@@ -324,7 +325,7 @@ export function Navigator() {
           {/* The selected site's numbers sit next to its charts: both are
               about the same site and hour. */}
           <Panel title="Selected site">
-            {/* Numbers on the left, the month's clearance charts on the right. */}
+            {/* Numbers on the left, the sky and the charts on the right. */}
             <div className="grid grid-cols-[23rem_minmax(0,1fr)] gap-6">
               <SelectedSite
                 row={selectedRow}
@@ -332,13 +333,23 @@ export function Navigator() {
                 hourlyFailed={selectedHourlyFailed}
                 selectedHour={selectedHour}
               />
-              <ClearanceCharts
-                row={selectedRow}
-                hourly={selectedHourly}
-                hourlyFailed={selectedHourlyFailed}
-                visibleMonth={visibleMonth}
-                selectedHour={selectedHour}
-              />
+              {/* The sky at the selected hour on top, the month's clearance
+                  charts under it. */}
+              <div className="flex min-w-0 flex-col gap-1">
+                <SkyPanorama
+                  row={selectedRow}
+                  hourly={selectedHourly}
+                  visibleMonth={visibleMonth}
+                  selectedHour={selectedHour}
+                />
+                <ClearanceCharts
+                  row={selectedRow}
+                  hourly={selectedHourly}
+                  hourlyFailed={selectedHourlyFailed}
+                  visibleMonth={visibleMonth}
+                  selectedHour={selectedHour}
+                />
+              </div>
             </div>
           </Panel>
         </div>

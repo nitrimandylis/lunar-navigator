@@ -24,7 +24,8 @@ export type ClearanceChartsProps = {
 // Size of the drawing in SVG units. The SVG stretches to the panel width and
 // keeps this shape, so one unit is about one screen pixel.
 // About the drawn width in pixels, so 11 units of text come out near 11 px.
-const WIDTH = 620;
+// The two charts sit side by side, so each is half the column wide.
+const WIDTH = 300;
 const HEIGHT = 80;
 const LEFT = 44;
 const RIGHT = 8;
@@ -83,7 +84,7 @@ function ClearanceChart({
   const selectedIsInMonth = selectedHour >= startHour && selectedHour < endHour;
   const selectedX = (selectedHour - startHour) * xStep;
 
-  // Day ticks along the bottom, with a number on every other day.
+  // Day ticks along the bottom, with a number on every fifth day: 1, 6, 11.
   const dayTicks = [];
   for (let day = 0; day < dayCount; day++) {
     const x = day * HOURS_PER_DAY * xStep;
@@ -96,7 +97,7 @@ function ClearanceChart({
           y2={TOP + PLOT_HEIGHT + 4}
           className="stroke-line"
         />
-        {day % 2 === 0 && (
+        {day % 5 === 0 && (
           <text
             x={x + 2}
             y={HEIGHT - 4}
@@ -221,7 +222,7 @@ export function ClearanceCharts({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="grid grid-cols-2 gap-4">
       <ClearanceChart
         title="Sun"
         body="sun"
