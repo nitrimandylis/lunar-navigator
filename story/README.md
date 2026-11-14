@@ -21,6 +21,8 @@ The final submission should present our team's actual work, verified outputs and
 | [Sources and evidence register](sources.md) | Original links, source authority, inspection limits and credits to complete |
 | [Team working index](START-HERE.md) | Draft status, workflow and remaining confirmations |
 
-The older pitch, video-script and evidence-checklist documents are preparation drafts. Their historical snapshots and rehearsal timings should not be read as the current submitted project or current NASA rules.
+Our chosen demo is an English slide deck of up to seven slides total. We are not preparing a video.
+
+The older pitch and evidence-checklist documents are preparation drafts. Their historical snapshots and rehearsal timings should not be read as the current submitted project or current NASA rules.
 
 Research basis reviewed on 14 November 2026. See the source register for publication dates, exact locations and unresolved points.

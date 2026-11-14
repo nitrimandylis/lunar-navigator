@@ -104,7 +104,7 @@ The ten awards are Best Use of Science, Best Use of Data, Best Use of Technology
 | Avoid | Reason / better action | Source |
 | --- | --- | --- |
 | Eight slides because the last one is only references | The demo limit includes the whole deck; use concise credits and the full project references | N02 pp. 6, 11 |
-| Submitting the older 60-second rehearsal video | It exceeds the current video limit; our chosen official format is a deck | N02 pp. 10-11 |
+| Treating an additional video as a required deliverable | Our chosen official demo is a deck of up to seven slides; NASA also permits a video of at most 30 seconds as an alternative | N02 pp. 6, 10-11 |
 | Treating Save Progress as submission | Confirm Submit for Judging and the banner | N02 pp. 3, 12 |
 | Private links or a localhost final-project link | Judges need a publicly accessible hosted result | N02 pp. 4, 7 |
 | NASA logo or background image as the whole data explanation | Identify meaningful NASA resource use and show its role | N01 p. 6; N02 p. 8; N05 |
