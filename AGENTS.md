@@ -3,6 +3,24 @@
 Lunar Landing Site Navigator, NASA Space Apps 2026 (Athens). Team: trim, gio, koum.
 Trim and gio use Claude Code. Koum uses Codex (ChatGPT) on Windows.
 
+## The challenge
+
+Brief: https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/
+Read it before planning a feature. In short: let mission planners, educators and the public
+compare lunar landing sites and dates quickly, showing Sun and Earth against the horizon
+(power and direct-to-Earth comms). It suggests:
+
+- Curated sites (Apollo, CLPS targets, other commercial and national missions) plus custom
+  lat/lon, compared side by side.
+- Date/time picking, and how conditions change across lunar days and seasons.
+- Solar elevation, sunlight duration, Earth visibility windows, and time left before
+  sunset and Earthset.
+- Terrain horizons from LOLA topography (no atmosphere, so no refraction). Libration matters.
+
+Named resources: JPL Horizons (https://ssd.jpl.nasa.gov/horizons/), LROC Quickmap
+(https://quickmap.lroc.asu.edu/), Moon Trek (https://trek.nasa.gov/moon/), LOLA (named only,
+no link), CSA Moon Exploration (background).
+
 ## Folder ownership
 
 Only edit files inside folders your human owns.
@@ -17,7 +35,7 @@ Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those 
 
 ## Stack
 
-- Next.js (App Router), TypeScript, Tailwind, shadcn/ui. Package manager: Bun (`bun install`, `bun run dev`).
+- Next.js (App Router), TypeScript, Tailwind, shadcn/ui. Package manager: npm (`npm install`, `npm run dev`). Commit `package-lock.json`, no other lockfile.
 - `data/` is Python. It writes JSON that the app reads. The app never calls Python at runtime.
 - `story/` is Markdown only: no code.
 
@@ -36,7 +54,7 @@ FILL IN at kickoff (sites + hourly Sun/Earth elevation JSON).
    what to fix and pings the author in Discord. Fix it on the same branch and push again.
 5. Before starting new work: `git checkout main && git pull`.
 
-The check is `bun run check` (eslint, typecheck, `bun test`) plus `pytest` for `data/`.
+The check is `npm run check` (eslint, `next typegen`, `tsc`, `node --test`) plus `pytest` for `data/`.
 Run it before saying anything is done. `story/` changes need no check.
 
 ## Tests
