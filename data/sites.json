@@ -26,9 +26,9 @@
   {
     "id": "haworth-candidate",
     "name": "Candidate near Haworth (computed)",
-    "lat": -85.9166,
-    "lon": -4.067,
-    "elevation_m": 4800,
+    "lat": -85.962,
+    "lon": -2.3833,
+    "elevation_m": 4994,
     "source": "Best Sun plus Earth hours in the area scanned around the Haworth crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
@@ -58,9 +58,9 @@
   {
     "id": "amundsen-candidate",
     "name": "Candidate near Amundsen (computed)",
-    "lat": -83.9405,
-    "lon": 100.11,
-    "elevation_m": -1558,
+    "lat": -82.7489,
+    "lon": 72.9299,
+    "elevation_m": 2805,
     "source": "Best Sun plus Earth hours in the area scanned around the Amundsen crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
