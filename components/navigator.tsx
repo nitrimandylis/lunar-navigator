@@ -27,8 +27,9 @@ import type {
   SiteHourly,
   SiteSummary,
 } from "@/lib/data";
-import { sortRows, type SortKey } from "@/lib/sort";
-import { HOURS_PER_DAY, YEAR, firstDayOfMonth } from "@/lib/time";
+import { buildRows } from "@/lib/rows";
+import type { SortKey } from "@/lib/sort";
+import { YEAR, moveHourToMonth } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -38,22 +39,6 @@ async function fetchJson(path: string): Promise<unknown> {
     throw new Error("Could not load " + path + " (status " + response.status + ")");
   }
   return response.json();
-}
-
-// Joins the sites with their per-day totals: one row per site.
-function buildRows(
-  curatedSites: Site[],
-  customSites: Site[],
-  summaries: Record<string, DaySummary[]>,
-): SiteRow[] {
-  const rows: SiteRow[] = [];
-  for (const site of curatedSites) {
-    rows.push({ site: site, isCustom: false, days: summaries[site.id] ?? [] });
-  }
-  for (const site of customSites) {
-    rows.push({ site: site, isCustom: true, days: summaries[site.id] ?? [] });
-  }
-  return rows;
 }
 
 // A titled box. Every panel on the page uses it.
@@ -68,9 +53,10 @@ function Panel({
 }) {
   return (
     <section
-      className={cn("rounded-lg border border-line bg-panel p-4", className)}
+      aria-label={title}
+      className={cn("rounded-lg border border-line bg-panel px-4 py-3", className)}
     >
-      <h2 className="mb-2 text-sm font-medium text-bright">{title}</h2>
+      <h2 className="mb-1.5 text-sm font-medium text-bright">{title}</h2>
       {children}
     </section>
   );
@@ -81,6 +67,8 @@ export function Navigator() {
   const [sites, setSites] = useState<Site[]>([]);
   const [summaries, setSummaries] = useState<Record<string, DaySummary[]>>({});
   const [hourlyBySite, setHourlyBySite] = useState<Record<string, Hourly>>({});
+  // Sites whose hourly file failed to load. Selecting the site again retries.
+  const [failedHourlyIds, setFailedHourlyIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -107,13 +95,15 @@ export function Navigator() {
       return;
     }
     requestedHourlyIds.current.add(siteId);
+    setFailedHourlyIds((previous) => previous.filter((id) => id !== siteId));
 
     try {
       const hourly = (await fetchJson("/data/sites/" + siteId + ".json")) as SiteHourly;
       setHourlyBySite((previous) => ({ ...previous, [siteId]: hourly }));
     } catch {
-      // Forget the request so a later click can try again.
+      // Forget the request so a later click can try again, and say it failed.
       requestedHourlyIds.current.delete(siteId);
+      setFailedHourlyIds((previous) => [...previous, siteId]);
     }
   }
 
@@ -140,7 +130,7 @@ export function Navigator() {
         setSummaries(loadedSummaries);
 
         // Start with the top row selected.
-        const firstRows = sortRows(buildRows(loadedSites, [], loadedSummaries), "power", 0);
+        const firstRows = buildRows(loadedSites, [], loadedSummaries, "power", 0);
         if (firstRows.length > 0) {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
@@ -174,11 +164,12 @@ export function Navigator() {
     setSelectedHour(hour);
   }
 
-  // Showing another month also moves the selected hour to that month's first
-  // hour, so the selection is always inside the month on screen.
+  // Showing another month also moves the selected hour into that month, on the
+  // same day of the month and hour of the day, so the selection is always
+  // inside the month on screen.
   function changeMonth(month: number) {
     setVisibleMonth(month);
-    setSelectedHour(firstDayOfMonth(month) * HOURS_PER_DAY);
+    setSelectedHour(moveHourToMonth(selectedHour, month));
   }
 
   // Works out a custom point's hourly data and per-day totals in the browser,
@@ -228,18 +219,35 @@ export function Navigator() {
   }
 
   function removeCustomSite(siteId: string) {
+    // Update from "previous", so two quick removals never undo each other.
     setCustomSites((previous) => previous.filter((site) => site.id !== siteId));
-    // If the removed site was selected, fall back to the first curated site.
+
+    // Forget its per-day totals and hourly data too.
+    setSummaries((previous) => {
+      const copy = { ...previous };
+      delete copy[siteId];
+      return copy;
+    });
+    setHourlyBySite((previous) => {
+      const copy = { ...previous };
+      delete copy[siteId];
+      return copy;
+    });
+    requestedHourlyIds.current.delete(siteId);
+
+    // If the removed site was selected, select the top row on screen instead.
     if (selectedSiteId === siteId) {
-      if (sites.length > 0) {
-        selectSite(sites[0].id);
+      const remainingCustomSites = customSites.filter((site) => site.id !== siteId);
+      const remainingRows = buildRows(sites, remainingCustomSites, summaries, sortKey, visibleMonth);
+      if (remainingRows.length > 0) {
+        selectSite(remainingRows[0].site.id);
       } else {
         setSelectedSiteId(null);
       }
     }
   }
 
-  const rows = sortRows(buildRows(sites, customSites, summaries), sortKey, visibleMonth);
+  const rows = buildRows(sites, customSites, summaries, sortKey, visibleMonth);
 
   let selectedRow: SiteRow | null = null;
   for (const row of rows) {
@@ -252,10 +260,12 @@ export function Navigator() {
   if (selectedSiteId !== null && hourlyBySite[selectedSiteId] !== undefined) {
     selectedHourly = hourlyBySite[selectedSiteId];
   }
+  const selectedHourlyFailed =
+    selectedSiteId !== null && failedHourlyIds.includes(selectedSiteId);
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="flex items-center gap-6 border-b border-line px-4 py-3">
+      <header className="flex items-center gap-6 border-b border-line px-4 py-2">
         <h1 className="text-lg font-medium text-bright">
           Lunar Landing Site Navigator
         </h1>
@@ -276,9 +286,11 @@ export function Navigator() {
         </div>
       </header>
 
-      <main className="grid flex-1 grid-cols-[minmax(0,1fr)_380px] gap-4 p-4">
-        <div className="flex flex-col gap-4">
-          <Panel title="Sites" className="flex-1">
+      {/* items-start: each column is only as tall as its panels, so the Sites
+          panel does not stretch and push the charts below the fold. */}
+      <main className="grid flex-1 grid-cols-[minmax(0,1fr)_380px] items-start gap-3 p-3">
+        <div className="flex flex-col gap-3">
+          <Panel title="Sites">
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
             )}
@@ -288,16 +300,20 @@ export function Navigator() {
               </p>
             )}
             {!isLoading && loadError === null && (
-              <SitesGrid
-                rows={rows}
-                visibleMonth={visibleMonth}
-                selectedSiteId={selectedSiteId}
-                selectedHour={selectedHour}
-                hourlyBySite={hourlyBySite}
-                onSelect={selectSiteAndHour}
-                onRequestHourly={requestHourly}
-                onRemoveCustom={removeCustomSite}
-              />
+              <>
+                <SitesGrid
+                  rows={rows}
+                  visibleMonth={visibleMonth}
+                  selectedSiteId={selectedSiteId}
+                  selectedHour={selectedHour}
+                  hourlyBySite={hourlyBySite}
+                  failedHourlyIds={failedHourlyIds}
+                  onSelect={selectSiteAndHour}
+                  onRequestHourly={requestHourly}
+                  onRemoveCustom={removeCustomSite}
+                />
+                <Legend />
+              </>
             )}
           </Panel>
 
@@ -305,25 +321,28 @@ export function Navigator() {
             <ClearanceCharts
               row={selectedRow}
               hourly={selectedHourly}
+              hourlyFailed={selectedHourlyFailed}
               visibleMonth={visibleMonth}
               selectedHour={selectedHour}
             />
           </Panel>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <Panel title="Selected site">
             <SelectedSite
               row={selectedRow}
               hourly={selectedHourly}
+              hourlyFailed={selectedHourlyFailed}
               selectedHour={selectedHour}
             />
           </Panel>
 
-          <Panel title="South pole" className="flex-1">
+          <Panel title="South pole">
             <SouthPoleMap
               rows={rows}
               selectedSiteId={selectedSiteId}
+              pickedPoint={pickedPoint}
               onSelectSite={selectSite}
               onPickPoint={(lat, lon) => setPickedPoint({ lat: lat, lon: lon })}
             />
@@ -336,10 +355,6 @@ export function Navigator() {
               error={customError}
               onAdd={addCustomSite}
             />
-          </Panel>
-
-          <Panel title="Legend">
-            <Legend />
           </Panel>
         </div>
       </main>

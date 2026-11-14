@@ -8,7 +8,9 @@
 import type { Hourly } from "./app-types.ts";
 import { hoursUntilChange } from "./data.ts";
 
-// Apparent radius of the Sun's disc seen from the Moon, in degrees.
+// Apparent radius of the Sun's disc seen from the Moon, in degrees:
+// asin(695700 km / 1 AU). The Sun's distance barely changes, so one value is
+// enough. custom-site.ts uses this same constant.
 export const SUN_RADIUS_DEG = 0.2664;
 
 // Apparent radius of Earth's disc, in degrees. The real value is

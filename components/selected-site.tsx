@@ -7,12 +7,14 @@ export type SelectedSiteProps = {
   row: SiteRow | null;
   // The selected site's hourly data, or null while it is still loading.
   hourly: Hourly | null;
+  // True when the selected site's hourly file failed to load.
+  hourlyFailed: boolean;
   // Hour index counted from 2027-01-01 00:00 UTC.
   selectedHour: number;
 };
 
 // Numbers for the selected site and hour.
-export function SelectedSite({ row, hourly, selectedHour }: SelectedSiteProps) {
+export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: SelectedSiteProps) {
   if (row === null) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -27,7 +29,10 @@ export function SelectedSite({ row, hourly, selectedHour }: SelectedSiteProps) {
   return (
     <div className="flex flex-col gap-3 text-sm">
       <div>
-        <p className="text-bright">{site.name}</p>
+        {/* A custom point is named by its numbers, which use the mono font. */}
+        <p className={row.isCustom ? "font-mono tabular-nums text-bright" : "text-bright"}>
+          {site.name}
+        </p>
         <p className="font-mono tabular-nums text-muted-foreground">
           {site.lat.toFixed(4)}°, {site.lon.toFixed(4)}°
         </p>
@@ -36,8 +41,13 @@ export function SelectedSite({ row, hourly, selectedHour }: SelectedSiteProps) {
         </p>
       </div>
 
-      {hourly === null && (
+      {hourly === null && !hourlyFailed && (
         <p className="text-muted-foreground">Loading hourly data.</p>
+      )}
+      {hourly === null && hourlyFailed && (
+        <p className="text-bright">
+          Could not load this site&apos;s hourly data. Select the site again to retry.
+        </p>
       )}
 
       {hourly !== null && (

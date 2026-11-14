@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { projectSouthPole } from "./geometry.ts";
-import { kmToMapPx, unprojectSouthPole } from "./map.ts";
+import { clampLabelX, kmToMapPx, unprojectSouthPole } from "./map.ts";
 
 // Passes when actual is within tolerance of expected.
 function assertClose(
@@ -66,4 +66,14 @@ test("kmToMapPx for Shackleton crater", () => {
   // IAU Gazetteer of Planetary Nomenclature: Shackleton is 20.92 km across,
   // so its radius is 10.46 km. 10.46 / 30.3234 * 15 px per degree = 5.174 px.
   assertClose(kmToMapPx(10.46, 150), 5.174, 0.001, "pixels");
+});
+
+test("clampLabelX centres a label on its pin when it fits", () => {
+  assert.equal(clampLabelX(20, 100, 165), 20);
+});
+
+test("clampLabelX pushes a label inwards at the edges", () => {
+  // A 100 wide label on a pin at 150 would end at 200, past 165.
+  assert.equal(clampLabelX(150, 100, 165), 115);
+  assert.equal(clampLabelX(-150, 100, 165), -115);
 });
