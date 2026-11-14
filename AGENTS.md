@@ -54,8 +54,11 @@ Conventions:
   north, 0 to 360.
 - Hourly series are plain arrays. Index `i` in every array is the hour
   `start_utc + i * step_minutes`.
-- A body is visible at an hour when its centre is above the terrain horizon at its azimuth.
-  The Sun and Earth are treated as points, not discs.
+- The Sun and Earth are treated as discs, not points. A body is visible at an hour when any
+  part of its disc is above the terrain horizon. Sun radius: 0.2664 degrees. Earth radius:
+  0.9 to 1.0 degrees, from 6378.137 km at the Earth-Moon distance of that hour.
+- The elevation arrays hold the centre of the disc, so a body can be visible while its
+  elevation is slightly below the horizon.
 
 ### `sites.json`: the list of sites
 
@@ -110,8 +113,9 @@ Conventions:
 }
 ```
 
-365 days, each a UTC day. `longest_sun_gap_hours` is counted inside that day only: a gap
-that runs past midnight is cut there.
+365 days, each a UTC day. `longest_sun_gap_hours` is the whole dark spell that touches that
+day, not just the part inside it, so it can be more than 24. A spell that touches the first
+or last day of 2027 is cut there.
 
 ### `ephemeris.json`: where the Sun and Earth are overhead, for custom points
 
