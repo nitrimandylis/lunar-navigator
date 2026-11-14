@@ -199,9 +199,9 @@ def main() -> None:
     here = Path(__file__).parent
     p = argparse.ArgumentParser()
     p.add_argument("--dem30", required=True)
-    p.add_argument("--reference", default=str(here / "out/sites/shackleton.json"))
-    p.add_argument("--reference-lat", type=float, default=-89.67)
-    p.add_argument("--reference-lon", type=float, default=129.78)
+    p.add_argument("--reference", default=str(here.parent / "public/data/sites/shackleton-ridge.json"))
+    p.add_argument("--reference-lat", type=float, default=-89.3277)
+    p.add_argument("--reference-lon", type=float, default=116.8355)
     p.add_argument("--sites", default=str(here / "sites.json"))
     p.add_argument("--out", required=True)
     p.add_argument("--workers", type=int, default=6)

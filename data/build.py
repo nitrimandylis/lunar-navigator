@@ -1,6 +1,6 @@
 """Build the JSON the app reads: one hourly series and one daily summary per site.
 
-    python data/build.py --dem5 <5 m DEM .tif> --dem30 <30 m DEM .tif> --out data/out
+    python data/build.py --dem5 <5 m DEM .tif> --dem30 <30 m DEM .tif> --out public/data
 
 Shapes are described in data/CONTRACT-DRAFT.md. Sun and Earth positions come from JPL
 Horizons (needs internet), horizons from the LOLA DEMs (LRO LOLA DEM v4 S Pole).
@@ -117,7 +117,7 @@ def main() -> None:
     p.add_argument("--dem5", default=str(here / "raw/LRO_LOLA_DEM_SPole875_5mp_v04.tif"))
     p.add_argument("--dem30", default=str(here / "raw/LRO_LOLA_DEM_SPole75_30mp_v04.tif"))
     p.add_argument("--sites", default=str(here / "sites.json"))
-    p.add_argument("--out", default=str(here / "out"))
+    p.add_argument("--out", default=str(here.parent / "public/data"))
     p.add_argument("--start", default="2027-01-01", help="UTC date, YYYY-MM-DD")
     p.add_argument("--days", type=int, default=365)
     p.add_argument("--step-minutes", type=int, default=60)

@@ -1,7 +1,6 @@
-# Data contract: DRAFT for trim to review
+# Data contract
 
-Proposed by gio. Nothing is final until trim agrees. Once agreed, trim copies it into
-`AGENTS.md` (Contract section). Python in `data/` writes these files; the app only reads them.
+Agreed between gio and trim. Trim can copy it into `AGENTS.md` (Contract section). Python in `data/` writes these files; the app only reads them.
 
 ## Conventions
 
@@ -75,12 +74,31 @@ For the site-by-day grid (power lane and comms lane).
 }
 ```
 
-## Open questions for trim
+## File 4: `ephemeris.json` (for custom latitude/longitude)
 
-1. Which date range? Proposal: one full year to start. More = bigger files.
-2. Does the app want `sites/<id>.json` and `summary/<id>.json` as two files, or one?
-3. Where should the app find them? Proposal: `data/out/`, and trim copies or imports them.
-   If it should be `public/data/`, trim decides, since `public/` is not in `data/`.
-4. Is 60 minute steps fine, or does the timeline need finer?
-5. Anything else the UI needs per hour (for example time to next sunset)? Proposal: the app
-   works that out from `sun_visible`.
+Same hours as the site files, one array per quantity. From these the app can work out Sun and
+Earth elevation at any point on the Moon. Longitudes are east-positive, 0 to 360.
+
+```json
+{
+  "start_utc": "2027-01-01T00:00:00Z",
+  "step_minutes": 60,
+  "count": 8760,
+  "sub_solar_lon_deg": [263.1159],
+  "sub_solar_lat_deg": [-1.0146],
+  "sub_earth_lon_deg": [7.1872],
+  "sub_earth_lat_deg": [5.996],
+  "earth_distance_km": [391461]
+}
+```
+
+## Decisions (answered by trim)
+
+1. Range: calendar year 2027.
+2. Two files per site (`summary/<id>.json` loaded for all sites first, `sites/<id>.json` on demand).
+3. Location: `public/data/`, written there directly by `data/build.py`.
+4. Hourly steps.
+5. Nothing extra per hour.
+
+`longest_sun_gap_hours` is counted within each UTC day only (a gap across midnight is cut).
+Sun and Earth are treated as points (their centres), not discs.
