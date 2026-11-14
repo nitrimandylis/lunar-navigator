@@ -103,3 +103,15 @@ def test_far_peak_is_seen_only_with_the_far_pass(tmp_path):
     assert elev_at(near_only, 0) < 0.0
     assert elev_at(both, 0) == pytest.approx(1.21, abs=0.06)
     assert elev_at(both, 180) < 0.0  # nothing to the south
+
+
+def test_observer_height_lowers_the_horizon(tmp_path):
+    # A 200 m wall to the north: from 2 m up the wall top is a smaller angle than from 0 m.
+    path = str(tmp_path / "dem.tif")
+    make_dem(path, left=28000.0, top=3000.0, size=500, res=10.0,
+             wall=lambda gx, gy: gx > 30324.1 + 1000)
+    ground = terrain.site_horizon(path, -89.0, 90.0, max_range_m=1500, observer_height_m=0.0)
+    raised = terrain.site_horizon(path, -89.0, 90.0, max_range_m=1500, observer_height_m=terrain.DEFAULT_OBSERVER_HEIGHT_M)
+    assert terrain.DEFAULT_OBSERVER_HEIGHT_M == 2.0
+    assert (raised.elev_deg <= ground.elev_deg + 1e-9).all()
+    assert (raised.elev_deg < ground.elev_deg - 1e-3).any()

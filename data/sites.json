@@ -2,18 +2,18 @@
   {
     "id": "shackleton-ridge",
     "name": "Lit ridge near Shackleton (computed)",
-    "lat": -89.3277,
-    "lon": 116.8355,
-    "elevation_m": 1200,
-    "source": "Lit member of a lit/dark pair about 3500 m apart, found by data/rim_search.py pair. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -89.43865,
+    "lon": -137.49989,
+    "elevation_m": 1960,
+    "source": "Lit member of a lit/dark pair about 2100 m apart, re-found with a finer scan (50 m grid) by the repick scripts using the 2 m observer; about 7936 h of Sun in 2027. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "shackleton-shadow",
     "name": "Shadowed ground near Shackleton (computed)",
-    "lat": -89.4283,
-    "lon": 122.0651,
-    "elevation_m": -638,
-    "source": "Dark member of a lit/dark pair about 3500 m apart, found by data/rim_search.py pair. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -89.36899,
+    "lon": -136.5882,
+    "elevation_m": 1591,
+    "source": "Dark member of a lit/dark pair about 2100 m apart (0 h of Sun in 2027), partner of shackleton-ridge. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "de-gerlache-candidate",

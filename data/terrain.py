@@ -16,6 +16,10 @@ from rasterio.windows import Window
 
 from horizon_mask import MOON_RADIUS_M, Horizon, horizon_profile
 
+# Metres above the ground. The height published polar illumination studies use; roughly a
+# lander's panel or antenna height. build.py and rim_search.py pass it to site_horizon.
+DEFAULT_OBSERVER_HEIGHT_M = 2.0
+
 
 def lonlat_to_xy(lat_deg: float, lon_deg: float) -> tuple[float, float]:
     """Latitude/east longitude on the Moon to projection metres (x east of pole, y up)."""

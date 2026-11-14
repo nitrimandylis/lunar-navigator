@@ -88,3 +88,22 @@ def test_pick_dem_uses_fine_dem_only_when_the_search_circle_fits(tmp_path):
     assert build.pick_dem(-89.67, 129.78, fine, "coarse.tif") == fine
     # Haworth is ~94 km from the pole: does not fit.
     assert build.pick_dem(-86.9, -4.0, fine, "coarse.tif") == "coarse.tif"
+
+
+def test_build_site_passes_the_observer_height(monkeypatch):
+    calls = []
+
+    def fake_site_horizon(*args, **kwargs):
+        calls.append(kwargs["observer_height_m"])
+        return flat_horizon(0.0)
+
+    def fake_fetch_series(body, lon, lat, start, count, step_minutes):
+        return [horizons.Sample(START, 10.0, 5.0) for _ in range(count)]
+
+    monkeypatch.setattr(build.terrain, "site_horizon", fake_site_horizon)
+    monkeypatch.setattr(build.horizons, "fetch_series", fake_fetch_series)
+    site = {"id": "x", "lat": -89.0, "lon": 0.0}
+    dist = np.full(24, 384_400.0)
+    build.build_site(site, "dem.tif", START, 1, 60, dist)
+    build.build_site(site, "dem.tif", START, 1, 60, dist, observer_height_m=5.0)
+    assert calls == [2.0, 5.0]
