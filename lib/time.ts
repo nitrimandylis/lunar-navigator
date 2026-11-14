@@ -6,6 +6,9 @@ export const YEAR = 2027;
 
 export const HOURS_PER_DAY = 24;
 
+// 365 days of 24 hours. The last hour index is one less than this.
+export const HOURS_IN_YEAR = 8760;
+
 export const MONTH_NAMES = [
   "Jan",
   "Feb",
@@ -75,4 +78,31 @@ export function moveHourToMonth(hourIndex: number, month: number): number {
 
   const newDayOfYear = firstDayOfMonth(month) + dayOfMonth;
   return newDayOfYear * HOURS_PER_DAY + hourOfDay;
+}
+
+// The month an hour index falls in. 0 = January.
+export function monthOfHour(hourIndex: number): number {
+  const dayOfYear = Math.floor(hourIndex / HOURS_PER_DAY);
+
+  // Walk through the months until the day falls inside one (as in formatHour).
+  let month = 0;
+  let dayOfMonth = dayOfYear;
+  while (month < 11 && dayOfMonth >= DAYS_IN_MONTH[month]) {
+    dayOfMonth -= DAYS_IN_MONTH[month];
+    month += 1;
+  }
+  return month;
+}
+
+// Moves an hour index by a number of hours (negative goes back), stopping at
+// the first and the last hour of the year.
+export function stepHour(hourIndex: number, hours: number): number {
+  const moved = hourIndex + hours;
+  if (moved < 0) {
+    return 0;
+  }
+  if (moved > HOURS_IN_YEAR - 1) {
+    return HOURS_IN_YEAR - 1;
+  }
+  return moved;
 }
