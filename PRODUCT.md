@@ -42,6 +42,10 @@ Built now:
   under their own divider, and never ranked against them, because a flat horizon near the
   pole gives far too many Sun hours.
 
+- Plain-language layer: every panel has a one-sentence caption, and an About panel explains
+  how to read the screen, why the Moon is not like Earth, where the numbers come from, what
+  the tool does not tell you, and links the sources.
+
 Still open:
 
 - Terrain for custom points. Judged not possible before the deadline.
