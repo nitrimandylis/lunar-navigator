@@ -20,8 +20,9 @@ Built now:
   the month, with the selected hour marked.
 - Selected-site numbers: Sun and Earth elevation, and countdowns to sunset or sunrise and to
   Earthset or Earthrise.
-- South pole map with crater outlines, site pins and the near pair (two sites 3.5 km apart
-  with very different light). Click empty ground to pick a custom point.
+- South pole map with ten crater outlines, site pins and two near pairs (near Shackleton,
+  3.5 km apart, and near Sverdrup, 2.5 km apart, each a lit and a shadowed site). Click empty
+  ground to pick a custom point.
 - Custom points: up to 3, latitude -90 to -80, with a flat horizon and no terrain. They are
   listed apart from the curated sites, under their own divider, and never ranked against
   them, because a flat horizon near the pole gives far too many Sun hours.

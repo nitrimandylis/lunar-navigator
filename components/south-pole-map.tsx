@@ -1,4 +1,4 @@
-import { NEAR_PAIR_IDS, type PickedPoint, type SiteRow } from "@/lib/app-types";
+import { NEAR_PAIRS, type PickedPoint, type SiteRow } from "@/lib/app-types";
 import { distanceKm, projectSouthPole } from "@/lib/geometry";
 import { clampLabelX, kmToMapPx, unprojectSouthPole } from "@/lib/map";
 
@@ -34,15 +34,23 @@ const CRATERS = [
   { name: "Shackleton", lat: -89.67, lon: 129.78, diameterKm: 20.92, labelSide: "below" },
   { name: "de Gerlache", lat: -88.48, lon: -88.34, diameterKm: 32.71, labelSide: "left" },
   { name: "Haworth", lat: -87.45, lon: -5.17, diameterKm: 51.42, labelSide: "left" },
-  { name: "Faustini", lat: -87.18, lon: 84.31, diameterKm: 42.48, labelSide: "below" },
+  { name: "Faustini", lat: -87.18, lon: 84.31, diameterKm: 42.48, labelSide: "above" },
   { name: "Malapert", lat: -85.0, lon: 11.4, diameterKm: 72.38, labelSide: "above" },
   { name: "Nobile", lat: -85.28, lon: 53.27, diameterKm: 79.27, labelSide: "right" },
   { name: "Amundsen", lat: -84.44, lon: 83.07, diameterKm: 103.39, labelSide: "below" },
+  { name: "Cabeus", lat: -85.33, lon: -42.13, diameterKm: 100.58, labelSide: "left" },
+  { name: "Sverdrup", lat: -88.32, lon: -153.39, diameterKm: 32.83, labelSide: "below" },
+  { name: "Slater", lat: -88.08, lon: 111.29, diameterKm: 25.12, labelSide: "right" },
 ];
 
-// Where the "pair" callout sits, in SVG units. Lower right is empty ground.
-const PAIR_LABEL_X = 62;
-const PAIR_LABEL_Y = 62;
+// Where each near pair's callout text sits, in SVG units, in the same order
+// as NEAR_PAIRS. anchor "start" puts the text right of x, "end" left of it.
+// Shackleton's goes lower right, which is empty ground. Sverdrup's goes left of
+// its pins, between the "de Gerlache" name and the -88 ring label.
+const PAIR_LABELS: { x: number; y: number; anchor: "start" | "end" }[] = [
+  { x: 62, y: 62, anchor: "start" },
+  { x: -32, y: 14, anchor: "end" },
+];
 
 // The selected pin's label: font size and a rough width per letter, in SVG
 // units. Site names are long, so the label gets a solid box behind it. That
@@ -98,76 +106,94 @@ export function SouthPoleMap({
     pinRows.push(selectedRow);
   }
 
-  // The near pair, if both of its sites are loaded.
-  let pairA: SiteRow | null = null;
-  let pairB: SiteRow | null = null;
-  for (const row of rows) {
-    if (row.site.id === NEAR_PAIR_IDS[0]) {
-      pairA = row;
-    }
-    if (row.site.id === NEAR_PAIR_IDS[1]) {
-      pairB = row;
-    }
-  }
-
-  // Clicking the pair callout switches between the two sites. They are under
-  // 2 pixels apart, so this is the easy way to reach the one underneath.
-  function selectOtherInPair() {
-    if (pairA === null || pairB === null) {
-      return;
-    }
-    if (selectedSiteId === pairA.site.id) {
-      onSelectSite(pairB.site.id);
+  // Clicking a pair callout switches between its two sites. They are only a
+  // few pixels apart, so this is the easy way to reach the one underneath.
+  function selectOtherInPair(siteIdA: string, siteIdB: string) {
+    if (selectedSiteId === siteIdA) {
+      onSelectSite(siteIdB);
     } else {
-      onSelectSite(pairA.site.id);
+      onSelectSite(siteIdA);
     }
   }
 
-  let pairCallout: React.ReactNode = null;
-  if (pairA !== null && pairB !== null) {
+  // One callout per near pair, if both of its sites are loaded.
+  const pairCallouts: React.ReactNode[] = [];
+  for (let pairIndex = 0; pairIndex < NEAR_PAIRS.length; pairIndex++) {
+    const pair = NEAR_PAIRS[pairIndex];
+    const label = PAIR_LABELS[pairIndex];
+    let pairA: SiteRow | null = null;
+    let pairB: SiteRow | null = null;
+    for (const row of rows) {
+      if (row.site.id === pair[0]) {
+        pairA = row;
+      }
+      if (row.site.id === pair[1]) {
+        pairB = row;
+      }
+    }
+    if (pairA === null || pairB === null || label === undefined) {
+      continue;
+    }
+
+    const siteIdA = pairA.site.id;
+    const siteIdB = pairB.site.id;
     const a = projectSouthPole(pairA.site.lat, pairA.site.lon, MAP_RADIUS, EDGE_LAT);
     const b = projectSouthPole(pairB.site.lat, pairB.site.lon, MAP_RADIUS, EDGE_LAT);
     const middleX = (a.x + b.x) / 2;
     const middleY = (a.y + b.y) / 2;
     const km = distanceKm(pairA.site.lat, pairA.site.lon, pairB.site.lat, pairB.site.lon);
 
-    pairCallout = (
+    // The leader line runs from the near end of the text to the ring.
+    let lineStartX = label.x - 2;
+    let lineEndX = middleX + 4;
+    if (label.anchor === "end") {
+      lineStartX = label.x + 2;
+      lineEndX = middleX - 6;
+    }
+    let lineEndY = middleY + 4;
+    if (label.anchor === "end") {
+      lineEndY = middleY;
+    }
+
+    pairCallouts.push(
       <g
+        key={"pair-" + siteIdA}
         role="button"
         tabIndex={0}
         aria-label={"Near pair, " + km.toFixed(1) + " km apart. Switch between the two sites"}
         className="cursor-pointer outline-none [&:focus-visible_text]:underline"
         onClick={(event) => {
           event.stopPropagation();
-          selectOtherInPair();
+          selectOtherInPair(siteIdA, siteIdB);
         }}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            selectOtherInPair();
+            selectOtherInPair(siteIdA, siteIdB);
           }
         }}
       >
         <title>{"Two sites " + km.toFixed(1) + " km apart with very different light. Click to switch."}</title>
         {/* Leader line from the label to a small ring around both pins. */}
         <line
-          x1={PAIR_LABEL_X - 2}
-          y1={PAIR_LABEL_Y - 4}
-          x2={middleX + 4}
-          y2={middleY + 4}
+          x1={lineStartX}
+          y1={label.y - 4}
+          x2={lineEndX}
+          y2={lineEndY}
           className="stroke-foreground"
           strokeWidth={0.75}
         />
         <circle cx={middleX} cy={middleY} r={6} className="fill-none stroke-foreground" strokeWidth={0.75} />
         <text
-          x={PAIR_LABEL_X}
-          y={PAIR_LABEL_Y + 3}
+          x={label.x}
+          y={label.y + 3}
           fontSize={9}
+          textAnchor={label.anchor}
           className="fill-foreground font-mono tabular-nums"
         >
           {"pair · " + km.toFixed(1) + " km"}
         </text>
-      </g>
+      </g>,
     );
   }
 
@@ -298,7 +324,7 @@ export function SouthPoleMap({
         );
       })}
 
-      {pairCallout}
+      {pairCallouts}
 
       {/* Site pins. */}
       {pinRows.map((row) => {

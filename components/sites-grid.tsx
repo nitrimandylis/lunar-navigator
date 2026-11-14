@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { NEAR_PAIR_IDS, type Hourly, type SiteRow } from "@/lib/app-types";
-import { totalsByMonth, type Site } from "@/lib/data";
+import { NEAR_PAIRS, type Hourly, type SiteRow } from "@/lib/app-types";
+import { totalsByMonth } from "@/lib/data";
 import {
   dayCellLabel,
   daysOfMonth,
@@ -13,6 +13,7 @@ import {
   hoursOfDay,
   laneOpacity,
   pairLabel,
+  pairPartnerId,
 } from "@/lib/grid";
 import { HOURS_PER_DAY, formatHour } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ type Tooltip = {
 };
 
 // The three columns of every row: name, the day cells, the month totals.
-const ROW_COLUMNS = "grid grid-cols-[20rem_minmax(0,1fr)_5.5rem] items-center gap-x-3";
+const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_5.5rem] items-center gap-x-3";
 
 // The two lanes inside one cell: power on top, comms below. Each lane's
 // opacity is its strength, drawn over the dark cell background.
@@ -96,22 +97,11 @@ export function SitesGrid({
   const monthDays = daysOfMonth(visibleMonth);
   const selectedDay = Math.floor(selectedHour / HOURS_PER_DAY);
 
-  // The near pair: find both sites. The tag only shows if both are in the grid.
-  let pairSiteA: Site | null = null;
-  let pairSiteB: Site | null = null;
-  for (const row of rows) {
-    if (row.site.id === NEAR_PAIR_IDS[0]) {
-      pairSiteA = row.site;
-    }
-    if (row.site.id === NEAR_PAIR_IDS[1]) {
-      pairSiteB = row.site;
-    }
+  // The partner of the selected site in its near pair, if it has one.
+  let selectedPartnerId: string | null = null;
+  if (selectedSiteId !== null) {
+    selectedPartnerId = pairPartnerId(selectedSiteId, NEAR_PAIRS);
   }
-  let pairText: string | null = null;
-  if (pairSiteA !== null && pairSiteB !== null) {
-    pairText = pairLabel(pairSiteA, pairSiteB);
-  }
-  const isPairSelected = selectedSiteId !== null && NEAR_PAIR_IDS.includes(selectedSiteId);
 
   // Moves the one shared tooltip above the cell under the pointer or focus.
   function showTooltip(cell: HTMLElement, title: string, detail: string) {
@@ -167,12 +157,20 @@ export function SitesGrid({
         <span className="text-right text-xs text-muted-foreground">Month hours</span>
       </div>
 
-      <ul className="flex flex-col gap-1">
+      <ul className="flex flex-col gap-[5px]">
         {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
-          const isPairSite = pairText !== null && NEAR_PAIR_IDS.includes(site.id);
-          const isPairPartner = isPairSite && isPairSelected && !isSelected;
+
+          // The near pair tag only shows if the partner is in the grid too.
+          let pairText: string | null = null;
+          const partnerId = pairPartnerId(site.id, NEAR_PAIRS);
+          for (const otherRow of rows) {
+            if (otherRow.site.id === partnerId) {
+              pairText = pairLabel(site, otherRow.site);
+            }
+          }
+          const isPairPartner = pairText !== null && site.id === selectedPartnerId;
           const monthTotals = totalsByMonth(row.days)[visibleMonth];
 
           // The selected row shows 24 hourly cells while a day is open.
@@ -184,21 +182,22 @@ export function SitesGrid({
           const isFirstCustom = row.isCustom && (rowIndex === 0 || !rows[rowIndex - 1].isCustom);
 
           return (
-            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-9")}>
+            <li key={site.id} className={cn(ROW_COLUMNS, "min-h-[26px]")}>
               {/* The divider spans all three columns, above the first custom row. */}
               {isFirstCustom && (
                 <div className="col-span-3 mt-1 mb-1 border-t border-line pt-1.5 text-xs text-muted-foreground">
                   Custom points: no terrain
                 </div>
               )}
-              {/* Name, with its tags on a second line. */}
-              <div className="min-w-0">
+              {/* Name, with its tags on the same line. A long name is cut
+                  short so the tags always fit; its title shows it in full. */}
+              <div className="flex min-w-0 items-center gap-2">
                 <button
                   type="button"
                   title={site.name}
                   onClick={() => onSelect(site.id, selectedHour)}
                   className={cn(
-                    "block max-w-full truncate rounded-sm text-left text-sm",
+                    "block min-w-0 truncate rounded-sm text-left text-sm",
                     // A custom point is named by its numbers, which use the mono font.
                     row.isCustom && "font-mono tabular-nums",
                     isSelected && "font-medium text-bright",
@@ -207,9 +206,9 @@ export function SitesGrid({
                 >
                   {site.name}
                 </button>
-                {(isPairSite || row.isCustom) && (
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
-                    {isPairSite && <span className="font-mono tabular-nums">{pairText}</span>}
+                {(pairText !== null || row.isCustom) && (
+                  <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
+                    {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
                     {row.isCustom && (
                       <>
                         <span className="rounded-sm border border-line px-1">no terrain</span>
@@ -258,7 +257,7 @@ export function SitesGrid({
                         }
                         onBlur={hideTooltip}
                         className={cn(
-                          "flex h-7 flex-col gap-px rounded-xs bg-neither p-px",
+                          "flex h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
                           hasRing && "relative z-10 ring-2 ring-bright",
                         )}
                       >
@@ -308,7 +307,7 @@ export function SitesGrid({
                             }
                             onBlur={hideTooltip}
                             className={cn(
-                              "flex h-7 flex-col gap-px rounded-xs bg-neither p-px",
+                              "flex h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
                               hasRing && "relative z-10 ring-2 ring-bright",
                             )}
                           >
@@ -331,7 +330,7 @@ export function SitesGrid({
               )}
 
               {/* Right: this month's totals. */}
-              <div className="flex flex-col items-end font-mono text-xs tabular-nums">
+              <div className="flex flex-col items-end font-mono text-xs leading-[13px] tabular-nums">
                 <span className="flex items-center gap-1.5">
                   <span aria-hidden="true" className="size-2 rounded-xs bg-power" />
                   <span className="sr-only">Power hours this month: </span>

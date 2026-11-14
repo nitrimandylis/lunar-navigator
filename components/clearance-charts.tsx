@@ -24,7 +24,7 @@ export type ClearanceChartsProps = {
 // Size of the drawing in SVG units. The SVG stretches to the panel width and
 // keeps this shape, so one unit is about one screen pixel.
 const WIDTH = 1000;
-const HEIGHT = 112;
+const HEIGHT = 104;
 const LEFT = 44;
 const RIGHT = 8;
 const TOP = 6;
