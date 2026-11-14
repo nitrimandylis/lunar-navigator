@@ -2,9 +2,9 @@
 
     python data/build.py --dem5 <5 m DEM .tif> --dem30 <30 m DEM .tif> --out public/data
 
-Shapes are described in data/CONTRACT-DRAFT.md. Sun and Earth positions come from JPL
+Shapes are described in the Contract section of AGENTS.md. Sun and Earth positions come from JPL
 Horizons (needs internet), horizons from the LOLA DEMs (LRO LOLA DEM v4 S Pole).
-A body counts as visible when its centre is above the terrain horizon at its azimuth.
+A body counts as visible when any part of its disc is above the terrain horizon.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ import rasterio
 import ephemeris
 import horizons
 import terrain
-from horizon_mask import Horizon, visible_mask
+from horizon_mask import Horizon, disc_visible_mask, earth_angular_radius_deg, sun_angular_radius_deg
 
 MAX_RANGE_M = 25_000.0  # full-detail terrain search
 FAR_RANGE_M = 150_000.0  # coarser search beyond that: a 5 km peak is visible from ~130 km
@@ -35,13 +35,21 @@ def pick_dem(lat: float, lon: float, dem5: str, dem30: str) -> str:
     return dem5 if math.hypot(x, y) + MAX_RANGE_M <= half_width else dem30
 
 
-def longest_run(flags: np.ndarray) -> int:
-    """Length of the longest run of False in a boolean array."""
-    best = run = 0
-    for f in flags:
-        run = 0 if f else run + 1
-        best = max(best, run)
-    return best
+def dark_run_lengths(visible: np.ndarray) -> np.ndarray:
+    """For every hour, the length (in hours) of the unbroken dark spell it belongs to; 0 when lit."""
+    n = len(visible)
+    out = np.zeros(n, dtype=int)
+    i = 0
+    while i < n:
+        if visible[i]:
+            i += 1
+            continue
+        j = i
+        while j < n and not visible[j]:
+            j += 1
+        out[i:j] = j - i
+        i = j
+    return out
 
 
 def daily_summary(
@@ -51,9 +59,15 @@ def daily_summary(
     sun_visible: np.ndarray,
     earth_visible: np.ndarray,
 ) -> list[dict]:
-    """Per UTC day: hours of Sun, hours of Earth, highest Sun, longest Sun gap that day."""
+    """Per UTC day: hours of Sun, hours of Earth, highest Sun, longest Sun gap touching that day.
+
+    The gap is the whole dark spell, not just the part inside the day, so it can be longer than
+    24 hours. Spells are measured inside the data, so one that touches the first or last hour is
+    cut there.
+    """
     per_day = int(24 * 60 / step_minutes)
     hours = step_minutes / 60.0
+    dark = dark_run_lengths(sun_visible.astype(bool))
     days = []
     for d in range(len(sun_elev) // per_day):
         s = slice(d * per_day, (d + 1) * per_day)
@@ -63,14 +77,20 @@ def daily_summary(
                 "sun_hours": round(float(sun_visible[s].sum()) * hours, 2),
                 "earth_hours": round(float(earth_visible[s].sum()) * hours, 2),
                 "max_sun_elev_deg": round(float(sun_elev[s].max()), 3),
-                "longest_sun_gap_hours": round(longest_run(sun_visible[s].astype(bool)) * hours, 2),
+                "longest_sun_gap_hours": round(float(dark[s].max()) * hours, 2),
             }
         )
     return days
 
 
 def build_site(
-    site: dict, dem_path: str, start: datetime, days: int, step_minutes: int, far_dem_path: str | None = None
+    site: dict,
+    dem_path: str,
+    start: datetime,
+    days: int,
+    step_minutes: int,
+    earth_distance_km: np.ndarray,
+    far_dem_path: str | None = None,
 ) -> tuple[dict, dict]:
     count = days * 24 * 60 // step_minutes
     horizon: Horizon = terrain.site_horizon(
@@ -83,8 +103,9 @@ def build_site(
     sun_el = np.array([s.elev_deg for s in sun])
     earth_az = np.array([s.az_deg for s in earth])
     earth_el = np.array([s.elev_deg for s in earth])
-    sun_vis = visible_mask(horizon, sun_az, sun_el)
-    earth_vis = visible_mask(horizon, earth_az, earth_el)
+    # A body is visible when any part of its disc is above the terrain horizon.
+    sun_vis = disc_visible_mask(horizon, sun_az, sun_el, sun_angular_radius_deg())
+    earth_vis = disc_visible_mask(horizon, earth_az, earth_el, earth_angular_radius_deg(earth_distance_km))
 
     series = {
         "id": site["id"],
@@ -128,15 +149,19 @@ def main() -> None:
     sites = json.loads(Path(args.sites).read_text())
     out = Path(args.out)
     write_json(out / "sites.json", sites)
+    count = args.days * 24 * 60 // args.step_minutes
+    eph = ephemeris.build_ephemeris(start, count, args.step_minutes)  # also gives Earth's size
     if not args.only:
-        count = args.days * 24 * 60 // args.step_minutes
-        write_json(out / "ephemeris.json", ephemeris.build_ephemeris(start, count, args.step_minutes))
+        write_json(out / "ephemeris.json", eph)
+    earth_distance_km = np.array(eph["earth_distance_km"], dtype=float)
     for site in sites:
         if args.only and site["id"] != args.only:
             continue
         dem = pick_dem(site["lat"], site["lon"], args.dem5, args.dem30)
         print(f"{site['id']}: {Path(dem).name}", flush=True)
-        series, summary = build_site(site, dem, start, args.days, args.step_minutes, far_dem_path=args.dem30)
+        series, summary = build_site(
+            site, dem, start, args.days, args.step_minutes, earth_distance_km, far_dem_path=args.dem30
+        )
         write_json(out / "sites" / f"{site['id']}.json", series)
         write_json(out / "summary" / f"{site['id']}.json", summary)
 

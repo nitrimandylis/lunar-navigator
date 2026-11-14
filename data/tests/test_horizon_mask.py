@@ -96,3 +96,41 @@ def test_site_height_override():
     plain = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500)
     standing_on_a_hill = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500, site_height_m=60.0)
     assert az(standing_on_a_hill, 90) < az(plain, 90)
+
+
+def flat(deg=0.0):
+    return hm.Horizon(np.arange(360.0), np.full(360, deg), np.zeros(360))
+
+
+def test_angular_radii_match_known_sizes():
+    # The Sun from 1 au: asin(695,700 / 149,597,870.7) = 0.2664 degrees (about 16 arcminutes).
+    assert abs(hm.sun_angular_radius_deg() - 0.2664) < 0.0005
+    # Earth from the Moon at its mean distance, 384,400 km: asin(6378.137 / 384400) = 0.951 degrees,
+    # so Earth looks about 1.9 degrees wide.
+    assert abs(float(hm.earth_angular_radius_deg(384_400.0)) - 0.951) < 0.001
+    near, far = hm.earth_angular_radius_deg(np.array([357_000.0, 407_000.0]))
+    assert near > far
+
+
+def test_sunrise_is_when_the_top_edge_clears_the_horizon():
+    r = hm.sun_angular_radius_deg()
+    az = np.array([90.0, 90.0, 90.0])
+    el = np.array([-r + 0.01, -r - 0.01, 0.5])  # top edge just up, just down, well up
+    assert hm.disc_visible_mask(flat(), az, el, r).tolist() == [True, False, True]
+
+
+def test_disc_shows_beside_a_narrow_ridge():
+    # A 5 degree ridge exactly at azimuth 90 (one degree wide), nothing around it.
+    elev = np.zeros(360)
+    elev[89:92] = 5.0
+    h = hm.Horizon(np.arange(360.0), elev, np.zeros(360))
+    az, el = np.array([90.0]), np.array([1.0])
+    assert not hm.disc_visible_mask(h, az, el, 0.27)[0]  # small disc: hidden by the ridge
+    assert hm.disc_visible_mask(h, az, el, 3.0)[0]  # wide disc: its sides show past the ridge
+    assert not hm.visible_mask(h, az, el)[0]  # the centre alone is hidden
+
+
+def test_disc_radius_can_differ_per_sample():
+    az, el = np.array([0.0, 0.0]), np.array([-0.5, -0.5])
+    out = hm.disc_visible_mask(flat(), az, el, np.array([0.3, 1.0]))
+    assert out.tolist() == [False, True]

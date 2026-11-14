@@ -18,10 +18,11 @@ def flat_horizon(deg):
     return hm.Horizon(np.arange(360.0), np.full(360, float(deg)), np.zeros(360))
 
 
-def test_longest_run():
-    assert build.longest_run(np.array([1, 1, 0, 0, 0, 1, 0], dtype=bool)) == 3
-    assert build.longest_run(np.array([1, 1], dtype=bool)) == 0
-    assert build.longest_run(np.array([0, 0, 0], dtype=bool)) == 3
+def test_dark_run_lengths():
+    flags = np.array([1, 1, 0, 0, 0, 1, 0], dtype=bool)
+    assert build.dark_run_lengths(flags).tolist() == [0, 0, 3, 3, 3, 0, 1]
+    assert build.dark_run_lengths(np.array([1, 1], dtype=bool)).tolist() == [0, 0]
+    assert build.dark_run_lengths(np.array([0, 0, 0], dtype=bool)).tolist() == [3, 3, 3]
 
 
 def test_visible_mask_with_real_horizons_sun_values():
@@ -43,7 +44,7 @@ def test_visible_mask_uses_the_azimuth_of_the_body():
 
 
 def test_daily_summary():
-    # Two days of hourly data. Day 1: Sun for hours 0-11, Earth for hours 6-17.
+    # Two days of hourly data. Sun for hours 0-11 of day 1, Earth for hours 6-17.
     sun_vis = np.zeros(48, dtype=bool)
     sun_vis[0:12] = True
     earth_vis = np.zeros(48, dtype=bool)
@@ -53,10 +54,27 @@ def test_daily_summary():
     assert [d["date"] for d in days] == ["2027-01-01", "2027-01-02"]
     assert days[0]["sun_hours"] == 12.0
     assert days[0]["earth_hours"] == 12.0
-    assert days[0]["longest_sun_gap_hours"] == 12.0  # hours 12-23 have no Sun
     assert days[1]["sun_hours"] == 0.0
-    assert days[1]["longest_sun_gap_hours"] == 24.0
     assert days[1]["max_sun_elev_deg"] == 1.0
+    # The dark spell starts at hour 12 of day 1 and runs to the end of the data: 36 hours.
+    assert days[0]["longest_sun_gap_hours"] == 36.0
+    assert days[1]["longest_sun_gap_hours"] == 36.0
+
+
+def test_sun_gap_across_midnight_counts_in_full():
+    # Sun for hours 0-5, dark for hours 6-29 (24 h, crossing midnight), Sun again 30-47.
+    sun_vis = np.ones(48, dtype=bool)
+    sun_vis[6:30] = False
+    elev = np.zeros(48)
+    days = build.daily_summary(START, 60, elev, sun_vis, np.ones(48, dtype=bool))
+    assert days[0]["longest_sun_gap_hours"] == 24.0  # old rule: 18 (hours 6-23 only)
+    assert days[1]["longest_sun_gap_hours"] == 24.0  # old rule: 6 (hours 24-29 only)
+    assert days[0]["sun_hours"] == 6.0 and days[1]["sun_hours"] == 18.0
+
+
+def test_daily_summary_lit_day_has_no_gap():
+    days = build.daily_summary(START, 60, np.zeros(24), np.ones(24, dtype=bool), np.ones(24, dtype=bool))
+    assert days[0]["longest_sun_gap_hours"] == 0.0
 
 
 def test_pick_dem_uses_fine_dem_only_when_the_search_circle_fits(tmp_path):
