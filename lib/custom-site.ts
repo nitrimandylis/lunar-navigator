@@ -1,6 +1,8 @@
 // Sun and Earth angles for a custom point on the Moon, worked out in the
-// browser from ephemeris.json. There is no terrain here: the horizon is flat,
-// so a body counts as visible when its centre is above 0 degrees.
+// browser from ephemeris.json. There is no terrain here: the horizon is flat.
+// The Sun and Earth are discs, and a body counts as visible when any part of
+// its disc is above 0 degrees, the same rule as sunrise and sunset. That is the
+// rule data/build.py uses for the curated sites.
 
 import type { DaySummary } from "./data.ts";
 
@@ -9,6 +11,14 @@ const MOON_RADIUS_KM = 1737.4;
 // One astronomical unit. The Sun is so far away that its real distance on a
 // given day changes the answer by far less than 0.001 degrees.
 const SUN_DISTANCE_KM = 149_597_870.7;
+
+// Real sizes from JPL Horizons, the same ones data/horizon_mask.py uses.
+const SUN_RADIUS_KM = 695_700;
+const EARTH_RADIUS_KM = 6378.137;
+
+// How far the top edge of the Sun's disc is above its centre, in degrees:
+// about 0.2664. The Sun's distance barely changes, so one value is enough.
+const SUN_ANGULAR_RADIUS_DEG = (Math.asin(SUN_RADIUS_KM / SUN_DISTANCE_KM) * 180) / Math.PI;
 
 const HOURS_PER_DAY = 24;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -80,7 +90,8 @@ export function elevationDeg(
 }
 
 // Sun and Earth elevation for every hour in the ephemeris, at one custom
-// point, plus 1 or 0 flags for "above the flat horizon".
+// point, plus 1 or 0 visible flags. The elevations are of each disc's centre.
+// A flag is 1 when the top edge of the disc is above the flat horizon.
 export function customSiteHourly(
   latDeg: number,
   lonDeg: number,
@@ -109,10 +120,17 @@ export function customSiteHourly(
       subPoints.earth_distance_km[i],
     );
 
+    // Earth's disc looks bigger when it is closer, so work it out each hour.
+    const earthRadiusDeg = toDegrees(
+      Math.asin(EARTH_RADIUS_KM / subPoints.earth_distance_km[i]),
+    );
+    const sunTopEdge = sunElevation + SUN_ANGULAR_RADIUS_DEG;
+    const earthTopEdge = earthElevation + earthRadiusDeg;
+
     hourly.sun_elev_deg.push(roundTo3(sunElevation));
     hourly.earth_elev_deg.push(roundTo3(earthElevation));
-    hourly.sun_visible.push(sunElevation > 0 ? 1 : 0);
-    hourly.earth_visible.push(earthElevation > 0 ? 1 : 0);
+    hourly.sun_visible.push(sunTopEdge > 0 ? 1 : 0);
+    hourly.earth_visible.push(earthTopEdge > 0 ? 1 : 0);
   }
 
   return hourly;
