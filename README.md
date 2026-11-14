@@ -6,8 +6,8 @@ Built for the NASA Space Apps Challenge 2026, "Lunar Landing Site Navigator", At
 ## Run
 
 ```bash
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
 ## Layout
