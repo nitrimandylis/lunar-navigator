@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { projectSouthPole } from "./geometry.ts";
+import { distanceKm, projectSouthPole } from "./geometry.ts";
 
 // Passes when actual is within tolerance of expected.
 function assertClose(
@@ -48,6 +48,27 @@ test("projectSouthPole puts lat -85 lon 180 halfway down", () => {
   const point = projectSouthPole(-85, 180, 200);
   assertClose(point.x, 0, PIXEL_TOLERANCE, "x");
   assertClose(point.y, 100, PIXEL_TOLERANCE, "y");
+});
+
+test("distanceKm is zero for the same point", () => {
+  assertClose(distanceKm(-85, 40, -85, 40), 0, 1e-9, "distance");
+});
+
+test("distanceKm from the pole to lat -80 is 10 degrees of arc", () => {
+  // 10 degrees of a circle with radius 1737.4 km:
+  // 1737.4 * 10 * pi / 180 = 303.2335 km. The longitude does not matter.
+  assertClose(distanceKm(-90, 0, -80, 123), 303.2335, 0.001, "distance");
+});
+
+test("distanceKm along the equator for a quarter turn", () => {
+  // A quarter of the Moon's circumference: 1737.4 * pi / 2 = 2729.1015 km.
+  assertClose(distanceKm(0, 10, 0, 100), 2729.1015, 0.001, "distance");
+});
+
+test("distanceKm is the same in both directions", () => {
+  const there = distanceKm(-89.3277, 116.8355, -89.4283, 122.0651);
+  const back = distanceKm(-89.4283, 122.0651, -89.3277, 116.8355);
+  assertClose(there, back, 1e-9, "distance");
 });
 
 test("projectSouthPole uses the edge latitude it is given", () => {
