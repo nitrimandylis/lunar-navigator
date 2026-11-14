@@ -114,7 +114,7 @@
   },
   {
     "id": "artemis3-haworth",
-    "name": "Artemis III candidate region: Haworth",
+    "name": "Haworth region centre",
     "mission": "Artemis III candidate",
     "lat": -87.45,
     "lon": -5.0,
@@ -122,8 +122,17 @@
     "source": "Centre point of the NASA Artemis III candidate region Haworth, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 87.45 S, 5.0 W. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
+    "id": "artemis3-haworth-computed",
+    "name": "Haworth region, best-lit spot (computed)",
+    "mission": "Artemis III candidate",
+    "lat": -87.65936,
+    "lon": -11.57253,
+    "elevation_m": -3391,
+    "source": "Best Sun plus Earth hours found by data/rim_search.py (coarse 500 m scan of a 15 km x 15 km box, then 50 m refinement, then re-scored with the 150 km horizon) within about 10 km of the centre of the NASA Artemis III candidate region Haworth, 87.45 S, 5.0 W, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions; a region is about 15 km x 15 km and its centre need not be lit). This point is on the edge of the box, about 10.6 km from the centre, and the terrain inside the Haworth crater basin gets no Sun at all at the 2 m observer height: 0 hours of Sun in 2027, with Earth visible 2462 h (28.1%), so it is only the best of a poorly lit area. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
+  },
+  {
     "id": "artemis3-malapert-massif",
-    "name": "Artemis III candidate region: Malapert Massif",
+    "name": "Malapert Massif region",
     "mission": "Artemis III candidate",
     "lat": -86.0,
     "lon": 2.7,
@@ -132,7 +141,7 @@
   },
   {
     "id": "artemis3-nobile-rim-1",
-    "name": "Artemis III candidate region: Nobile Rim 1",
+    "name": "Nobile Rim 1 region",
     "mission": "Artemis III candidate",
     "lat": -85.3,
     "lon": 31.5,
