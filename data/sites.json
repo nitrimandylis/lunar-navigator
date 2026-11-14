@@ -1,0 +1,58 @@
+[
+  {
+    "id": "shackleton",
+    "name": "Shackleton (crater centre)",
+    "lat": -89.67,
+    "lon": 129.78,
+    "elevation_m": -2788,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 87.5 deg v4 S Pole, 5 m, NASA Moon Trek."
+  },
+  {
+    "id": "de-gerlache",
+    "name": "de Gerlache (crater centre)",
+    "lat": -88.5,
+    "lon": -87.1,
+    "elevation_m": -1012,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 87.5 deg v4 S Pole, 5 m, NASA Moon Trek."
+  },
+  {
+    "id": "haworth",
+    "name": "Haworth (crater centre)",
+    "lat": -86.9,
+    "lon": -4.0,
+    "elevation_m": -1578,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 75 deg v4 S Pole, 30 m, NASA Moon Trek."
+  },
+  {
+    "id": "faustini",
+    "name": "Faustini (crater centre)",
+    "lat": -87.3,
+    "lon": 77.0,
+    "elevation_m": -2772,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 75 deg v4 S Pole, 30 m, NASA Moon Trek."
+  },
+  {
+    "id": "malapert",
+    "name": "Malapert (crater centre)",
+    "lat": -84.9,
+    "lon": 12.9,
+    "elevation_m": -1861,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 75 deg v4 S Pole, 30 m, NASA Moon Trek."
+  },
+  {
+    "id": "nobile",
+    "name": "Nobile (crater centre)",
+    "lat": -85.28,
+    "lon": 53.27,
+    "elevation_m": 919,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 75 deg v4 S Pole, 30 m, NASA Moon Trek."
+  },
+  {
+    "id": "amundsen",
+    "name": "Amundsen (crater centre)",
+    "lat": -84.5,
+    "lon": 82.8,
+    "elevation_m": -3626,
+    "source": "Crater centre from IAU Gazetteer of Planetary Nomenclature (via Wikipedia). Height from LRO LOLA DEM 75 deg v4 S Pole, 30 m, NASA Moon Trek."
+  }
+]
