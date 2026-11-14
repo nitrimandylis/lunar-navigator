@@ -43,7 +43,9 @@ test("a body is at 90 degrees over its sub point and near 0 a quarter turn away"
   assert.ok(Math.abs(elevationDeg(0, 90, 0, 0, AU_KM)) < 0.001);
 });
 
-test("visible flags follow the flat horizon", () => {
+test("visible flags follow the top edge of each disc on a flat horizon", () => {
+  // Hour 0: the Sun is straight overhead and Earth is straight below.
+  // Hour 1: the other way round.
   const subPoints = {
     sub_solar_lon_deg: [0, 180],
     sub_solar_lat_deg: [0, 0],
@@ -54,6 +56,31 @@ test("visible flags follow the flat horizon", () => {
   const hourly = customSiteHourly(0, 0, subPoints);
   assert.deepEqual(hourly.sun_visible, [1, 0]);
   assert.deepEqual(hourly.earth_visible, [0, 1]);
+});
+
+test("a disc counts as visible while its centre is just below the horizon", () => {
+  // Seen from (0, 0), a body whose sub point is a bit more than 90 degrees of
+  // longitude away sits just below the horizon. The Sun's disc has a radius of
+  // about 0.266 degrees. Earth's has about 0.951 degrees at 384,400 km.
+  // Hour 0: both centres are slightly below 0, but the top edges are above it.
+  // Hour 1: both are low enough that the whole disc is hidden.
+  const subPoints = {
+    sub_solar_lon_deg: [90.1, 90.4],
+    sub_solar_lat_deg: [0, 0],
+    sub_earth_lon_deg: [90, 91.5],
+    sub_earth_lat_deg: [0, 0],
+    earth_distance_km: [384_400, 384_400],
+  };
+  const hourly = customSiteHourly(0, 0, subPoints);
+
+  // The elevations are still those of the centres, so they are below 0.
+  assert.ok(hourly.sun_elev_deg[0] < 0 && hourly.sun_elev_deg[0] > -0.266, "sun centre");
+  assert.ok(hourly.earth_elev_deg[0] < 0 && hourly.earth_elev_deg[0] > -0.951, "earth centre");
+  assert.ok(hourly.sun_elev_deg[1] < -0.266, "sun fully down");
+  assert.ok(hourly.earth_elev_deg[1] < -0.951, "earth fully down");
+
+  assert.deepEqual(hourly.sun_visible, [1, 0]);
+  assert.deepEqual(hourly.earth_visible, [1, 0]);
 });
 
 test("day summaries add up hours, the highest Sun and the longest gap", () => {
