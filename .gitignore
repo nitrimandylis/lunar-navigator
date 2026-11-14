@@ -46,3 +46,6 @@ __pycache__/
 check.log
 review.md
 pr.diff
+
+# playwright-cli debug output
+.playwright-cli/
