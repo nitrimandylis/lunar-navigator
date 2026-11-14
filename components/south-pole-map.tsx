@@ -268,13 +268,11 @@ export function SouthPoleMap({
     );
   }
 
-  // The selected pin's name, and the hovered pin's if that is another one.
-  // Only these two get a name, so names never pile up on top of each other.
+  // Only the pin under the pointer (or keyboard focus) gets a name, so names
+  // never cover other pins. The selected pin is marked by its ring, and its
+  // name is in the selected site panel.
   const labelledIds: string[] = [];
-  if (selectedSiteId !== null) {
-    labelledIds.push(selectedSiteId);
-  }
-  if (hoveredSiteId !== null && hoveredSiteId !== selectedSiteId) {
+  if (hoveredSiteId !== null) {
     labelledIds.push(hoveredSiteId);
   }
 
@@ -494,8 +492,8 @@ export function SouthPoleMap({
         );
       })}
 
-      {/* Names of the selected and hovered pins, in a box so they stay
-          readable over lines and other pins. They never catch the pointer. */}
+      {/* The hovered pin's name, in a box so it stays
+          readable over lines and other pins. It never catches the pointer. */}
       {labelledIds.map((siteId) => {
         let labelRow: SiteRow | null = null;
         for (const row of rows) {
