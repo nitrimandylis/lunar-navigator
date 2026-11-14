@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The deterministic check: same result every time, no AI.
 # Runs on every PR and on main. It works before any stack exists:
-#   - package.json with a "check" script -> bun run check (typecheck + tests)
+#   - package.json with a "check" script -> npm run check (typecheck + tests)
 #   - Python test files                  -> pytest
 
 set -euo pipefail
@@ -9,8 +9,8 @@ set -euo pipefail
 ran_something=no
 
 if [ -f package.json ] && jq -e '.scripts.check' package.json > /dev/null; then
-  bun install
-  bun run check
+  npm ci
+  npm run check
   ran_something=yes
 fi
 

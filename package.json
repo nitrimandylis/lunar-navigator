@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "eslint && tsc --noEmit && node --test"
+    "check": "eslint && next typegen && tsc --noEmit && node --test"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
