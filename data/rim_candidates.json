@@ -1,5 +1,5 @@
 {
-  "note": "Scan results from data/rim_search.py with a 2 m observer, hours for 2027 with the 150 km horizon (point-Sun score). Where a site in data/sites.json was swapped, its hours in the app come from build.py (disc rule), so they differ a little. shackleton_pair is the earlier pair and was not re-scanned here.",
+  "note": "Scan results from data/rim_search.py with a 2 m observer, hours for 2027 with the 150 km horizon (point-Sun score). Where a site in data/sites.json was swapped, its hours in the app come from build.py (disc rule), so they differ a little. shackleton_pair and sverdrup_pair are the earlier pairs and were not re-scanned here (the Sverdrup pair in sites.json was kept).",
   "shackleton_pair": {
     "lit": {
       "lat": -89.3277,
@@ -109,19 +109,19 @@
   ],
   "sverdrup_pair": {
     "lit": {
-      "lat": -89.1544,
-      "lon": 207.7422,
-      "sun_hours": 4519.0,
-      "earth_hours": 0.0,
-      "both_hours": 0.0
+      "lat": -88.8259,
+      "lon": 201.338,
+      "sun_hours": 3254.0,
+      "earth_hours": 978.0,
+      "both_hours": 397.0
     },
     "dark": {
-      "lat": -89.1396,
-      "lon": 212.5448,
+      "lat": -88.8053,
+      "lon": 197.4358,
       "sun_hours": 0.0,
       "earth_hours": 0.0,
       "both_hours": 0.0
     },
-    "separation_m": 2214
+    "separation_m": 2524
   }
 }

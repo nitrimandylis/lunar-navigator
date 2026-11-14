@@ -1,6 +1,6 @@
 import { NEAR_PAIRS, type PickedPoint, type SiteRow } from "@/lib/app-types";
-import { distanceKm, projectSouthPole } from "@/lib/geometry";
-import { clampLabelX, kmToMapPx, unprojectSouthPole } from "@/lib/map";
+import { distanceKm } from "@/lib/geometry";
+import { clampLabelX, kmToMapPx, projectForMap, unprojectSouthPole } from "@/lib/map";
 
 export type SouthPoleMapProps = {
   // Every site to pin, curated and custom.
@@ -137,8 +137,8 @@ export function SouthPoleMap({
 
     const siteIdA = pairA.site.id;
     const siteIdB = pairB.site.id;
-    const a = projectSouthPole(pairA.site.lat, pairA.site.lon, MAP_RADIUS, EDGE_LAT);
-    const b = projectSouthPole(pairB.site.lat, pairB.site.lon, MAP_RADIUS, EDGE_LAT);
+    const a = projectForMap(pairA.site.lat, pairA.site.lon, MAP_RADIUS, EDGE_LAT);
+    const b = projectForMap(pairB.site.lat, pairB.site.lon, MAP_RADIUS, EDGE_LAT);
     const middleX = (a.x + b.x) / 2;
     const middleY = (a.y + b.y) / 2;
     const km = distanceKm(pairA.site.lat, pairA.site.lon, pairB.site.lat, pairB.site.lon);
@@ -199,13 +199,13 @@ export function SouthPoleMap({
 
   let pickedCross: { x: number; y: number } | null = null;
   if (pickedPoint !== null) {
-    pickedCross = projectSouthPole(pickedPoint.lat, pickedPoint.lon, MAP_RADIUS, EDGE_LAT);
+    pickedCross = projectForMap(pickedPoint.lat, pickedPoint.lon, MAP_RADIUS, EDGE_LAT);
   }
 
   return (
     <svg
       viewBox={-VIEW_SIZE / 2 + " " + -VIEW_SIZE / 2 + " " + VIEW_SIZE + " " + VIEW_SIZE}
-      className="block h-auto w-full cursor-crosshair select-none"
+      className="block min-h-0 w-full flex-1 cursor-crosshair select-none"
       role="group"
       aria-label="Map of the lunar south pole. Click empty ground to pick a custom point."
       onClick={handleMapClick}
@@ -223,7 +223,7 @@ export function SouthPoleMap({
 
       {/* Longitude spokes. */}
       {SPOKE_LONGITUDES.map((lon) => {
-        const end = projectSouthPole(EDGE_LAT, lon, MAP_RADIUS, EDGE_LAT);
+        const end = projectForMap(EDGE_LAT, lon, MAP_RADIUS, EDGE_LAT);
         return (
           <line
             aria-hidden="true"
@@ -240,7 +240,7 @@ export function SouthPoleMap({
 
       {/* Latitude rings, labelled along the bottom spoke (longitude 180). */}
       {LATITUDE_RINGS.map((lat) => {
-        const ringRadius = projectSouthPole(lat, 180, MAP_RADIUS, EDGE_LAT).y;
+        const ringRadius = projectForMap(lat, 180, MAP_RADIUS, EDGE_LAT).y;
         return (
           <g key={"ring-" + lat}>
             <circle
@@ -281,7 +281,7 @@ export function SouthPoleMap({
 
       {/* Craters: outline at the real diameter, name underneath. */}
       {CRATERS.map((crater) => {
-        const centre = projectSouthPole(crater.lat, crater.lon, MAP_RADIUS, EDGE_LAT);
+        const centre = projectForMap(crater.lat, crater.lon, MAP_RADIUS, EDGE_LAT);
         const craterRadius = kmToMapPx(crater.diameterKm / 2, MAP_RADIUS, EDGE_LAT);
 
         // Put the name just outside the outline, on the chosen side.
@@ -330,7 +330,7 @@ export function SouthPoleMap({
       {pinRows.map((row) => {
         const site = row.site;
         const isSelected = site.id === selectedSiteId;
-        const spot = projectSouthPole(site.lat, site.lon, MAP_RADIUS, EDGE_LAT);
+        const spot = projectForMap(site.lat, site.lon, MAP_RADIUS, EDGE_LAT);
 
         let dotRadius = 2.5;
         if (isSelected) {

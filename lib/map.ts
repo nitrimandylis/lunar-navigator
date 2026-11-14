@@ -1,5 +1,8 @@
 // Helpers for the south pole locator map: the reverse of projectSouthPole in
-// geometry.ts, and turning a distance in km into map pixels.
+// geometry.ts, turning a distance in km into map pixels, and the rounded
+// projection the map draws with.
+
+import { projectSouthPole } from "./geometry.ts";
 
 // Mean radius of the Moon in km, the same value geometry.ts uses.
 const MOON_RADIUS_KM = 1737.4;
@@ -59,4 +62,22 @@ export function clampLabelX(pinX: number, labelWidth: number, limit: number): nu
     return -limit + halfWidth;
   }
   return pinX;
+}
+
+// projectSouthPole, rounded to 2 decimals (0.01 px). The server and the browser
+// can disagree in the last digits of sin and cos, and drawing those digits into
+// the SVG breaks hydration. Rounding hides the difference. Use this for drawing
+// only: unprojectSouthPole should get the exact point.
+export function projectForMap(
+  latDeg: number,
+  lonDeg: number,
+  radiusPx: number,
+  edgeLatDeg: number = -80,
+): { x: number; y: number } {
+  const point = projectSouthPole(latDeg, lonDeg, radiusPx, edgeLatDeg);
+  // + 0 turns a rounded -0 into 0.
+  return {
+    x: Math.round(point.x * 100) / 100 + 0,
+    y: Math.round(point.y * 100) / 100 + 0,
+  };
 }

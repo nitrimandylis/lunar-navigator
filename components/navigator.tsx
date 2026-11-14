@@ -264,7 +264,7 @@ export function Navigator() {
     selectedSiteId !== null && failedHourlyIds.includes(selectedSiteId);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex h-dvh flex-col">
       <header className="flex items-center gap-6 border-b border-line px-4 py-2">
         <h1 className="text-lg font-medium text-bright">
           Lunar Landing Site Navigator
@@ -286,11 +286,12 @@ export function Navigator() {
         </div>
       </header>
 
-      {/* items-start: each column is only as tall as its panels, so the Sites
-          panel does not stretch and push the charts below the fold. */}
-      <main className="grid flex-1 grid-cols-[minmax(0,1fr)_380px] items-start gap-3 p-3">
-        <div className="flex flex-col gap-3">
-          <Panel title="Sites">
+      {/* The page is exactly one screen tall. Each column fills the space under
+          the header: the Sites panel and the map take what the other panels
+          leave, so the rows and the map shrink instead of the page scrolling. */}
+      <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_380px] grid-rows-[minmax(0,1fr)] gap-3 p-3">
+        <div className="flex min-h-0 flex-col gap-3">
+          <Panel title="Sites" className="flex min-h-0 flex-1 flex-col">
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
             )}
@@ -328,7 +329,7 @@ export function Navigator() {
           </Panel>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex min-h-0 flex-col gap-3">
           <Panel title="Selected site">
             <SelectedSite
               row={selectedRow}
@@ -338,7 +339,7 @@ export function Navigator() {
             />
           </Panel>
 
-          <Panel title="South pole">
+          <Panel title="South pole" className="flex min-h-0 flex-1 flex-col">
             <SouthPoleMap
               rows={rows}
               selectedSiteId={selectedSiteId}

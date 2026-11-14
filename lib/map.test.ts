@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { projectSouthPole } from "./geometry.ts";
-import { clampLabelX, kmToMapPx, unprojectSouthPole } from "./map.ts";
+import { clampLabelX, kmToMapPx, projectForMap, unprojectSouthPole } from "./map.ts";
 
 // Passes when actual is within tolerance of expected.
 function assertClose(
@@ -76,4 +76,13 @@ test("clampLabelX pushes a label inwards at the edges", () => {
   // A 100 wide label on a pin at 150 would end at 200, past 165.
   assert.equal(clampLabelX(150, 100, 165), 115);
   assert.equal(clampLabelX(-150, 100, 165), -115);
+});
+
+test("projectForMap rounds to 2 decimals and stays within 0.005 of the exact point", () => {
+  const exact = projectSouthPole(-84.3, 137.7, 150);
+  const point = projectForMap(-84.3, 137.7, 150);
+  assert.equal(point.x, Math.round(point.x * 100) / 100);
+  assert.equal(point.y, Math.round(point.y * 100) / 100);
+  assertClose(point.x, exact.x, 0.005 + 1e-9, "x");
+  assertClose(point.y, exact.y, 0.005 + 1e-9, "y");
 });
