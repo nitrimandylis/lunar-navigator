@@ -28,7 +28,7 @@ Only edit files inside folders your human owns.
 | Name | GitHub login  | Owns                                   |
 |------|---------------|----------------------------------------|
 | trim | nitrimandylis | everything not listed below            |
-| gio  | supergioo0    | `data/` (Python precompute, JSON out)  |
+| gio  | supergioo0    | `data/` (Python precompute), `public/data/` (JSON out) |
 | koum | FILL_IN       | `story/` (slides, video script, sources) |
 
 Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those by hand.
@@ -36,7 +36,7 @@ Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those 
 ## Stack
 
 - Next.js (App Router), TypeScript, Tailwind, shadcn/ui. Package manager: npm (`npm install`, `npm run dev`). Commit `package-lock.json`, no other lockfile.
-- `data/` is Python. It writes JSON that the app reads. The app never calls Python at runtime.
+- `data/` is Python. It writes JSON to `public/data/`, which the app reads. The app never calls Python at runtime.
 - `story/` is Markdown only: no code.
 
 ## Contract
