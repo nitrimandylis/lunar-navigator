@@ -73,6 +73,55 @@
       "sun_hours": 2184.0,
       "earth_hours": 3690.0,
       "both_hours": 1119.0
+    },
+    {
+      "crater": "cabeus",
+      "lat": -84.3857,
+      "lon": 333.1422,
+      "sun_hours": 3046.0,
+      "earth_hours": 6621.0,
+      "both_hours": 2379.0
+    },
+    {
+      "crater": "kocher",
+      "lat": -84.2499,
+      "lon": 222.7995,
+      "sun_hours": 3266.0,
+      "earth_hours": 0.0,
+      "both_hours": 0.0
+    },
+    {
+      "crater": "sverdrup",
+      "lat": -88.1042,
+      "lon": 195.7274,
+      "sun_hours": 1344.0,
+      "earth_hours": 2532.0,
+      "both_hours": 526.0
+    },
+    {
+      "crater": "slater",
+      "lat": -87.717,
+      "lon": 115.1188,
+      "sun_hours": 2586.0,
+      "earth_hours": 3753.0,
+      "both_hours": 1018.0
     }
-  ]
+  ],
+  "sverdrup_pair": {
+    "lit": {
+      "lat": -88.8259,
+      "lon": 201.338,
+      "sun_hours": 3254.0,
+      "earth_hours": 978.0,
+      "both_hours": 397.0
+    },
+    "dark": {
+      "lat": -88.8053,
+      "lon": 197.4358,
+      "sun_hours": 0.0,
+      "earth_hours": 0.0,
+      "both_hours": 0.0
+    },
+    "separation_m": 2524
+  }
 }
