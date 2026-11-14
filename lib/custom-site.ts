@@ -2,6 +2,8 @@
 // browser from ephemeris.json. There is no terrain here: the horizon is flat,
 // so a body counts as visible when its centre is above 0 degrees.
 
+import type { DaySummary } from "./data.ts";
+
 const MOON_RADIUS_KM = 1737.4;
 
 // One astronomical unit. The Sun is so far away that its real distance on a
@@ -26,15 +28,6 @@ export type CustomHourly = {
   earth_elev_deg: number[];
   sun_visible: number[];
   earth_visible: number[];
-};
-
-// Same shape as one day of summary/<id>.json.
-export type DaySummary = {
-  date: string;
-  sun_hours: number;
-  earth_hours: number;
-  max_sun_elev_deg: number;
-  longest_sun_gap_hours: number;
 };
 
 function toRadians(degrees: number): number {
