@@ -81,3 +81,42 @@ export function projectForMap(
     y: Math.round(point.y * 100) / 100 + 0,
   };
 }
+
+// The part of the map on screen: a square, x and y its top left corner and
+// size its width, all in SVG units. The whole map is { x: -170, y: -170, size: 340 }.
+export type MapView = {
+  x: number;
+  y: number;
+  size: number;
+};
+
+// Keeps the centre of the view inside the square from -limit to limit, so the
+// user cannot pan the map away entirely.
+export function clampView(view: MapView, limit: number): MapView {
+  const half = view.size / 2;
+  let centreX = view.x + half;
+  let centreY = view.y + half;
+  centreX = Math.min(limit, Math.max(-limit, centreX));
+  centreY = Math.min(limit, Math.max(-limit, centreY));
+  return { x: centreX - half, y: centreY - half, size: view.size };
+}
+
+// Zooms the view by factor (below 1 zooms in) around the point (focusX,
+// focusY), which stays at the same place on screen, like zooming a photo
+// under the mouse. The new size is kept between minSize and maxSize.
+export function zoomView(
+  view: MapView,
+  focusX: number,
+  focusY: number,
+  factor: number,
+  minSize: number,
+  maxSize: number,
+): MapView {
+  const newSize = Math.min(maxSize, Math.max(minSize, view.size * factor));
+  const ratio = newSize / view.size;
+  return {
+    x: focusX - (focusX - view.x) * ratio,
+    y: focusY - (focusY - view.y) * ratio,
+    size: newSize,
+  };
+}

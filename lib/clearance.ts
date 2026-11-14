@@ -90,13 +90,14 @@ export function chartYRange(values: number[]): YRange {
 }
 
 // Where to put the y labels: whole multiples of a round step that fall inside
-// the range. The step is the smallest one that gives at most 5 labels.
+// the range. The step is the smallest one that gives at most 3 labels, so the
+// short charts never crowd their axis.
 export function yTicks(range: YRange): number[] {
-  const steps = [0.5, 1, 2, 5, 10, 20, 30, 45];
+  const steps = [0.5, 1, 2, 3, 4, 5, 10, 20, 30, 45];
   let step = steps[steps.length - 1];
   for (const candidate of steps) {
     const labelCount = Math.floor(range.max / candidate) - Math.ceil(range.min / candidate) + 1;
-    if (labelCount <= 5) {
+    if (labelCount <= 3) {
       step = candidate;
       break;
     }

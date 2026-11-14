@@ -13,15 +13,25 @@ import {
   monthLaneStrengths,
   pairLabel,
   pairPartnerId,
+  shortSiteName,
 } from "./grid.ts";
 
-test("laneOpacity is the share of the hours, cut to 0 to 1", () => {
-  assert.equal(laneOpacity(12, 24), 0.5);
+test("laneOpacity is 0 for no hours and rises from the floor to 1", () => {
   assert.equal(laneOpacity(0, 24), 0);
-  assert.equal(laneOpacity(24, 24), 1);
-  assert.equal(laneOpacity(30, 24), 1);
   assert.equal(laneOpacity(-1, 24), 0);
   assert.equal(laneOpacity(5, 0), 0);
+  // 12 of 24 hours: halfway from 0.3 to 1.
+  assert.ok(Math.abs(laneOpacity(12, 24) - 0.65) < 1e-9);
+  assert.equal(laneOpacity(24, 24), 1);
+  assert.equal(laneOpacity(30, 24), 1);
+  // One hour is already clearly visible.
+  assert.ok(laneOpacity(1, 24) > 0.3);
+});
+
+test("shortSiteName drops only a trailing (computed)", () => {
+  assert.equal(shortSiteName("Candidate near Haworth (computed)"), "Candidate near Haworth");
+  assert.equal(shortSiteName("IM-2 landing site"), "IM-2 landing site");
+  assert.equal(shortSiteName("(computed) first"), "(computed) first");
 });
 
 test("daysOfMonth lists the day-of-year numbers of a month", () => {
@@ -130,11 +140,11 @@ test("pairPartnerId finds the other site of a pair, either way round", () => {
 test("monthLaneStrengths divides by the hours in that month", () => {
   // February has 28 * 24 = 672 hours.
   const february = monthLaneStrengths(1, 336, 672);
-  assert.equal(february.power, 0.5);
+  assert.ok(Math.abs(february.power - 0.65) < 1e-9);
   assert.equal(february.comms, 1);
 
   // January has 31 * 24 = 744 hours.
   const january = monthLaneStrengths(0, 372, 0);
-  assert.equal(january.power, 0.5);
+  assert.ok(Math.abs(january.power - 0.65) < 1e-9);
   assert.equal(january.comms, 0);
 });

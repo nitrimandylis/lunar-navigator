@@ -90,9 +90,10 @@ test("chartYRange pads the data and always keeps zero inside", () => {
   assert.deepEqual(chartYRange([-3, -1]), { min: -3.5, max: 0.5 });
 });
 
-test("yTicks gives at most 5 round labels inside the range", () => {
-  assert.deepEqual(yTicks({ min: -0.8, max: 8.8 }), [0, 2, 4, 6, 8]);
-  assert.deepEqual(yTicks({ min: -3.5, max: 0.5 }), [-3, -2, -1, 0]);
+test("yTicks gives at most 3 round labels inside the range", () => {
+  assert.deepEqual(yTicks({ min: -0.8, max: 8.8 }), [0, 3, 6]);
+  assert.deepEqual(yTicks({ min: -3.5, max: 0.5 }), [-2, 0]);
+  assert.deepEqual(yTicks({ min: -4.5, max: 4.5 }), [-3, 0, 3]);
 });
 
 test("linePath joins the points with M then L", () => {

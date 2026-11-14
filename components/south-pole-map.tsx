@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
+
 import { NEAR_PAIRS, type PickedPoint, type SiteRow } from "@/lib/app-types";
 import { distanceKm } from "@/lib/geometry";
-import { clampLabelX, kmToMapPx, projectForMap, unprojectSouthPole } from "@/lib/map";
+import { shortSiteName } from "@/lib/grid";
+import { kmToMapPx, projectForMap, unprojectSouthPole, type MapView } from "@/lib/map";
 
 export type SouthPoleMapProps = {
   // Every site to pin, curated and custom.
@@ -9,19 +14,46 @@ export type SouthPoleMapProps = {
   // The point the user clicked on the map and has not added yet, marked with a
   // cross. null if none. The navigator clears it once the point is added.
   pickedPoint: PickedPoint | null;
+  // The part of the map to show. Leave it out for the whole map.
+  view?: MapView;
+  // How big the whole map is drawn on screen, in pixels across. Text and pins
+  // are sized for SMALL_MAP_PX; a bigger map scales them down to match, so
+  // they stay the same size on screen. Leave it out for the small map.
+  drawnSizePx?: number;
   // Select a site. The selected hour stays as it is.
   onSelectSite: (siteId: string) => void;
-  // The user clicked empty ground: offer this point to the custom point form.
-  onPickPoint: (lat: number, lon: number) => void;
+  // The user clicked empty ground inside the map, at this point.
+  onEmptyClick: (lat: number, lon: number) => void;
+  // What a click on empty ground does, read out by screen readers.
+  emptyClickHint: string;
 };
 
 // The SVG is drawn in a 340 by 340 box with the pole at (0, 0).
-const VIEW_SIZE = 340;
-// Map radius in SVG units: the edge circle, latitude -80.
-const MAP_RADIUS = 148;
-const EDGE_LAT = -80;
+export const VIEW_SIZE = 340;
+// Map radius in SVG units: the edge circle, latitude -82. Every curated site
+// lies inside -82, so the map spends its space on the sites, not empty ground.
+export const MAP_RADIUS = 152;
+export const EDGE_LAT = -82;
+export const FULL_VIEW: MapView = { x: -VIEW_SIZE / 2, y: -VIEW_SIZE / 2, size: VIEW_SIZE };
 
-const LATITUDE_RINGS = [-88, -86, -84, -82];
+// Latitude rings every 2 degrees on the whole map, every degree once zoomed in
+// a little, and every quarter degree once zoomed in a lot.
+const WIDE_RINGS = [-88, -86, -84];
+const MEDIUM_RINGS = [-89, -88, -87, -86, -85, -84, -83];
+const FINE_RINGS: number[] = [];
+for (let lat = -89.75; lat < -82; lat += 0.25) {
+  FINE_RINGS.push(lat);
+}
+// The ring labels sit along this longitude, where no site pins are.
+const RING_LABEL_LON = 160;
+
+// The width the small map is drawn at, in pixels. Sizes below are in SVG
+// units, picked to look right at this width.
+const SMALL_MAP_PX = 300;
+
+// Text sizes in SVG units.
+const CRATER_LABEL_SIZE = 11;
+const SMALL_LABEL_SIZE = 10;
 const SPOKE_LONGITUDES = [0, 90, 180, 270];
 
 // Craters near the curated sites, for context.
@@ -31,7 +63,7 @@ const SPOKE_LONGITUDES = [0, 90, 180, 270];
 // differently; these are the Gazetteer's own values.
 // labelSide says where the name goes, so names near the pole do not overlap.
 const CRATERS = [
-  { name: "Shackleton", lat: -89.67, lon: 129.78, diameterKm: 20.92, labelSide: "below" },
+  { name: "Shackleton", lat: -89.67, lon: 129.78, diameterKm: 20.92, labelSide: "right" },
   { name: "de Gerlache", lat: -88.48, lon: -88.34, diameterKm: 32.71, labelSide: "left" },
   { name: "Haworth", lat: -87.45, lon: -5.17, diameterKm: 51.42, labelSide: "left" },
   { name: "Faustini", lat: -87.18, lon: 84.31, diameterKm: 42.48, labelSide: "above" },
@@ -55,41 +87,79 @@ const PAIR_LABELS: { x: number; y: number; anchor: "start" | "end" }[] = [
 // The selected pin's label: font size and a rough width per letter, in SVG
 // units. Site names are long, so the label gets a solid box behind it. That
 // keeps it readable where it crosses crater names, lines and other pins.
-const PIN_LABEL_SIZE = 10;
-const SANS_LETTER_WIDTH = 5.4;
-const MONO_LETTER_WIDTH = 6.0;
+const PIN_LABEL_SIZE = 12;
+const SANS_LETTER_WIDTH = 6.5;
+const MONO_LETTER_WIDTH = 7.2;
 const PIN_LABEL_PADDING = 4;
 
-// Rounds to 2 decimals, for the picked point.
-function roundTo2(value: number): number {
-  return Math.round(value * 100) / 100;
+// Rounds to 3 decimals (about 30 m of latitude), for a picked point.
+function roundTo3(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
+// Turns a pointer position on screen into SVG units. The browser centres the
+// square drawing inside a box that is often taller or wider than it, so the
+// box edges are not the drawing's edges. getScreenCTM is the browser's own
+// SVG-to-screen mapping; its inverse undoes it exactly, at any zoom.
+export function screenToMap(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const svgToScreen = svg.getScreenCTM();
+  if (svgToScreen === null) {
+    return null;
+  }
+  const point = new DOMPoint(clientX, clientY).matrixTransform(svgToScreen.inverse());
+  return { x: point.x, y: point.y };
+}
+
+// The latitude and longitude under a pointer, rounded to 3 decimals, or null
+// when the pointer is outside the edge circle.
+export function latLonAt(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const point = screenToMap(svg, clientX, clientY);
+  if (point === null) {
+    return null;
+  }
+  const distanceFromCentre = Math.sqrt(point.x * point.x + point.y * point.y);
+  if (distanceFromCentre > MAP_RADIUS) {
+    return null;
+  }
+  const latLon = unprojectSouthPole(point.x, point.y, MAP_RADIUS, EDGE_LAT);
+  return { lat: roundTo3(latLon.lat), lon: roundTo3(latLon.lon) };
 }
 
 export function SouthPoleMap({
   rows,
   selectedSiteId,
   pickedPoint,
+  view = FULL_VIEW,
+  drawnSizePx = SMALL_MAP_PX,
   onSelectSite,
-  onPickPoint,
+  onEmptyClick,
+  emptyClickHint,
 }: SouthPoleMapProps) {
+  // The pin under the pointer. Its name shows, like the selected pin's.
+  const [hoveredSiteId, setHoveredSiteId] = useState<string | null>(null);
+
+  // Everything is drawn in map units, so zooming in, or drawing the map
+  // bigger, would make text, pins and lines grow too. Multiplying their sizes
+  // by k keeps them the same size on screen. k is 1 for the small whole map.
+  const k = (view.size / VIEW_SIZE) * (SMALL_MAP_PX / drawnSizePx);
+
   // A click on the map that did not land on a pin.
   function handleMapClick(event: React.MouseEvent<SVGSVGElement>) {
-    // Turn screen pixels into SVG units. The SVG is square, so one scale works.
-    const box = event.currentTarget.getBoundingClientRect();
-    const scale = VIEW_SIZE / box.width;
-    const x = (event.clientX - box.left) * scale - VIEW_SIZE / 2;
-    const y = (event.clientY - box.top) * scale - VIEW_SIZE / 2;
-
+    const point = latLonAt(event.currentTarget, event.clientX, event.clientY);
     // Clicks outside the edge circle do nothing.
-    const distanceFromCentre = Math.sqrt(x * x + y * y);
-    if (distanceFromCentre > MAP_RADIUS) {
+    if (point === null) {
       return;
     }
+    onEmptyClick(point.lat, point.lon);
+  }
 
-    const point = unprojectSouthPole(x, y, MAP_RADIUS, EDGE_LAT);
-    const lat = roundTo2(point.lat);
-    const lon = roundTo2(point.lon);
-    onPickPoint(lat, lon);
+  // Finer rings the more of the map's width is on screen per pixel.
+  let latitudeRings = WIDE_RINGS;
+  if (k < 0.3) {
+    latitudeRings = MEDIUM_RINGS;
+  }
+  if (k < 0.04) {
+    latitudeRings = FINE_RINGS;
   }
 
   // Draw the selected pin last, so it sits on top of its neighbours.
@@ -117,8 +187,9 @@ export function SouthPoleMap({
   }
 
   // One callout per near pair, if both of its sites are loaded.
+  // Zoomed in, the two sites of a pair sit apart and the callout is not needed.
   const pairCallouts: React.ReactNode[] = [];
-  for (let pairIndex = 0; pairIndex < NEAR_PAIRS.length; pairIndex++) {
+  for (let pairIndex = 0; pairIndex < NEAR_PAIRS.length && view.size > VIEW_SIZE / 2; pairIndex++) {
     const pair = NEAR_PAIRS[pairIndex];
     const label = PAIR_LABELS[pairIndex];
     let pairA: SiteRow | null = null;
@@ -181,20 +252,30 @@ export function SouthPoleMap({
           x2={lineEndX}
           y2={lineEndY}
           className="stroke-foreground"
-          strokeWidth={0.75}
+          strokeWidth={0.75 * k}
         />
-        <circle cx={middleX} cy={middleY} r={6} className="fill-none stroke-foreground" strokeWidth={0.75} />
+        <circle cx={middleX} cy={middleY} r={6 * k} className="fill-none stroke-foreground" strokeWidth={0.75 * k} />
         <text
           x={label.x}
           y={label.y + 3}
-          fontSize={9}
+          fontSize={CRATER_LABEL_SIZE * k}
           textAnchor={label.anchor}
-          className="fill-foreground font-mono tabular-nums"
+          className="fill-foreground tabular-nums"
         >
-          {"pair · " + km.toFixed(1) + " km"}
+          {"pair, " + km.toFixed(1) + " km apart"}
         </text>
       </g>,
     );
+  }
+
+  // The selected pin's name, and the hovered pin's if that is another one.
+  // Only these two get a name, so names never pile up on top of each other.
+  const labelledIds: string[] = [];
+  if (selectedSiteId !== null) {
+    labelledIds.push(selectedSiteId);
+  }
+  if (hoveredSiteId !== null && hoveredSiteId !== selectedSiteId) {
+    labelledIds.push(hoveredSiteId);
   }
 
   let pickedCross: { x: number; y: number } | null = null;
@@ -204,13 +285,13 @@ export function SouthPoleMap({
 
   return (
     <svg
-      viewBox={-VIEW_SIZE / 2 + " " + -VIEW_SIZE / 2 + " " + VIEW_SIZE + " " + VIEW_SIZE}
-      className="block min-h-0 w-full flex-1 cursor-crosshair select-none"
+      viewBox={view.x + " " + view.y + " " + view.size + " " + view.size}
+      className="block size-full select-none"
       role="group"
-      aria-label="Map of the lunar south pole. Click empty ground to pick a custom point."
+      aria-label={"Map of the lunar south pole. " + emptyClickHint}
       onClick={handleMapClick}
     >
-      {/* Edge circle at latitude -80. Lines, rings and outlines are decoration,
+      {/* Edge circle at latitude -82. Lines, rings and outlines are decoration,
           so they are hidden from screen readers. */}
       <circle
         aria-hidden="true"
@@ -218,7 +299,7 @@ export function SouthPoleMap({
         cy={0}
         r={MAP_RADIUS}
         className="fill-background stroke-line"
-        strokeWidth={1}
+        strokeWidth={k}
       />
 
       {/* Longitude spokes. */}
@@ -233,14 +314,15 @@ export function SouthPoleMap({
             x2={end.x}
             y2={end.y}
             className="stroke-line"
-            strokeWidth={0.5}
+            strokeWidth={0.5 * k}
           />
         );
       })}
 
-      {/* Latitude rings, labelled along the bottom spoke (longitude 180). */}
-      {LATITUDE_RINGS.map((lat) => {
+      {/* Latitude rings, labelled along one spoke where no pins are. */}
+      {latitudeRings.map((lat) => {
         const ringRadius = projectForMap(lat, 180, MAP_RADIUS, EDGE_LAT).y;
+        const labelSpot = projectForMap(lat, RING_LABEL_LON, MAP_RADIUS, EDGE_LAT);
         return (
           <g key={"ring-" + lat}>
             <circle
@@ -249,14 +331,13 @@ export function SouthPoleMap({
               cy={0}
               r={ringRadius}
               className="fill-none stroke-line"
-              strokeWidth={0.5}
+              strokeWidth={0.5 * k}
             />
             <text
-              x={-3}
-              y={ringRadius - 2}
-              fontSize={8}
-              textAnchor="end"
-              className="fill-muted-foreground font-mono tabular-nums"
+              x={labelSpot.x + 3 * k}
+              y={labelSpot.y + 4 * k}
+              fontSize={SMALL_LABEL_SIZE * k}
+              className="fill-muted-foreground/70 font-mono tabular-nums"
             >
               {lat + "°"}
             </text>
@@ -267,13 +348,17 @@ export function SouthPoleMap({
       {/* Earth is straight up, above longitude 0. */}
       <path
         aria-hidden="true"
-        d={"M -4 " + (-MAP_RADIUS - 3) + " L 0 " + (-MAP_RADIUS - 10) + " L 4 " + (-MAP_RADIUS - 3) + " Z"}
+        d={
+          "M " + -4 * k + " " + (-MAP_RADIUS - 3 * k) +
+          " L 0 " + (-MAP_RADIUS - 10 * k) +
+          " L " + 4 * k + " " + (-MAP_RADIUS - 3 * k) + " Z"
+        }
         className="fill-muted-foreground"
       />
       <text
-        x={8}
-        y={-MAP_RADIUS - 4}
-        fontSize={9}
+        x={8 * k}
+        y={-MAP_RADIUS - 4 * k}
+        fontSize={SMALL_LABEL_SIZE * k}
         className="fill-muted-foreground"
       >
         Earth
@@ -286,19 +371,21 @@ export function SouthPoleMap({
 
         // Put the name just outside the outline, on the chosen side.
         let labelX = centre.x;
-        let labelY = centre.y + craterRadius + 9;
+        const gap = 3 * k;
+        const labelSize = CRATER_LABEL_SIZE * k;
+        let labelY = centre.y + craterRadius + labelSize;
         let labelAnchor: "start" | "middle" | "end" = "middle";
         if (crater.labelSide === "above") {
-          labelY = centre.y - craterRadius - 3;
+          labelY = centre.y - craterRadius - gap;
         }
         if (crater.labelSide === "left") {
-          labelX = centre.x - craterRadius - 3;
-          labelY = centre.y + 3;
+          labelX = centre.x - craterRadius - gap;
+          labelY = centre.y + gap;
           labelAnchor = "end";
         }
         if (crater.labelSide === "right") {
-          labelX = centre.x + craterRadius + 3;
-          labelY = centre.y + 3;
+          labelX = centre.x + craterRadius + gap;
+          labelY = centre.y + gap;
           labelAnchor = "start";
         }
         return (
@@ -308,15 +395,15 @@ export function SouthPoleMap({
               cx={centre.x}
               cy={centre.y}
               r={craterRadius}
-              className="fill-none stroke-muted-foreground/50"
-              strokeWidth={0.75}
+              className="fill-none stroke-muted-foreground/35"
+              strokeWidth={0.75 * k}
             />
             <text
               x={labelX}
               y={labelY}
-              fontSize={8}
+              fontSize={labelSize}
               textAnchor={labelAnchor}
-              className="fill-muted-foreground"
+              className="fill-muted-foreground/60 italic"
             >
               {crater.name}
             </text>
@@ -326,19 +413,21 @@ export function SouthPoleMap({
 
       {pairCallouts}
 
-      {/* Site pins. */}
+      {/* Site pins: dots first, then the names on top of every dot. */}
       {pinRows.map((row) => {
         const site = row.site;
         const isSelected = site.id === selectedSiteId;
         const spot = projectForMap(site.lat, site.lon, MAP_RADIUS, EDGE_LAT);
 
-        let dotRadius = 2.5;
+        let dotRadius = 3.5;
         if (isSelected) {
-          dotRadius = 4;
+          dotRadius = 4.5;
         }
 
-        // Curated sites are filled dots, custom points are hollow.
-        let dotClass = "fill-muted-foreground";
+        // Curated sites are filled dots, custom points are hollow. Real
+        // mission targets get a bright outer ring, like their grid tag.
+        const isMission = site.mission !== undefined;
+        let dotClass = "fill-foreground stroke-background";
         if (row.isCustom) {
           dotClass = "fill-panel stroke-muted-foreground";
         }
@@ -347,26 +436,6 @@ export function SouthPoleMap({
         }
         if (isSelected && !row.isCustom) {
           dotClass = "fill-bright";
-        }
-
-        // A custom point is named by its numbers, which use the mono font.
-        let labelClass = "fill-bright font-medium";
-        let letterWidth = SANS_LETTER_WIDTH;
-        if (row.isCustom) {
-          labelClass = "fill-bright font-mono tabular-nums";
-          letterWidth = MONO_LETTER_WIDTH;
-        }
-
-        // The label sits above the pin, centred on it, pushed inwards near the
-        // map's left and right edges.
-        const labelWidth = site.name.length * letterWidth + 2 * PIN_LABEL_PADDING;
-        const labelX = clampLabelX(spot.x, labelWidth, VIEW_SIZE / 2 - 2);
-        // Pins right by the pole get their label a little higher, so it clears
-        // the "de Gerlache" name that sits level with the pole.
-        let labelY = spot.y - 11;
-        const distanceFromPole = Math.sqrt(spot.x * spot.x + spot.y * spot.y);
-        if (distanceFromPole < 20) {
-          labelY = spot.y - 16;
         }
 
         function selectThisSite() {
@@ -392,60 +461,103 @@ export function SouthPoleMap({
                 selectThisSite();
               }
             }}
+            onMouseEnter={() => setHoveredSiteId(site.id)}
+            onMouseLeave={() => setHoveredSiteId(null)}
+            onFocus={() => setHoveredSiteId(site.id)}
+            onBlur={() => setHoveredSiteId(null)}
           >
-            <title>{site.name}</title>
             {/* A bigger invisible circle, so a small pin is still easy to click. */}
-            <circle cx={spot.x} cy={spot.y} r={6} className="fill-transparent" />
+            <circle cx={spot.x} cy={spot.y} r={7 * k} className="fill-transparent" />
             {/* Keyboard focus ring. */}
             <circle
               cx={spot.x}
               cy={spot.y}
-              r={10}
+              r={10 * k}
               className="hidden fill-none stroke-bright group-focus-visible:block"
-              strokeWidth={0.75}
-              strokeDasharray="2 2"
+              strokeWidth={0.75 * k}
+              strokeDasharray={2 * k + " " + 2 * k}
             />
+            {isMission && !isSelected && (
+              <circle cx={spot.x} cy={spot.y} r={6 * k} className="fill-none stroke-bright" strokeWidth={1.25 * k} />
+            )}
             {isSelected && (
-              <circle cx={spot.x} cy={spot.y} r={7} className="fill-none stroke-bright" strokeWidth={1} />
+              <circle cx={spot.x} cy={spot.y} r={8.5 * k} className="fill-none stroke-bright" strokeWidth={1.5 * k} />
             )}
             <circle
               cx={spot.x}
               cy={spot.y}
-              r={dotRadius}
+              r={dotRadius * k}
               className={dotClass}
-              strokeWidth={1.25}
+              strokeWidth={1.25 * k}
             />
-            {isSelected && (
-              <g aria-hidden="true">
-                <rect
-                  x={labelX - labelWidth / 2}
-                  y={labelY - PIN_LABEL_SIZE}
-                  width={labelWidth}
-                  height={PIN_LABEL_SIZE + 4}
-                  rx={2}
-                  className="fill-background stroke-line"
-                  strokeWidth={0.75}
-                />
-                <text
-                  x={labelX}
-                  y={labelY}
-                  fontSize={PIN_LABEL_SIZE}
-                  textAnchor="middle"
-                  className={labelClass}
-                >
-                  {site.name}
-                </text>
-              </g>
-            )}
+          </g>
+        );
+      })}
+
+      {/* Names of the selected and hovered pins, in a box so they stay
+          readable over lines and other pins. They never catch the pointer. */}
+      {labelledIds.map((siteId) => {
+        let labelRow: SiteRow | null = null;
+        for (const row of rows) {
+          if (row.site.id === siteId) {
+            labelRow = row;
+          }
+        }
+        if (labelRow === null) {
+          return null;
+        }
+        const site = labelRow.site;
+        const spot = projectForMap(site.lat, site.lon, MAP_RADIUS, EDGE_LAT);
+
+        // A custom point is named by its numbers, which use the mono font.
+        let labelClass = "fill-bright font-medium";
+        let letterWidth = SANS_LETTER_WIDTH;
+        if (labelRow.isCustom) {
+          labelClass = "fill-bright font-mono tabular-nums";
+          letterWidth = MONO_LETTER_WIDTH;
+        }
+
+        // The box sits above the pin, clear of its selection ring, and is
+        // pushed back inside the view near the left and right edges.
+        const labelText = shortSiteName(site.name);
+        const labelWidth = (labelText.length * letterWidth + 2 * PIN_LABEL_PADDING) * k;
+        const labelHeight = (PIN_LABEL_SIZE + 5) * k;
+        const viewLeft = view.x + 2 * k;
+        const viewRight = view.x + view.size - 2 * k;
+        let labelX = spot.x;
+        labelX = Math.min(labelX, viewRight - labelWidth / 2);
+        labelX = Math.max(labelX, viewLeft + labelWidth / 2);
+        const labelBottom = spot.y - 11 * k;
+
+        return (
+          <g key={"label-" + siteId} aria-hidden="true" className="pointer-events-none">
+            <rect
+              x={labelX - labelWidth / 2}
+              y={labelBottom - labelHeight}
+              width={labelWidth}
+              height={labelHeight}
+              rx={2 * k}
+              className="fill-background stroke-line"
+              strokeWidth={0.75 * k}
+            />
+            <text
+              x={labelX}
+              y={labelBottom - 4.5 * k}
+              fontSize={PIN_LABEL_SIZE * k}
+              textAnchor="middle"
+              className={labelClass}
+            >
+              {labelText}
+            </text>
           </g>
         );
       })}
 
       {/* A small cross where the user last clicked empty ground. */}
       {pickedCross !== null && (
-        <g aria-hidden="true" className="pointer-events-none stroke-bright" strokeWidth={1.25}>
-          <line x1={pickedCross.x - 4} y1={pickedCross.y - 4} x2={pickedCross.x + 4} y2={pickedCross.y + 4} />
-          <line x1={pickedCross.x - 4} y1={pickedCross.y + 4} x2={pickedCross.x + 4} y2={pickedCross.y - 4} />
+        <g aria-hidden="true" className="pointer-events-none stroke-bright" strokeWidth={1.5 * k}>
+          <line x1={pickedCross.x - 5 * k} y1={pickedCross.y - 5 * k} x2={pickedCross.x + 5 * k} y2={pickedCross.y + 5 * k} />
+          <line x1={pickedCross.x - 5 * k} y1={pickedCross.y + 5 * k} x2={pickedCross.x + 5 * k} y2={pickedCross.y - 5 * k} />
         </g>
       )}
     </svg>

@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { projectSouthPole } from "./geometry.ts";
-import { clampLabelX, kmToMapPx, projectForMap, unprojectSouthPole } from "./map.ts";
+import {
+  clampLabelX,
+  clampView,
+  kmToMapPx,
+  projectForMap,
+  unprojectSouthPole,
+  zoomView,
+} from "./map.ts";
 
 // Passes when actual is within tolerance of expected.
 function assertClose(
@@ -85,4 +92,26 @@ test("projectForMap rounds to 2 decimals and stays within 0.005 of the exact poi
   assert.equal(point.y, Math.round(point.y * 100) / 100);
   assertClose(point.x, exact.x, 0.005 + 1e-9, "x");
   assertClose(point.y, exact.y, 0.005 + 1e-9, "y");
+});
+
+test("zoomView keeps the focus point at the same place in the view", () => {
+  const full = { x: -170, y: -170, size: 340 };
+  const zoomed = zoomView(full, 50, -20, 0.5, 5, 340);
+  assert.equal(zoomed.size, 170);
+  // The focus point sat at (220/340, 150/340) of the way across. It still does.
+  assertClose((50 - zoomed.x) / zoomed.size, 220 / 340, 1e-12, "x share");
+  assertClose((-20 - zoomed.y) / zoomed.size, 150 / 340, 1e-12, "y share");
+});
+
+test("zoomView stops at the smallest and largest size", () => {
+  const full = { x: -170, y: -170, size: 340 };
+  assert.equal(zoomView(full, 0, 0, 2, 5, 340).size, 340);
+  assert.equal(zoomView({ x: 0, y: 0, size: 6 }, 3, 3, 0.5, 5, 340).size, 5);
+});
+
+test("clampView keeps the view centre inside the limit", () => {
+  const moved = clampView({ x: 300, y: -400, size: 20 }, 160);
+  assert.deepEqual(moved, { x: 150, y: -170, size: 20 });
+  const inside = { x: -10, y: -10, size: 20 };
+  assert.deepEqual(clampView(inside, 160), inside);
 });

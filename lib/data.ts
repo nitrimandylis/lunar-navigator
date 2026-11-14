@@ -11,6 +11,9 @@ export type Site = {
   lon: number;
   elevation_m: number;
   source: string;
+  // Only on real mission targets, for example "IM-2" or "Artemis III candidate".
+  // Computed candidates leave it out.
+  mission?: string;
 };
 
 // sites/<id>.json: one value per hour for one site.
@@ -40,6 +43,8 @@ export type DaySummary = {
   date: string;
   sun_hours: number;
   earth_hours: number;
+  // Hours with the Sun and Earth both in view.
+  both_hours: number;
   max_sun_elev_deg: number;
   longest_sun_gap_hours: number;
 };
@@ -67,14 +72,15 @@ export type Ephemeris = {
 export type MonthTotals = {
   sunHours: number;
   earthHours: number;
+  bothHours: number;
 };
 
-// Adds up the hours of sunlight and of Earth visibility for each month.
+// Adds up the hours of sunlight, of Earth visibility and of both for each month.
 // Returns 12 entries, January first. A month with no days gives zeros.
 export function totalsByMonth(days: DaySummary[]): MonthTotals[] {
   const totals: MonthTotals[] = [];
   for (let month = 0; month < 12; month++) {
-    totals.push({ sunHours: 0, earthHours: 0 });
+    totals.push({ sunHours: 0, earthHours: 0, bothHours: 0 });
   }
 
   for (const day of days) {
@@ -83,6 +89,7 @@ export function totalsByMonth(days: DaySummary[]): MonthTotals[] {
     const monthTotals = totals[monthNumber - 1];
     monthTotals.sunHours += day.sun_hours;
     monthTotals.earthHours += day.earth_hours;
+    monthTotals.bothHours += day.both_hours;
   }
 
   return totals;

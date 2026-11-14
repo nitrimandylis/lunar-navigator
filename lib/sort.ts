@@ -4,7 +4,8 @@ import type { SiteRow } from "./app-types.ts";
 import { totalsByMonth } from "./data.ts";
 
 // "power" = most hours of sunlight first. "comms" = most hours of Earth first.
-export type SortKey = "power" | "comms";
+// "both" = most hours with the Sun and Earth in view at the same time.
+export type SortKey = "power" | "comms" | "both";
 
 // Returns a new array with the rows ordered by their total hours in one
 // month, most hours first. Rows with the same hours are ordered by name, so
@@ -20,8 +21,10 @@ export function sortRows(
     const monthTotals = totalsByMonth(row.days)[month];
     if (sortKey === "power") {
       hoursBySiteId[row.site.id] = monthTotals.sunHours;
-    } else {
+    } else if (sortKey === "comms") {
       hoursBySiteId[row.site.id] = monthTotals.earthHours;
+    } else {
+      hoursBySiteId[row.site.id] = monthTotals.bothHours;
     }
   }
 
