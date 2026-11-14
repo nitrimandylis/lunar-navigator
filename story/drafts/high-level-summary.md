@@ -35,9 +35,13 @@ Side-by-side comparison, simpler public/educator and more detailed professional 
 ### Questions corresponding to this summary
 
 1. **Nick/team:** What are the final project and team names?
+
+   Answer - gio/2026-11-14: Not yet confirmed.
 2. **Trim:** Does coordinate entry/map clicking analyse the exact selected location or select the nearest prepared data point? The summary currently describes selection only; it does not promise equal terrain coverage for every coordinate.
 3. **Nick/trim:** Once completed, which comparison and audience-interface functions should move from planned to working?
 4. **Team:** What will the AI optimise, over which sites and times, and how will its suggestions be checked? Until agreed, keep the cautious planned-feature wording.
+
+   Answer - gio/2026-11-14: Data side only: the committed data (18 prepared points, hourly 2027) and the offline scan scripts in data/ could support a search, but the criteria, sites, times and checking are not decided. Not yet confirmed (team decision).
 5. **Nick:** Which audience provides the clearest demonstrated use case? Target audiences are not evidence of actual adoption.
 
 ### Evidence behind the draft
