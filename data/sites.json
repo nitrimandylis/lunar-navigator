@@ -26,10 +26,10 @@
   {
     "id": "haworth-candidate",
     "name": "Candidate near Haworth (computed)",
-    "lat": -85.9166,
-    "lon": -4.067,
-    "elevation_m": 4800,
-    "source": "Best Sun plus Earth hours in the area scanned around the Haworth crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -85.962,
+    "lon": -2.3833,
+    "elevation_m": 4994,
+    "source": "Best Sun plus Earth hours in the area scanned around the Haworth crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "malapert-candidate",
@@ -58,10 +58,10 @@
   {
     "id": "amundsen-candidate",
     "name": "Candidate near Amundsen (computed)",
-    "lat": -83.9405,
-    "lon": 100.11,
-    "elevation_m": -1558,
-    "source": "Best Sun plus Earth hours in the area scanned around the Amundsen crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -82.7489,
+    "lon": 72.9299,
+    "elevation_m": 2805,
+    "source": "Best Sun plus Earth hours in the area scanned around the Amundsen crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "cabeus-candidate",
@@ -90,18 +90,18 @@
   {
     "id": "sverdrup-pair-lit",
     "name": "Lit ground near Sverdrup (computed)",
-    "lat": -88.8259,
-    "lon": -158.662,
-    "elevation_m": -258,
-    "source": "Lit member of a lit/dark pair about 2500 m apart, found by data/rim_search.py pair (centre at Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -89.1544,
+    "lon": -152.2578,
+    "elevation_m": 728,
+    "source": "Lit member of a lit/dark pair about 2200 m apart, found by data/rim_search.py pair (search centred at 88.815 S, 160.6 W, near Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "sverdrup-pair-shadow",
     "name": "Shadowed ground near Sverdrup (computed)",
-    "lat": -88.8053,
-    "lon": -162.5642,
-    "elevation_m": -272,
-    "source": "Dark member of a lit/dark pair about 2500 m apart, found by data/rim_search.py pair (centre at Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+    "lat": -89.1396,
+    "lon": -147.4552,
+    "elevation_m": 319,
+    "source": "Dark member of a lit/dark pair about 2200 m apart, found by data/rim_search.py pair (search centred at 88.815 S, 160.6 W, near Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   },
   {
     "id": "im2-mons-mouton",

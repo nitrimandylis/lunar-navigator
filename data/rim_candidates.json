@@ -1,5 +1,5 @@
 {
-  "note": "Scan results behind data/sites.json, from data/rim_search.py. Hours are for 2027, with the 150 km horizon.",
+  "note": "Scan results from data/rim_search.py with a 2 m observer, hours for 2027 with the 150 km horizon (point-Sun score). Where a site in data/sites.json was swapped, its hours in the app come from build.py (disc rule), so they differ a little. shackleton_pair is the earlier pair and was not re-scanned here.",
   "shackleton_pair": {
     "lit": {
       "lat": -89.3277,
@@ -20,73 +20,73 @@
   "crater_candidates": [
     {
       "crater": "shackleton",
-      "lat": -89.7758,
-      "lon": 52.1851,
-      "sun_hours": 3988.0,
-      "earth_hours": 4266.0,
-      "both_hours": 2191.0
+      "lat": -89.3944,
+      "lon": 102.77,
+      "sun_hours": 4951.0,
+      "earth_hours": 4689.0,
+      "both_hours": 2752.0
     },
     {
       "crater": "de-gerlache",
-      "lat": -88.3355,
-      "lon": 290.4229,
-      "sun_hours": 4651.0,
-      "earth_hours": 4722.0,
-      "both_hours": 2606.0
+      "lat": -88.3503,
+      "lon": 290.7097,
+      "sun_hours": 4852.0,
+      "earth_hours": 4710.0,
+      "both_hours": 2724.0
     },
     {
       "crater": "haworth",
-      "lat": -85.9166,
-      "lon": 355.933,
-      "sun_hours": 4829.0,
+      "lat": -85.962,
+      "lon": 357.6167,
+      "sun_hours": 6399.0,
       "earth_hours": 8760.0,
-      "both_hours": 4829.0
+      "both_hours": 6399.0
     },
     {
       "crater": "faustini",
-      "lat": -88.1542,
-      "lon": 73.3088,
-      "sun_hours": 2496.0,
-      "earth_hours": 4136.0,
-      "both_hours": 1630.0
+      "lat": -88.0734,
+      "lon": 72.3269,
+      "sun_hours": 2515.0,
+      "earth_hours": 4028.0,
+      "both_hours": 1611.0
     },
     {
       "crater": "malapert",
-      "lat": -85.7378,
-      "lon": 3.6101,
-      "sun_hours": 4324.0,
+      "lat": -85.735,
+      "lon": 3.6425,
+      "sun_hours": 4470.0,
       "earth_hours": 8587.0,
-      "both_hours": 4233.0
+      "both_hours": 4372.0
     },
     {
       "crater": "nobile",
-      "lat": -84.2273,
-      "lon": 47.4917,
-      "sun_hours": 4467.0,
+      "lat": -84.2346,
+      "lon": 47.4949,
+      "sun_hours": 4858.0,
       "earth_hours": 8760.0,
-      "both_hours": 4467.0
+      "both_hours": 4858.0
     },
     {
       "crater": "amundsen",
-      "lat": -83.9405,
-      "lon": 100.11,
-      "sun_hours": 2184.0,
-      "earth_hours": 3690.0,
-      "both_hours": 1119.0
+      "lat": -82.7489,
+      "lon": 72.9299,
+      "sun_hours": 3167.0,
+      "earth_hours": 6286.0,
+      "both_hours": 2310.0
     },
     {
       "crater": "cabeus",
-      "lat": -84.3857,
-      "lon": 333.1422,
-      "sun_hours": 3046.0,
-      "earth_hours": 6621.0,
-      "both_hours": 2379.0
+      "lat": -84.3866,
+      "lon": 333.1598,
+      "sun_hours": 3048.0,
+      "earth_hours": 6635.0,
+      "both_hours": 2385.0
     },
     {
       "crater": "kocher",
-      "lat": -84.2499,
-      "lon": 222.7995,
-      "sun_hours": 3266.0,
+      "lat": -84.4192,
+      "lon": 221.9328,
+      "sun_hours": 4415.0,
       "earth_hours": 0.0,
       "both_hours": 0.0
     },
@@ -94,34 +94,34 @@
       "crater": "sverdrup",
       "lat": -88.1042,
       "lon": 195.7274,
-      "sun_hours": 1344.0,
+      "sun_hours": 1348.0,
       "earth_hours": 2532.0,
-      "both_hours": 526.0
+      "both_hours": 528.0
     },
     {
       "crater": "slater",
-      "lat": -87.717,
-      "lon": 115.1188,
-      "sun_hours": 2586.0,
-      "earth_hours": 3753.0,
-      "both_hours": 1018.0
+      "lat": -87.7709,
+      "lon": 116.4787,
+      "sun_hours": 2817.0,
+      "earth_hours": 3696.0,
+      "both_hours": 1170.0
     }
   ],
   "sverdrup_pair": {
     "lit": {
-      "lat": -88.8259,
-      "lon": 201.338,
-      "sun_hours": 3254.0,
-      "earth_hours": 978.0,
-      "both_hours": 397.0
+      "lat": -89.1544,
+      "lon": 207.7422,
+      "sun_hours": 4519.0,
+      "earth_hours": 0.0,
+      "both_hours": 0.0
     },
     "dark": {
-      "lat": -88.8053,
-      "lon": 197.4358,
+      "lat": -89.1396,
+      "lon": 212.5448,
       "sun_hours": 0.0,
       "earth_hours": 0.0,
       "both_hours": 0.0
     },
-    "separation_m": 2524
+    "separation_m": 2214
   }
 }
