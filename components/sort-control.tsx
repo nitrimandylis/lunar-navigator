@@ -9,9 +9,11 @@ export type SortControlProps = {
 const OPTIONS: { key: SortKey; label: string }[] = [
   { key: "power", label: "Power" },
   { key: "comms", label: "Comms" },
+  { key: "both", label: "Both" },
 ];
 
-// Chooses how the grid rows are ordered: most sunlight or most Earth hours first.
+// Chooses how the grid rows are ordered: most sunlight, most Earth hours, or
+// most hours with both in view first.
 export function SortControl({ sortKey, onChangeSort }: SortControlProps) {
   return (
     <div role="group" aria-label="Sort" className="flex items-center gap-2">

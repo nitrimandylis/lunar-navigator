@@ -15,6 +15,7 @@ function oneDay(sunHours: number, earthHours: number): DaySummary[] {
       date: "2027-01-01",
       sun_hours: sunHours,
       earth_hours: earthHours,
+      both_hours: 0,
       max_sun_elev_deg: 1,
       longest_sun_gap_hours: 0,
     },

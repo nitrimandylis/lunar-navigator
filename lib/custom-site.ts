@@ -151,6 +151,7 @@ export function summarizeDays(
     const firstHour = day * HOURS_PER_DAY;
     let sunHours = 0;
     let earthHours = 0;
+    let bothHours = 0;
     let maxSunElevation = -Infinity;
     let currentGap = 0;
     let longestGap = 0;
@@ -158,6 +159,8 @@ export function summarizeDays(
     for (let i = firstHour; i < firstHour + HOURS_PER_DAY; i++) {
       sunHours += sunVisible[i];
       earthHours += earthVisible[i];
+      // Both flags are 1 or 0, so their product is 1 only when both are up.
+      bothHours += sunVisible[i] * earthVisible[i];
       maxSunElevation = Math.max(maxSunElevation, sunElevDeg[i]);
 
       // A gap is a run of hours in a row without the Sun.
@@ -176,6 +179,7 @@ export function summarizeDays(
       date: date,
       sun_hours: sunHours,
       earth_hours: earthHours,
+      both_hours: bothHours,
       max_sun_elev_deg: maxSunElevation,
       longest_sun_gap_hours: longestGap,
     });

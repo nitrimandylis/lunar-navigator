@@ -20,6 +20,7 @@ function makeRow(
         date: "2027-01-01",
         sun_hours: januarySun,
         earth_hours: januaryEarth,
+        both_hours: 0,
         max_sun_elev_deg: 1,
         longest_sun_gap_hours: 0,
       },
@@ -27,6 +28,7 @@ function makeRow(
         date: "2027-02-01",
         sun_hours: februarySun,
         earth_hours: 0,
+        both_hours: 0,
         max_sun_elev_deg: 1,
         longest_sun_gap_hours: 0,
       },
@@ -62,4 +64,15 @@ test("sortRows orders equal rows by name and leaves the input alone", () => {
   assert.deepEqual(ids(sortRows(tied, "power", 0)), ["m", "z"]);
   // The array passed in keeps its order.
   assert.deepEqual(ids(tied), ["z", "m"]);
+});
+
+test("sortRows by both puts the most hours with Sun and Earth together first", () => {
+  // "lit" has more Sun and more Earth, but they are rarely up at the same time.
+  const lit = makeRow("lit", "Lit", 20, 20, 0);
+  lit.days[0].both_hours = 2;
+  const steady = makeRow("steady", "Steady", 10, 10, 0);
+  steady.days[0].both_hours = 9;
+
+  assert.deepEqual(ids(sortRows([lit, steady], "power", 0)), ["lit", "steady"]);
+  assert.deepEqual(ids(sortRows([lit, steady], "both", 0)), ["steady", "lit"]);
 });

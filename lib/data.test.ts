@@ -3,12 +3,14 @@ import { test } from "node:test";
 
 import { hoursUntilChange, totalsByMonth } from "./data.ts";
 
-// Builds one summary day. The two fields the helpers do not read are zero.
-function day(date: string, sunHours: number, earthHours: number) {
+// Builds one summary day. bothHours is 0 unless given. The two fields the
+// helpers do not read are zero.
+function day(date: string, sunHours: number, earthHours: number, bothHours: number = 0) {
   return {
     date: date,
     sun_hours: sunHours,
     earth_hours: earthHours,
+    both_hours: bothHours,
     max_sun_elev_deg: 0,
     longest_sun_gap_hours: 0,
   };
@@ -18,21 +20,21 @@ test("totalsByMonth returns 12 months of zeros for no days", () => {
   const totals = totalsByMonth([]);
   assert.equal(totals.length, 12);
   for (const monthTotals of totals) {
-    assert.deepEqual(monthTotals, { sunHours: 0, earthHours: 0 });
+    assert.deepEqual(monthTotals, { sunHours: 0, earthHours: 0, bothHours: 0 });
   }
 });
 
 test("totalsByMonth sums the days of one month", () => {
   const days = [
-    day("2027-03-01", 10, 4),
+    day("2027-03-01", 10, 4, 3),
     day("2027-03-02", 5, 0),
     day("2027-03-03", 0, 24),
   ];
   const totals = totalsByMonth(days);
   // March is index 2, because January is index 0.
-  assert.deepEqual(totals[2], { sunHours: 15, earthHours: 28 });
-  assert.deepEqual(totals[1], { sunHours: 0, earthHours: 0 });
-  assert.deepEqual(totals[3], { sunHours: 0, earthHours: 0 });
+  assert.deepEqual(totals[2], { sunHours: 15, earthHours: 28, bothHours: 3 });
+  assert.deepEqual(totals[1], { sunHours: 0, earthHours: 0, bothHours: 0 });
+  assert.deepEqual(totals[3], { sunHours: 0, earthHours: 0, bothHours: 0 });
 });
 
 test("totalsByMonth keeps days on each side of a month boundary apart", () => {
@@ -44,10 +46,10 @@ test("totalsByMonth keeps days on each side of a month boundary apart", () => {
     day("2027-12-31", 6, 5),
   ];
   const totals = totalsByMonth(days);
-  assert.deepEqual(totals[0], { sunHours: 7, earthHours: 1 });
-  assert.deepEqual(totals[1], { sunHours: 20, earthHours: 2 });
-  assert.deepEqual(totals[10], { sunHours: 3, earthHours: 9 });
-  assert.deepEqual(totals[11], { sunHours: 10, earthHours: 13 });
+  assert.deepEqual(totals[0], { sunHours: 7, earthHours: 1, bothHours: 0 });
+  assert.deepEqual(totals[1], { sunHours: 20, earthHours: 2, bothHours: 0 });
+  assert.deepEqual(totals[10], { sunHours: 3, earthHours: 9, bothHours: 0 });
+  assert.deepEqual(totals[11], { sunHours: 10, earthHours: 13, bothHours: 0 });
 });
 
 test("totalsByMonth gives February 2027 its 28 days", () => {
@@ -60,55 +62,51 @@ test("totalsByMonth gives February 2027 its 28 days", () => {
   days.push(day("2027-03-01", 2, 2));
 
   const totals = totalsByMonth(days);
-  assert.deepEqual(totals[1], { sunHours: 28 * 24, earthHours: 28 });
-  assert.deepEqual(totals[2], { sunHours: 2, earthHours: 2 });
+  assert.deepEqual(totals[1], { sunHours: 28 * 24, earthHours: 28, bothHours: 0 });
+  assert.deepEqual(totals[2], { sunHours: 2, earthHours: 2, bothHours: 0 });
 });
 
 test("totalsByMonth matches a real month of data", () => {
-  // Source: data/out/summary/shackleton-candidate.json, site
-  // "shackleton-candidate", the 31 days of January 2027, copied as written.
+  // Source: public/data/summary/shackleton-ridge.json, the 31 days of
+  // January 2027, copied as written.
   const january = [
-    { date: "2027-01-01", sun_hours: 24.0, earth_hours: 0.0, max_sun_elev_deg: 0.827, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-02", sun_hours: 6.0, earth_hours: 0.0, max_sun_elev_deg: 0.791, longest_sun_gap_hours: 18.0 },
-    { date: "2027-01-03", sun_hours: 0.0, earth_hours: 0.0, max_sun_elev_deg: 0.764, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-04", sun_hours: 0.0, earth_hours: 0.0, max_sun_elev_deg: 0.748, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-05", sun_hours: 0.0, earth_hours: 0.0, max_sun_elev_deg: 0.743, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-06", sun_hours: 0.0, earth_hours: 23.0, max_sun_elev_deg: 0.753, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-07", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.769, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-08", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.791, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-09", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.815, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-10", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.841, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-11", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.865, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-12", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.886, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-13", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.902, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-14", sun_hours: 0.0, earth_hours: 24.0, max_sun_elev_deg: 0.911, longest_sun_gap_hours: 24.0 },
-    { date: "2027-01-15", sun_hours: 17.0, earth_hours: 24.0, max_sun_elev_deg: 0.912, longest_sun_gap_hours: 7.0 },
-    { date: "2027-01-16", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.911, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-17", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.9, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-18", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.879, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-19", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.846, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-20", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.802, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-21", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.746, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-22", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.682, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-23", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.61, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-24", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.533, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-25", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.454, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-26", sun_hours: 24.0, earth_hours: 24.0, max_sun_elev_deg: 0.374, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-27", sun_hours: 24.0, earth_hours: 21.0, max_sun_elev_deg: 0.297, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-28", sun_hours: 24.0, earth_hours: 0.0, max_sun_elev_deg: 0.225, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-29", sun_hours: 24.0, earth_hours: 0.0, max_sun_elev_deg: 0.159, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-30", sun_hours: 24.0, earth_hours: 0.0, max_sun_elev_deg: 0.102, longest_sun_gap_hours: 0.0 },
-    { date: "2027-01-31", sun_hours: 17.0, earth_hours: 0.0, max_sun_elev_deg: 0.053, longest_sun_gap_hours: 7.0 },
+    { date: "2027-01-01", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.49, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-02", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.521, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-03", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.529, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-04", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.528, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-05", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.509, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-06", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.464, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-07", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.395, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-08", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 1.303, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-09", sun_hours: 24.0, earth_hours: 15.0, both_hours: 15.0, max_sun_elev_deg: 1.192, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-10", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 1.066, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-11", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.93, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-12", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.788, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-13", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.647, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-14", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.512, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-15", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.387, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-16", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.276, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-17", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.184, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-18", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.114, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-19", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.065, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-20", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.041, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-21", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.059, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-22", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.099, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-23", sun_hours: 24.0, earth_hours: 24.0, both_hours: 24.0, max_sun_elev_deg: 0.157, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-24", sun_hours: 24.0, earth_hours: 12.0, both_hours: 12.0, max_sun_elev_deg: 0.23, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-25", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.312, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-26", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.4, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-27", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.488, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-28", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.571, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-29", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.644, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-30", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.702, longest_sun_gap_hours: 0.0 },
+    { date: "2027-01-31", sun_hours: 24.0, earth_hours: 0.0, both_hours: 0.0, max_sun_elev_deg: 0.741, longest_sun_gap_hours: 0.0 },
   ];
 
   const totals = totalsByMonth(january);
-  // Worked out by reading the rows above.
-  // Sun: 24 + 6 on the 1st and 2nd, 17 on the 15th, 15 full days from the
-  // 16th to the 30th (15 * 24 = 360), 17 on the 31st. 30 + 17 + 360 + 17 = 424.
-  // Earth: 23 on the 6th, 20 full days from the 7th to the 26th
-  // (20 * 24 = 480), 21 on the 27th. 23 + 480 + 21 = 524.
-  assert.deepEqual(totals[0], { sunHours: 424, earthHours: 524 });
-  assert.deepEqual(totals[1], { sunHours: 0, earthHours: 0 });
+  // Sums of the three hour columns above, added up by hand from the file.
+  assert.deepEqual(totals[0], { sunHours: 744, earthHours: 363, bothHours: 363 });
+  assert.deepEqual(totals[1], { sunHours: 0, earthHours: 0, bothHours: 0 });
 });
 
 test("hoursUntilChange counts the hours until the value flips", () => {
