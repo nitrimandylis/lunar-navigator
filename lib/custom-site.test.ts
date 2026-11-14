@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { customSiteHourly, elevationDeg, summarizeDays } from "./custom-site.ts";
+import { azimuthDeg, customSiteHourly, elevationDeg, summarizeDays } from "./custom-site.ts";
 
 const AU_KM = 149_597_870.7;
 
@@ -25,6 +25,9 @@ test("four hours at Nobile match JPL Horizons", () => {
   };
   const expectedSun = [-3.079774, -3.101079, -3.12206, -3.142717];
   const expectedEarth = [-2.967003, -2.995996, -3.024483, -3.052465];
+  // The azimuths from the same two Horizons files.
+  const expectedSunAz = [209.888046, 209.381012, 208.873942, 208.366838];
+  const expectedEarthAz = [314.174033, 314.154613, 314.134684, 314.11425];
 
   const hourly = customSiteHourly(-85.28, 53.27, subPoints);
 
@@ -32,6 +35,9 @@ test("four hours at Nobile match JPL Horizons", () => {
     // The results are rounded to 3 decimals, so allow 0.002 degrees.
     assert.ok(Math.abs(hourly.sun_elev_deg[i] - expectedSun[i]) < 0.002, `sun hour ${i}`);
     assert.ok(Math.abs(hourly.earth_elev_deg[i] - expectedEarth[i]) < 0.002, `earth hour ${i}`);
+    // The azimuths are rounded to 2 decimals, so allow 0.01 degrees.
+    assert.ok(Math.abs(hourly.sun_az_deg[i] - expectedSunAz[i]) < 0.01, `sun az hour ${i}`);
+    assert.ok(Math.abs(hourly.earth_az_deg[i] - expectedEarthAz[i]) < 0.01, `earth az hour ${i}`);
   }
   // Both bodies are below the horizon in these hours.
   assert.deepEqual(hourly.sun_visible, [0, 0, 0, 0]);
@@ -126,4 +132,19 @@ test("day summaries add up hours, the highest Sun and the longest gap", () => {
       longest_sun_gap_hours: 4,
     },
   ]);
+});
+
+test("azimuthDeg points north, east, south and west", () => {
+  // From the equator at longitude 0: a sub point further north is at azimuth
+  // 0, one to the east at 90, one to the south at 180, one to the west at 270.
+  assert.ok(Math.abs(azimuthDeg(0, 0, 10, 0) - 0) < 1e-9);
+  assert.ok(Math.abs(azimuthDeg(0, 0, 0, 10) - 90) < 1e-9);
+  assert.ok(Math.abs(azimuthDeg(0, 0, -10, 0) - 180) < 1e-9);
+  assert.ok(Math.abs(azimuthDeg(0, 0, 0, -10) - 270) < 1e-9);
+});
+
+test("azimuthDeg stays between 0 and 360 across the 0/360 longitude join", () => {
+  // The point is at longitude 350, the sub point at 10: 20 degrees to the east.
+  const azimuth = azimuthDeg(0, 350, 0, 10);
+  assert.ok(Math.abs(azimuth - 90) < 1e-9);
 });

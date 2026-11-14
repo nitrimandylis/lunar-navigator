@@ -4,16 +4,19 @@ import type { CustomHourly } from "./custom-site.ts";
 import type { DaySummary, Site, SiteHourly } from "./data.ts";
 
 // One row of the grid: a site and its per-day totals.
-// A custom site is a point the user typed in. It has a flat horizon.
+// A reference site is a real past landing outside the terrain data. A custom
+// site is a point the user typed in. Both have a flat horizon. A curated site
+// is neither, and has real terrain.
 export type SiteRow = {
   site: Site;
+  isReference: boolean;
   isCustom: boolean;
   days: DaySummary[];
 };
 
 // The hourly arrays of a site. A curated site has the full file from
-// sites/<id>.json. A custom site only has elevations and visible flags:
-// no azimuths and no terrain horizon.
+// sites/<id>.json. A reference or custom site has the same arrays worked out
+// in the browser, but no terrain horizon.
 export type Hourly = SiteHourly | CustomHourly;
 
 // A point picked by clicking the map, before it is added as a custom site.

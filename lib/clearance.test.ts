@@ -74,7 +74,9 @@ test("clearanceSeries on real Shackleton ridge numbers, worked by hand", () => {
 test("clearanceSeries for a custom point uses a flat horizon", () => {
   const hourly: CustomHourly = {
     sun_elev_deg: [1, -1],
+    sun_az_deg: [90, 91],
     earth_elev_deg: [2, -2],
+    earth_az_deg: [10, 10],
     sun_visible: [1, 0],
     earth_visible: [1, 0],
   };

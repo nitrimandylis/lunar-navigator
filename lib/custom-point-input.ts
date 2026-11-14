@@ -1,8 +1,8 @@
 // Checks the latitude and longitude a user typed for a custom point.
 
-// The map covers the south polar region, so custom points must be inside it.
+// A custom point can be anywhere on the Moon.
 export const MIN_LAT = -90;
-export const MAX_LAT = -82;
+export const MAX_LAT = 90;
 
 // Longitude is east-positive. Both -180 to 180 and 0 to 360 are common, so
 // accept either.
@@ -46,7 +46,7 @@ export function validateCustomPoint(latText: string, lonText: string): CustomPoi
   }
 
   if (lat < MIN_LAT || lat > MAX_LAT) {
-    return { ok: false, message: "Latitude must be from -90 to -82." };
+    return { ok: false, message: "Latitude must be from -90 to 90." };
   }
   if (lon < MIN_LON || lon > MAX_LON) {
     return { ok: false, message: "Longitude must be from -180 to 360." };

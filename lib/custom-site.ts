@@ -1,5 +1,6 @@
-// Sun and Earth angles for a custom point on the Moon, worked out in the
-// browser from ephemeris.json. There is no terrain here: the horizon is flat.
+// Sun and Earth angles for a custom point or a reference landing site on the
+// Moon, worked out in the browser from ephemeris.json. There is no terrain
+// here: the horizon is flat.
 // The Sun and Earth are discs, and a body counts as visible when any part of
 // its disc is above 0 degrees, the same rule as sunrise and sunset. That is the
 // rule data/build.py uses for the curated sites.
@@ -32,7 +33,9 @@ export type SubPoints = {
 // The hourly arrays of a custom point. Same names as in sites/<id>.json.
 export type CustomHourly = {
   sun_elev_deg: number[];
+  sun_az_deg: number[];
   earth_elev_deg: number[];
+  earth_az_deg: number[];
   sun_visible: number[];
   earth_visible: number[];
 };
@@ -47,6 +50,38 @@ function toDegrees(radians: number): number {
 
 function roundTo3(value: number): number {
   return Math.round(value * 1000) / 1000;
+}
+
+function roundTo2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+// Azimuth of a body (the Sun or Earth), in degrees clockwise from north, 0 to
+// 360, seen from the point (latDeg, lonDeg) on the Moon.
+//
+// It is the compass direction in which you would set off to walk the shortest
+// way to the sub point, the place where the body is straight overhead (the
+// initial bearing of a great circle). The body's distance does not matter:
+// being closer moves a body up or down in the sky, not sideways.
+export function azimuthDeg(
+  latDeg: number,
+  lonDeg: number,
+  subLatDeg: number,
+  subLonDeg: number,
+): number {
+  const lat = toRadians(latDeg);
+  const subLat = toRadians(subLatDeg);
+  const lonDifference = toRadians(subLonDeg - lonDeg);
+
+  // How far the sub point is to the east, and how far to the north.
+  const east = Math.sin(lonDifference) * Math.cos(subLat);
+  const north =
+    Math.cos(lat) * Math.sin(subLat) -
+    Math.sin(lat) * Math.cos(subLat) * Math.cos(lonDifference);
+
+  // atan2 gives -180 to 180. Adding 360 and taking the remainder gives 0 to 360.
+  const azimuth = toDegrees(Math.atan2(east, north));
+  return (azimuth + 360) % 360;
 }
 
 // Elevation of a body (the Sun or Earth) above a flat horizon, in degrees,
@@ -86,7 +121,7 @@ export function elevationDeg(
   return toDegrees(Math.atan2(heightKm, acrossKm));
 }
 
-// Sun and Earth elevation for every hour in the ephemeris, at one custom
+// Sun and Earth elevation and azimuth for every hour in the ephemeris, at one
 // point, plus 1 or 0 visible flags. The elevations are of each disc's centre.
 // A flag is 1 when the top edge of the disc is above the flat horizon.
 export function customSiteHourly(
@@ -96,7 +131,9 @@ export function customSiteHourly(
 ): CustomHourly {
   const hourly: CustomHourly = {
     sun_elev_deg: [],
+    sun_az_deg: [],
     earth_elev_deg: [],
+    earth_az_deg: [],
     sun_visible: [],
     earth_visible: [],
   };
@@ -124,8 +161,23 @@ export function customSiteHourly(
     const sunTopEdge = sunElevation + SUN_RADIUS_DEG;
     const earthTopEdge = earthElevation + earthRadiusDeg;
 
+    const sunAzimuth = azimuthDeg(
+      latDeg,
+      lonDeg,
+      subPoints.sub_solar_lat_deg[i],
+      subPoints.sub_solar_lon_deg[i],
+    );
+    const earthAzimuth = azimuthDeg(
+      latDeg,
+      lonDeg,
+      subPoints.sub_earth_lat_deg[i],
+      subPoints.sub_earth_lon_deg[i],
+    );
+
     hourly.sun_elev_deg.push(roundTo3(sunElevation));
+    hourly.sun_az_deg.push(roundTo2(sunAzimuth));
     hourly.earth_elev_deg.push(roundTo3(earthElevation));
+    hourly.earth_az_deg.push(roundTo2(earthAzimuth));
     hourly.sun_visible.push(sunTopEdge > 0 ? 1 : 0);
     hourly.earth_visible.push(earthTopEdge > 0 ? 1 : 0);
   }

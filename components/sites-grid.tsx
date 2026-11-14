@@ -165,7 +165,9 @@ export function SitesGrid({
         </span>
       </div>
 
-      <ul className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto">
+      {/* On a short screen the rows scroll inside the panel. The thin scrollbar
+          is always drawn, so it is clear there are more rows below. */}
+      <ul className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]">
         {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
@@ -186,23 +188,31 @@ export function SitesGrid({
           const hourly = hourlyBySite[site.id];
           const hourlyFailed = failedHourlyIds.includes(site.id);
 
-          // Custom rows sit below every curated row, under one divider.
-          const isFirstCustom = row.isCustom && (rowIndex === 0 || !rows[rowIndex - 1].isCustom);
+          // Reference rows sit below every curated row, and custom rows below
+          // those. The first row of each group carries the group's divider.
+          let dividerText: string | null = null;
+          const previousRow = rowIndex > 0 ? rows[rowIndex - 1] : null;
+          if (row.isReference && (previousRow === null || !previousRow.isReference)) {
+            dividerText = "Past landings elsewhere on the Moon: smooth horizon, no terrain";
+          }
+          if (row.isCustom && (previousRow === null || !previousRow.isCustom)) {
+            dividerText = "Custom points: no terrain";
+          }
 
           return (
             <li
               key={site.id}
               className={cn(
                 ROW_COLUMNS,
-                // Rows share the height. The first custom row also holds the
-                // divider, so it takes its own full height instead.
-                isFirstCustom ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
+                // Rows share the height. A row that holds a divider takes its
+                // own full height instead.
+                dividerText !== null ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
               )}
             >
-              {/* The divider spans all three columns, above the first custom row. */}
-              {isFirstCustom && (
+              {/* The divider spans all three columns, above the first row of its group. */}
+              {dividerText !== null && (
                 <div className="col-span-3 mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
-                  Custom points: no terrain
+                  {dividerText}
                 </div>
               )}
               {/* Name, with its tags on the same line. A long name is cut

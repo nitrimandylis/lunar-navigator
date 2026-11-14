@@ -121,20 +121,16 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
     return null;
   }
 
-  // A custom point has no terrain and no azimuths, so there is nothing to draw.
-  if (!("horizon" in hourly)) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No sky view for a custom point: it has no terrain horizon.
-      </p>
-    );
+  // A reference or custom site has no terrain: its horizon is flat, 0 degrees
+  // all the way round. One value with a step of 360 degrees says exactly that.
+  let terrainElevDeg = [0];
+  let terrainStepDeg = 360;
+  if ("horizon" in hourly) {
+    terrainElevDeg = hourly.horizon.elev_deg;
+    terrainStepDeg = hourly.horizon.az_step_deg;
   }
 
-  const range = skyYRange(
-    hourly.horizon.elev_deg,
-    hourly.sun_elev_deg,
-    hourly.earth_elev_deg,
-  );
+  const range = skyYRange(terrainElevDeg, hourly.sun_elev_deg, hourly.earth_elev_deg);
   const ticks = yTicks(range);
 
   // Turns an elevation into a y position: range.max at the top.
@@ -147,7 +143,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
   // The terrain line, and the same line closed along the bottom: the ground.
   const terrainLine = skyLinePath(
-    terrainPoints(hourly.horizon.elev_deg, hourly.horizon.az_step_deg),
+    terrainPoints(terrainElevDeg, terrainStepDeg),
     xFor,
     yFor,
   );
@@ -172,13 +168,13 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
     " degrees, elevation " +
     sunElev.toFixed(1) +
     " degrees, " +
-    (sunIsVisible ? "in view" : "hidden by terrain") +
+    (sunIsVisible ? "in view" : "below the horizon") +
     ". Earth at azimuth " +
     earthAz.toFixed(0) +
     " degrees, elevation " +
     earthElev.toFixed(1) +
     " degrees, " +
-    (earthIsVisible ? "in view" : "hidden by terrain") +
+    (earthIsVisible ? "in view" : "below the horizon") +
     ".";
 
   return (
