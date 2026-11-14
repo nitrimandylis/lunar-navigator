@@ -5,7 +5,7 @@ The app never calls Python at runtime.
 
 ## What it makes
 
-For the 18 sites in `sites.json`, near the Moon's south pole, for every hour of 2027:
+For the 19 sites in `sites.json`, near the Moon's south pole, for every hour of 2027:
 
 - where the Sun and Earth are in the sky (azimuth and elevation),
 - the terrain horizon around the site, seen from 2 m above the ground (so we know when a hill hides them),
@@ -121,7 +121,7 @@ tests/                          pytest checks, including test_public_data.py and
   page (https://lroc.im-ldi.com/images/1401). The Artemis III points are the region centres on the
   third-party Lunar Resources Registry map (https://lunarresourcesregistry.com/south-pole-map/),
   not a NASA file, and a region centre is not a landing spot. Their `elevation_m` is read from the
-  terrain file.
+  terrain file. `artemis3-haworth-computed` (`"Artemis III candidate"`) is a computed point: the best Sun-plus-Earth spot found by `rim_search.py` in a 15 km x 15 km box around the Haworth centre (0 h of Sun, Earth 28.1%).
 - **`connecting-ridge`**: the best-lit point we found by scanning within about 6 km of the
   registry centre of the Connecting Ridge. `tests/test_known_answer.py` checks its sunlit share
   for 2027 against Glaser et al. 2014 (92.27 percent at 2 m, over 19 years), with a loose
