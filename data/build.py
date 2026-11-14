@@ -60,7 +60,7 @@ def daily_summary(
     sun_visible: np.ndarray,
     earth_visible: np.ndarray,
 ) -> list[dict]:
-    """Per UTC day: hours of Sun, hours of Earth, highest Sun, longest Sun gap touching that day.
+    """Per UTC day: hours of Sun, hours of Earth, hours of both, highest Sun, longest Sun gap touching that day.
 
     The gap is the whole dark spell, not just the part inside the day, so it can be longer than
     24 hours. Spells are measured inside the data, so one that touches the first or last hour is
@@ -77,6 +77,7 @@ def daily_summary(
                 "date": (start + timedelta(days=d)).strftime("%Y-%m-%d"),
                 "sun_hours": round(float(sun_visible[s].sum()) * hours, 2),
                 "earth_hours": round(float(earth_visible[s].sum()) * hours, 2),
+                "both_hours": round(float((sun_visible[s].astype(bool) & earth_visible[s].astype(bool)).sum()) * hours, 2),
                 "max_sun_elev_deg": round(float(sun_elev[s].max()), 3),
                 "longest_sun_gap_hours": round(float(dark[s].max()) * hours, 2),
             }

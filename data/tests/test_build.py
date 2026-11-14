@@ -61,6 +61,20 @@ def test_daily_summary():
     assert days[1]["longest_sun_gap_hours"] == 36.0
 
 
+def test_daily_summary_both_hours():
+    # Day 1: Sun hours 0-11, Earth hours 6-17, so both for hours 6-11 (6 h). Day 2: Earth only.
+    sun_vis = np.zeros(48, dtype=int)
+    sun_vis[0:12] = 1
+    earth_vis = np.zeros(48, dtype=int)
+    earth_vis[6:18] = 1
+    earth_vis[24:30] = 1
+    days = build.daily_summary(START, 60, np.zeros(48), sun_vis, earth_vis)
+    assert days[0]["both_hours"] == 6.0
+    assert days[1]["both_hours"] == 0.0
+    for d in days:
+        assert d["both_hours"] <= min(d["sun_hours"], d["earth_hours"])
+
+
 def test_sun_gap_across_midnight_counts_in_full():
     # Sun for hours 0-5, dark for hours 6-29 (24 h, crossing midnight), Sun again 30-47.
     sun_vis = np.ones(48, dtype=bool)

@@ -102,5 +102,41 @@
     "lon": -162.5642,
     "elevation_m": -272,
     "source": "Dark member of a lit/dark pair about 2500 m apart, found by data/rim_search.py pair (centre at Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek); Sun and Earth hours are for 2027."
+  },
+  {
+    "id": "im2-mons-mouton",
+    "name": "IM-2 landing site, Mons Mouton",
+    "mission": "IM-2",
+    "lat": -84.78,
+    "lon": 29.13,
+    "elevation_m": 5312,
+    "source": "Intuitive Machines IM-2 intended landing site, as published by the LROC team (Robinson, 26 Feb 2025, https://lroc.im-ldi.com/images/1401): 84.78 S, 29.13 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
+  },
+  {
+    "id": "artemis3-haworth",
+    "name": "Artemis III candidate region: Haworth",
+    "mission": "Artemis III candidate",
+    "lat": -87.45,
+    "lon": -5.0,
+    "elevation_m": -3318,
+    "source": "Centre point of the NASA Artemis III candidate region Haworth, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 87.45 S, 5.0 W. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
+  },
+  {
+    "id": "artemis3-malapert-massif",
+    "name": "Artemis III candidate region: Malapert Massif",
+    "mission": "Artemis III candidate",
+    "lat": -86.0,
+    "lon": 2.7,
+    "elevation_m": 5142,
+    "source": "Centre point of the NASA Artemis III candidate region Malapert Massif, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 86.0 S, 2.7 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
+  },
+  {
+    "id": "artemis3-nobile-rim-1",
+    "name": "Artemis III candidate region: Nobile Rim 1",
+    "mission": "Artemis III candidate",
+    "lat": -85.3,
+    "lon": 31.5,
+    "elevation_m": 6145,
+    "source": "Centre point of the NASA Artemis III candidate region Nobile Rim 1, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 85.3 S, 31.5 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
   }
 ]
