@@ -1,21 +1,21 @@
 {
-  "note": "Scan results from data/rim_search.py with a 2 m observer, hours for 2027 with the 150 km horizon (point-Sun score). Where a site in data/sites.json was swapped, its hours in the app come from build.py (disc rule), so they differ a little. shackleton_pair and sverdrup_pair are the earlier pairs and were not re-scanned here (the Sverdrup pair in sites.json was kept).",
+  "note": "Scan results from data/rim_search.py with a 2 m observer, hours for 2027 with the 150 km horizon (point-Sun score). Where a site in data/sites.json was swapped, its hours in the app come from build.py (disc rule), so they differ a little. shackleton_pair is the pair committed in data/sites.json (shackleton-ridge and shackleton-shadow), scored with rim_search.score_point on the 5 m DEM; sverdrup_pair is the earlier pair and was not re-scanned here (the Sverdrup pair in sites.json was kept).",
   "shackleton_pair": {
     "lit": {
-      "lat": -89.3277,
-      "lon": 116.8355,
-      "sun_hours": 4769.0,
-      "earth_hours": 4094.0,
-      "both_hours": 2236.0
+      "lat": -89.43865,
+      "lon": 222.50011,
+      "sun_hours": 7661.0,
+      "earth_hours": 5426.0,
+      "both_hours": 4457.0
     },
     "dark": {
-      "lat": -89.4283,
-      "lon": 122.0651,
+      "lat": -89.36899,
+      "lon": 223.4118,
       "sun_hours": 0.0,
       "earth_hours": 0.0,
       "both_hours": 0.0
     },
-    "separation_m": 3500
+    "separation_m": 2132
   },
   "crater_candidates": [
     {
