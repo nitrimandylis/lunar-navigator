@@ -61,6 +61,6 @@ def test_candidate_points_stay_inside_the_circle():
 
 
 def test_crater_table_is_usable():
-    assert len(rs.CRATERS) == 7
+    assert len(rs.CRATERS) == 11
     for name, (lat, lon, radius) in rs.CRATERS.items():
         assert -90 < lat < -83 and -180 <= lon <= 180 and 5_000 <= radius <= 100_000, name
