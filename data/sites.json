@@ -138,5 +138,13 @@
     "lon": 31.5,
     "elevation_m": 6145,
     "source": "Centre point of the NASA Artemis III candidate region Nobile Rim 1, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 85.3 S, 31.5 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027."
+  },
+  {
+    "id": "connecting-ridge",
+    "name": "Best-lit point on Connecting Ridge (computed)",
+    "lat": -89.4739,
+    "lon": -137.3158,
+    "elevation_m": 1950,
+    "source": "Best-lit point found by scanning within about 6 km of the registry centre of the Connecting Ridge between Shackleton and de Gerlache, -89.45, -136.0 (Lunar Resources Registry south pole map, https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's 2022 candidate regions), on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027. Kept as a plausibility check against Glaser et al. 2014 (Icarus 243, 78, https://elib.dlr.de/94242), who report this ridge about 92% sunlit at 2 m over 19 years; their exact point is unknown, so this is not a replication."
   }
 ]
