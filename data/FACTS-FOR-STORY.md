@@ -65,9 +65,9 @@ Hourly visibility is 1 or 0. Totals are sums of those hours (each hour counts fu
 
 ## 4. Missing values
 
-There are none, and there is no gap code. I checked all 19 hourly files: every array has 8760
+There are none, and there is no gap code. I checked all 18 hourly files: every array has 8760
 values, every horizon has 360 values, no value is null, and `sun_visible` and `earth_visible` hold only 0 and 1.
-The summary files have 365 days each, and their daily sums match the hourly files for all 19 sites.
+The summary files have 365 days each, and their daily sums match the hourly files for all 18 sites.
 Horizons returns every requested sample or the build stops with an error
 (`fetch_series` raises if the count differs). The build also stops if the terrain file has
 no-data cells near a site. So a 0 means "terrain or geometry hides it", never "no data".
@@ -98,7 +98,6 @@ Everything else is a point we computed by scanning the terrain, not a NASA site.
 | sverdrup-pair-shadow | Shadowed ground near Sverdrup | -88.8053 | -162.5642 | -272 | 262 | 3.0 | 0 | 0.0 | 0 | computed |
 | im2-mons-mouton | IM-2 landing site, Mons Mouton | -84.7800 | 29.1300 | 5312 | 3935 | 44.9 | 8078 | 92.2 | 3666 | mission (IM-2) |
 | artemis3-haworth | Haworth region centre | -87.4500 | -5.0000 | -3318 | 0 | 0.0 | 513 | 5.9 | 0 | mission (Artemis III region centre) |
-| artemis3-haworth-computed | Haworth region, best-lit spot (computed) | -87.6594 | -11.5725 | -3391 | 0 | 0.0 | 2462 | 28.1 | 0 | computed (Artemis III Haworth region box) |
 | artemis3-malapert-massif | Malapert Massif region | -86.0000 | 2.7000 | 5142 | 5085 | 58.0 | 6956 | 79.4 | 3867 | mission (Artemis III region centre) |
 | artemis3-nobile-rim-1 | Nobile Rim 1 region | -85.3000 | 31.5000 | 6145 | 3678 | 42.0 | 8760 | 100.0 | 3678 | mission (Artemis III region centre) |
 
@@ -120,7 +119,7 @@ Sources behind the coordinates:
 Things to say carefully:
 
 - The Artemis III Haworth centre gets 0 hours of Sun in 2027 in our data (a low floor, -3318 m). That is a statement about that centre point
-  (a permanently shadowed area), not about the Haworth region as a whole. The `haworth-candidate` point on the rim gets 76.2 percent. `artemis3-haworth-computed` is the best spot we found in a 15 km x 15 km box around that centre (about 10.6 km away, on the box edge); it also gets 0 hours of Sun (Earth 28.1 percent), so the Haworth basin floor has no sunlight at a 2 m observer height.
+  (a permanently shadowed area), not about the Haworth region as a whole. The `haworth-candidate` point on the rim gets 76.2 percent. A scan of the whole region around the centre (about 15 km x 15 km, 500 m grid, 2 m observer, 150 km horizon) found no point with any Sun in 2027, so this region has no sunlit spot at this observer height. The nearest lit Haworth point in our list is the computed `haworth-candidate`, outside the region (about 45 km from -87.45, -5.0, great-circle).
 - `shackleton-shadow` gets 0 Sun and 0 Earth hours for the whole year at the 2 m observer height.
 
 ## 6. One reproducible comparison: the Shackleton lit/dark pair
