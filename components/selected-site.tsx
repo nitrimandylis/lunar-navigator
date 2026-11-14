@@ -56,6 +56,9 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         <p className="font-mono tabular-nums text-muted-foreground">
           {formatHour(selectedHour)}
         </p>
+        {(row.isReference || row.isCustom) && (
+          <p className="text-xs text-muted-foreground">Smooth Moon, no terrain.</p>
+        )}
       </div>
 
       {hourly === null && !hourlyFailed && (
@@ -71,7 +74,9 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         // Sun and Earth side by side: height above the terrain, raw
         // elevation, and the countdown to the next change.
         <div className="grid grid-cols-2 gap-x-4">
-          <p className="col-span-2 text-muted-foreground">Above terrain</p>
+          <p className="col-span-2 text-muted-foreground">
+            {row.isReference || row.isCustom ? "Above the horizon" : "Above terrain"}
+          </p>
           <div>
             <p className="font-mono text-2xl leading-tight tabular-nums text-power">
               {sunClearance.toFixed(2)}°

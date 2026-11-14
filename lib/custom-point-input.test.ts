@@ -17,14 +17,14 @@ test("good values come back as numbers", () => {
 
 test("the exact edges are allowed", () => {
   assert.deepEqual(validateCustomPoint("-90", "-180"), { ok: true, lat: -90, lon: -180 });
-  assert.deepEqual(validateCustomPoint("-82", "360"), { ok: true, lat: -82, lon: 360 });
+  assert.deepEqual(validateCustomPoint("90", "360"), { ok: true, lat: 90, lon: 360 });
 });
 
 test("just outside each edge is rejected", () => {
-  const latMessage = "Latitude must be from -90 to -82.";
+  const latMessage = "Latitude must be from -90 to 90.";
   const lonMessage = "Longitude must be from -180 to 360.";
   assert.deepEqual(validateCustomPoint("-90.01", "0"), { ok: false, message: latMessage });
-  assert.deepEqual(validateCustomPoint("-81.99", "0"), { ok: false, message: latMessage });
+  assert.deepEqual(validateCustomPoint("90.01", "0"), { ok: false, message: latMessage });
   assert.deepEqual(validateCustomPoint("-85", "-180.01"), { ok: false, message: lonMessage });
   assert.deepEqual(validateCustomPoint("-85", "360.01"), { ok: false, message: lonMessage });
 });

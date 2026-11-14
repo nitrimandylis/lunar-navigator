@@ -107,7 +107,7 @@ export function CustomSiteForm({
 
       <p className="text-xs text-muted-foreground">
         Latitude <span className="font-mono tabular-nums">-90</span> to{" "}
-        <span className="font-mono tabular-nums">-82</span>. Longitude east,{" "}
+        <span className="font-mono tabular-nums">90</span>. Longitude east,{" "}
         <span className="font-mono tabular-nums">-180</span> to{" "}
         <span className="font-mono tabular-nums">360</span>.
       </p>

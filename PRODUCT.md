@@ -33,9 +33,14 @@ Built now:
 - South pole map out to -82, with ten crater outlines, site pins (mission targets ringed)
   and two near pairs (near Shackleton, 2.1 km apart, and near Sverdrup, 2.5 km apart, each a
   lit and a shadowed site). Click empty ground to pick a custom point.
-- Custom points: up to 3, latitude -90 to -82, with a flat horizon and no terrain. They are
-  listed apart from the curated sites, under their own divider, and never ranked against
-  them, because a flat horizon near the pole gives far too many Sun hours.
+- Past landings for comparison: Apollo 11, Blue Ghost 1 (CLPS), SLIM, Chandrayaan-3 and
+  Chang'e 6 (far side), with coordinates from the NASA NSSDCA table. They are worked out in
+  the browser on a smooth Moon with no terrain, listed under their own divider, and never
+  ranked against the polar sites.
+- Custom points: up to 3, anywhere on the Moon by typing (map clicks stay inside the polar
+  map), with a flat horizon and no terrain. They are listed apart from the curated sites,
+  under their own divider, and never ranked against them, because a flat horizon near the
+  pole gives far too many Sun hours.
 
 Still open:
 

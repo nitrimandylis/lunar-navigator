@@ -40,17 +40,17 @@ function ids(sites: { site: Site }[]): string[] {
 }
 
 test("buildRows keeps custom rows below curated rows, in the order added", () => {
-  const rows = buildRows(CURATED, CUSTOM, SUMMARIES, "power", 0);
+  const rows = buildRows(CURATED, [], CUSTOM, SUMMARIES, "power", 0);
   assert.deepEqual(ids(rows), ["ridge", "shadow", "custom-1", "custom-2"]);
 
   // Sorting by comms would put custom-2 first if it were mixed in. It is not.
-  const byComms = buildRows(CURATED, CUSTOM, SUMMARIES, "comms", 0);
+  const byComms = buildRows(CURATED, [], CUSTOM, SUMMARIES, "comms", 0);
   assert.deepEqual(ids(byComms), ["ridge", "shadow", "custom-1", "custom-2"]);
 });
 
 test("buildRows sorts the curated rows and marks which rows are custom", () => {
   const reversed = [CURATED[1], CURATED[0]];
-  const rows = buildRows(reversed, CUSTOM, SUMMARIES, "power", 0);
+  const rows = buildRows(reversed, [], CUSTOM, SUMMARIES, "power", 0);
   assert.deepEqual(ids(rows), ["ridge", "shadow", "custom-1", "custom-2"]);
   assert.deepEqual(
     rows.map((row) => row.isCustom),
@@ -59,6 +59,19 @@ test("buildRows sorts the curated rows and marks which rows are custom", () => {
 });
 
 test("buildRows gives a site with no summary an empty list of days", () => {
-  const rows = buildRows([makeSite("new", "New")], [], {}, "power", 0);
+  const rows = buildRows([makeSite("new", "New")], [], [], {}, "power", 0);
   assert.deepEqual(rows[0].days, []);
+});
+
+test("reference rows sit between the curated rows and the custom rows, unsorted", () => {
+  // Apollo 11 on a smooth Moon has far more Sun hours than the shadowed site,
+  // but it must not be ranked among the curated rows.
+  const reference = [makeSite("ref-apollo-11", "Apollo 11")];
+  const summaries = { ...SUMMARIES, "ref-apollo-11": oneDay(24, 24) };
+  const rows = buildRows(CURATED, reference, CUSTOM, summaries, "power", 0);
+  assert.deepEqual(ids(rows), ["ridge", "shadow", "ref-apollo-11", "custom-1", "custom-2"]);
+  assert.deepEqual(
+    rows.map((row) => row.isReference),
+    [false, false, true, false, false],
+  );
 });

@@ -14,6 +14,7 @@ function makeRow(
 ): SiteRow {
   return {
     site: { id: id, name: name, lat: -89, lon: 0, elevation_m: 0, source: "test" },
+    isReference: false,
     isCustom: false,
     days: [
       {

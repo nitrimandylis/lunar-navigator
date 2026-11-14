@@ -14,7 +14,7 @@ import { SitesGrid } from "@/components/sites-grid";
 import { SkyPanorama } from "@/components/sky-panorama";
 import { SortControl } from "@/components/sort-control";
 import { MapOverlay } from "@/components/map-overlay";
-import { SouthPoleMap } from "@/components/south-pole-map";
+import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import {
   MAX_CUSTOM_SITES,
@@ -30,6 +30,7 @@ import type {
   SiteHourly,
   SiteSummary,
 } from "@/lib/data";
+import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
 import type { SortKey } from "@/lib/sort";
 import { HOURS_IN_YEAR, YEAR, monthOfHour, moveHourToMonth, stepHour } from "@/lib/time";
@@ -78,6 +79,10 @@ export function Navigator() {
   const [failedHourlyIds, setFailedHourlyIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Real past landings elsewhere on the Moon. Empty until their Sun and Earth
+  // hours have been worked out from the ephemeris.
+  const [referenceSites, setReferenceSites] = useState<Site[]>([]);
 
   // Points the user added.
   const [customSites, setCustomSites] = useState<Site[]>([]);
@@ -135,14 +140,36 @@ export function Navigator() {
           loadedSummaries[file.id] = file.days;
         }
 
+        // The reference landings have no data files. Work out their hours
+        // from the ephemeris, the same way as a custom point.
+        const ephemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        const referenceHourly: Record<string, Hourly> = {};
+        for (const site of REFERENCE_SITES) {
+          const hourly = customSiteHourly(site.lat, site.lon, ephemeris);
+          referenceHourly[site.id] = hourly;
+          loadedSummaries[site.id] = summarizeDays(
+            ephemeris.start_utc,
+            hourly.sun_elev_deg,
+            hourly.sun_visible,
+            hourly.earth_visible,
+          );
+        }
+
         if (wasCancelled) {
           return;
         }
+        ephemerisCache.current = ephemeris;
+        for (const site of REFERENCE_SITES) {
+          // Their hourly data is already here, so it never needs to be fetched.
+          requestedHourlyIds.current.add(site.id);
+        }
         setSites(loadedSites);
+        setReferenceSites(REFERENCE_SITES);
         setSummaries(loadedSummaries);
+        setHourlyBySite((previous) => ({ ...previous, ...referenceHourly }));
 
         // Start with the top row selected.
-        const firstRows = buildRows(loadedSites, [], loadedSummaries, "power", 0);
+        const firstRows = buildRows(loadedSites, [], [], loadedSummaries, "power", 0);
         if (firstRows.length > 0) {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
@@ -258,7 +285,7 @@ export function Navigator() {
         lat: lat,
         lon: lon,
         elevation_m: 0,
-        source: "Entered by the user. Flat horizon, no terrain.",
+        source: "Entered by the user. Smooth Moon, no terrain.",
       };
 
       setCustomSites((previous) => [...previous, site]);
@@ -291,7 +318,14 @@ export function Navigator() {
     // If the removed site was selected, select the top row on screen instead.
     if (selectedSiteId === siteId) {
       const remainingCustomSites = customSites.filter((site) => site.id !== siteId);
-      const remainingRows = buildRows(sites, remainingCustomSites, summaries, sortKey, visibleMonth);
+      const remainingRows = buildRows(
+        sites,
+        referenceSites,
+        remainingCustomSites,
+        summaries,
+        sortKey,
+        visibleMonth,
+      );
       if (remainingRows.length > 0) {
         selectSite(remainingRows[0].site.id);
       } else {
@@ -300,7 +334,9 @@ export function Navigator() {
     }
   }
 
-  const rows = buildRows(sites, customSites, summaries, sortKey, visibleMonth);
+  const rows = buildRows(sites, referenceSites, customSites, summaries, sortKey, visibleMonth);
+  // The map only reaches EDGE_LAT, so sites further north are left off it.
+  const mapRows = rows.filter((row) => row.site.lat <= EDGE_LAT);
 
   let selectedRow: SiteRow | null = null;
   for (const row of rows) {
@@ -419,7 +455,7 @@ export function Navigator() {
                 the big map, where points are picked. */}
             <div className="relative min-h-0 flex-1 cursor-zoom-in">
               <SouthPoleMap
-                rows={rows}
+                rows={mapRows}
                 selectedSiteId={selectedSiteId}
                 pickedPoint={pickedPoint}
                 onSelectSite={selectSite}
@@ -449,7 +485,7 @@ export function Navigator() {
 
       {isMapOpen && (
         <MapOverlay
-          rows={rows}
+          rows={mapRows}
           selectedSiteId={selectedSiteId}
           pickedPoint={pickedPoint}
           isCustomFull={customSites.length >= MAX_CUSTOM_SITES}
