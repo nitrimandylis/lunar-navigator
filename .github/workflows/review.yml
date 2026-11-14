@@ -1,0 +1,126 @@
+name: review
+
+# Every PR: deterministic check, then claude -p reviews the diff.
+# PASS -> squash-merge. FAIL -> comment. Either way, one Discord message.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+# A new push cancels the review of the old push.
+concurrency:
+  group: review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Skip drafts and forks. Forks do not get the secrets, and must never auto-merge.
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Deterministic check
+        id: check
+        run: |
+          if bash .github/check.sh > check.log 2>&1; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+          cat check.log
+
+      - name: Install Claude Code
+        if: steps.check.outputs.ok == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Claude review
+        if: steps.check.outputs.ok == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          BASE: ${{ github.base_ref }}
+          TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          # ponytail: reviews only the first 200 KB of a diff, split huge PRs if that bites
+          git diff "origin/$BASE...HEAD" | head -c 200000 > pr.diff
+          {
+            cat .github/review-prompt.md
+            echo
+            echo "PR title: $TITLE"
+            echo "PR author (GitHub login): $AUTHOR"
+            echo
+            echo '```diff'
+            cat pr.diff
+            echo '```'
+          } | claude -p --model opus > review.md
+
+      # !cancelled(), not always(): a cancelled run must not post a fake failure.
+      - name: Decide
+        id: decide
+        if: ${{ !cancelled() }}
+        env:
+          CHECK_OK: ${{ steps.check.outputs.ok }}
+        run: |
+          if [ "$CHECK_OK" != "true" ]; then
+            {
+              echo "The check failed. Last 30 lines:"
+              echo '```'
+              tail -n 30 check.log
+              echo '```'
+            } > review.md
+            echo "verdict=FAIL" >> "$GITHUB_OUTPUT"
+          elif [ ! -s review.md ]; then
+            echo "The review step errored. Check the Actions log." > review.md
+            echo "verdict=FAIL" >> "$GITHUB_OUTPUT"
+          else
+            # The last VERDICT line wins, in case the review quotes one earlier.
+            last=$(grep -E '^VERDICT: (PASS|FAIL)$' review.md | tail -n 1)
+            if [ "$last" = "VERDICT: PASS" ]; then
+              echo "verdict=PASS" >> "$GITHUB_OUTPUT"
+            else
+              echo "verdict=FAIL" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Comment, merge, notify
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PR: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          VERDICT: ${{ steps.decide.outputs.verdict }}
+        run: |
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file review.md
+
+          if [ "$VERDICT" = "PASS" ]; then
+            if gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --delete-branch; then
+              bash .github/notify.sh "✅ #$PR merged: $TITLE" "" "CI"
+              # A merge made with GITHUB_TOKEN does not fire "push" workflows,
+              # so start the check on main by hand.
+              gh workflow run main-check.yml --repo "$GITHUB_REPOSITORY" --ref main
+            else
+              bash .github/notify.sh "⚠️ #$PR passed review but did not merge (conflict?) $PR_URL" "$AUTHOR" "CI"
+            fi
+          else
+            reason=$(grep -v '^VERDICT:' review.md | head -c 1200)
+            bash .github/notify.sh "❌ #$PR needs fixes: $TITLE
+          $reason
+          $PR_URL" "$AUTHOR" "CI"
+          fi

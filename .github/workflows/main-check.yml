@@ -1,0 +1,41 @@
+name: main-check
+
+# Two PRs can each pass and still break main together. This catches that.
+# No Claude here: the same deterministic check, nothing else.
+# review.yml starts this by hand after each merge (workflow_dispatch),
+# because merges made with GITHUB_TOKEN do not fire "push".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check, alarm if broken
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          if bash .github/check.sh > check.log 2>&1; then
+            cat check.log
+            exit 0
+          fi
+          cat check.log
+          subject=$(git log -1 --format=%s)
+          details=$(tail -n 10 check.log | head -c 1000)
+          bash .github/notify.sh "🔥 main is broken after: $subject
+          $details" "trim" "CI"
+          exit 1

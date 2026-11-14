@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# team tooling
+__pycache__/
+.venv/
+check.log
+review.md
+pr.diff

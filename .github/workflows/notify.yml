@@ -1,0 +1,36 @@
+name: notify
+
+# Agents ping people through this, so the webhook URL never leaves GitHub:
+#   gh workflow run notify.yml -f to=gio -f message="need date from fetchSites()"
+
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: "Who to ping: trim, gio or koum"
+        required: true
+        type: string
+      message:
+        description: "What you need or what is ready"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TO: ${{ inputs.to }}
+          MESSAGE: ${{ inputs.message }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          # Show the team name when we know it, the GitHub login otherwise.
+          sender=$(jq -r --arg a "$ACTOR" '[.[] | select(.github == $a) | .name][0] // $a' .github/team.json)
+          bash .github/notify.sh "🤖 $MESSAGE" "$TO" "$sender's agent"
