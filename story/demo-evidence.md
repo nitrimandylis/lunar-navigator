@@ -9,7 +9,7 @@
 1. Turn the pitch outline into slides using actual screenshots when available.
 2. Run the demonstration as a first-time user and report confusing labels or missing units.
 3. Record one reproducible comparison, including dates and source data.
-4. Rehearse and record the approved video script.
+4. Assemble and review the approved slide deck, with no more than seven slides total.
 5. Keep the source and asset credits complete.
 6. Check the final project page and links from a signed-out browser.
 
@@ -53,7 +53,7 @@ These are planned checks, not completed test results.
 - [ ] Exact official challenge URL and resource requirements.
 - [ ] Athens pitch duration, Q&A format and local judging instructions.
 - [ ] Global submission deadline and time zone.
-- [ ] Video duration, format, hosting and access requirements.
+- [ ] Slide deck has at most seven slides total, readable visuals and a public link accessible without signing in.
 - [ ] Required project description, repository and deployed-app links.
 - [ ] Rules on prior work, third-party material and AI disclosure.
 - [ ] Sources, asset licences and attribution.

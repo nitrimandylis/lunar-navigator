@@ -71,4 +71,4 @@ Close:
 
 Use about 25 seconds each for slides 1–3, about 65 seconds for the demonstration, and 30 seconds for limitations and closing. This leaves roughly 10 seconds of margin in a three-minute rehearsal.
 
-Confirm the actual Athens pitch limit with the organisers before adapting this timing. The video and local pitch may have different rules.
+These timings belong to an earlier rehearsal draft. Our current submission plan is an English deck of up to seven slides, as described in [deck-reference.md](deck-reference.md); no video or separate local pitch is planned.

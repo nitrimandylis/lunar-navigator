@@ -25,17 +25,16 @@ Current NASA guidance takes priority. Each guide distinguishes requirements, rec
 
 ## Current presentation decision
 
-Use an English slide demo of **up to seven slides total**, including title and closing material. No separate Athens live-pitch format is being planned on Nick's instructions. The full project submission is a major evaluation component and must be prepared alongside the deck. No additional official video is required for this chosen format.
+Use an English slide demo of **up to seven slides total**, including title and closing material. We are not preparing a video or a separate Athens live pitch. The full project submission is a major evaluation component and must be prepared alongside the deck.
 
 ## Existing drafts: preserve, but do not submit unchanged
 
 | Older document | Status |
 | --- | --- |
 | [pitch.md](pitch.md) | Earlier five-slide/rehearsal draft; includes local-pitch timing notes that do not define our current submission |
-| [video-script.md](video-script.md) | Earlier approximately 60-second rehearsal draft; **not eligible as the official 30-second demo** and not our chosen format |
 | [demo-evidence.md](demo-evidence.md) | Useful evidence prompts, but its old app-state snapshot and unresolved-rule checklist are historical; use the new guides for current rules |
 
-These files were preserved without modification in this reference task. Their descriptions of the starter app reflect earlier inspection, not a fresh review. Adapt drafts only after actual screenshots, sources and outputs are confirmed.
+These drafts' descriptions of the starter app reflect earlier inspection, not a fresh review. Adapt drafts only after actual screenshots, sources and outputs are confirmed.
 
 ## What Nick can do now
 
