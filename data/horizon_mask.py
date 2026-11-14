@@ -88,7 +88,13 @@ def horizon_profile(
     return Horizon(azimuths, elev, reach)
 
 
+def visible_mask(horizon: Horizon, az_deg: np.ndarray, elev_deg: np.ndarray) -> np.ndarray:
+    """For many bodies at once: True where (az, elev) is above the terrain horizon."""
+    step = horizon.az_deg[1] - horizon.az_deg[0]
+    index = np.round(np.asarray(az_deg) / step).astype(int) % len(horizon.az_deg)
+    return np.asarray(elev_deg) > horizon.elev_deg[index]
+
+
 def is_visible(horizon: Horizon, az_deg: float, elev_deg: float) -> bool:
     """True if a body at (az, elev) is above the terrain horizon there."""
-    index = int(round(az_deg / (horizon.az_deg[1] - horizon.az_deg[0]))) % len(horizon.az_deg)
-    return elev_deg > horizon.elev_deg[index]
+    return bool(visible_mask(horizon, np.array([az_deg]), np.array([elev_deg]))[0])
