@@ -1,4 +1,5 @@
 import type { Hourly, SiteRow } from "@/lib/app-types";
+import { countdownText } from "@/lib/clearance";
 import { formatHour } from "@/lib/time";
 
 export type SelectedSiteProps = {
@@ -10,8 +11,8 @@ export type SelectedSiteProps = {
   selectedHour: number;
 };
 
-// Numbers for the selected site and hour. Placeholder: name and time only.
-export function SelectedSite({ row, selectedHour }: SelectedSiteProps) {
+// Numbers for the selected site and hour.
+export function SelectedSite({ row, hourly, selectedHour }: SelectedSiteProps) {
   if (row === null) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -21,12 +22,55 @@ export function SelectedSite({ row, selectedHour }: SelectedSiteProps) {
     );
   }
 
+  const site = row.site;
+
   return (
-    <div className="text-sm">
-      <p className="text-bright">{row.site.name}</p>
-      <p className="font-mono tabular-nums text-muted-foreground">
-        {formatHour(selectedHour)}
-      </p>
+    <div className="flex flex-col gap-3 text-sm">
+      <div>
+        <p className="text-bright">{site.name}</p>
+        <p className="font-mono tabular-nums text-muted-foreground">
+          {site.lat.toFixed(4)}°, {site.lon.toFixed(4)}°
+        </p>
+        <p className="font-mono tabular-nums text-muted-foreground">
+          {formatHour(selectedHour)}
+        </p>
+      </div>
+
+      {hourly === null && (
+        <p className="text-muted-foreground">Loading hourly data.</p>
+      )}
+
+      {hourly !== null && (
+        <>
+          <div className="flex items-end gap-6">
+            <div>
+              <p className="text-muted-foreground">Sun elevation</p>
+              <p className="font-mono text-4xl tabular-nums text-power">
+                {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Earth elevation</p>
+              <p className="font-mono text-xl tabular-nums text-comms">
+                {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
+              </p>
+            </div>
+          </div>
+
+          <div className="font-mono tabular-nums text-foreground">
+            <p>
+              {countdownText(hourly.sun_visible, selectedHour, "Sunset", "Sunrise")}
+            </p>
+            <p>
+              {countdownText(hourly.earth_visible, selectedHour, "Earthset", "Earthrise")}
+            </p>
+          </div>
+
+          {row.isCustom && (
+            <p className="text-muted-foreground">Flat horizon, no terrain.</p>
+          )}
+        </>
+      )}
     </div>
   );
 }
