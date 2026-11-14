@@ -401,3 +401,29 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 - Team-confirmed datasets, functionality, validation and evidence.
 - Final public URLs and access, actual asset licences and team SI account.
 - Any later official guidance revision; record changes instead of silently overwriting the dated basis.
+
+## Project data handoff
+
+### F01
+
+**Facts for the story (slides, submission page).** Gio's agent, 14 November 2026. **Internal implementation evidence, not NASA rules or independent scientific validation.**
+
+- [Committed snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/c99fb3df081aca91e54ac95b57e66b12fdeac194/data/FACTS-FOR-STORY.md); [current file](https://github.com/nitrimandylis/lunar-navigator/blob/main/data/FACTS-FOR-STORY.md). Added through PR #41. Snapshot reviewed through GitHub's rendered document on 14 November 2026.
+- Locations: sections 1-3 positions/terrain/visibility method; section 4 internal consistency checks; sections 5-6 site provenance and Shackleton comparison; section 7 plausibility checks; section 8 limitations; section 9 credits; final section unverified items.
+- Supports the prepared 18-point, hourly 2027 dataset; reported Horizons and LOLA usage; the May/full-year comparison; definitions and limitations. The writing task did not rerun the build, query Horizons, inspect raw terrain files or validate the finished interface.
+- This later owner handoff supplies implementation evidence where the older T01-T03 and project-credit rows record usage as pending. It does not turn those earlier background references into independent verification or prove final interface behaviour.
+- Reported analytical sources: NASA/JPL Horizons (https://ssd.jpl.nasa.gov/horizons/ ; API https://ssd.jpl.nasa.gov/api/horizons.api) and LRO LOLA DEM v4 via NASA Moon Trek (https://trek.nasa.gov/moon/). Products: `LRO_LOLA_DEM_SPole875_5mp_v04.tif` and `LRO_LOLA_DEM_SPole75_30mp_v04.tif`. Exact product-access references and usage rights still need final confirmation.
+- Reported coordinate sources: LROC/Mark Robinson, 26 February 2025, IM-2 intended landing point (https://lroc.im-ldi.com/images/1401); Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/) for region centres/search starting area. These original pages were not independently rechecked in this drafting task. A region centre is not an official precise landing point or a model of an entire region.
+- Reported literature check: Glaser et al. (2014), *Icarus* 243, 78-90 (https://elib.dlr.de/94242). F01's author did not reread the paper. Treat the comparison as a reported plausibility check; its quoted literature values, point/disc convention and mismatched point/time span must be resolved before stronger claims. No replication or accuracy percentage is established.
+- Do not use the unrecorded "within about 70 m" terrain rerun as verified evidence. Retain the handoff's other gaps: UT/UTC treatment, source-based terrain-product assignment, original coordinate checks, rights and Gazetteer access-path reconciliation.
+- Preparation drafts based on this source are in `story/drafts/`. NASA N01-N02 remain the authority for judging and submission; F01 is the basis for this project's reported calculations and their limits.
+
+### F02
+
+**Project scope and feature-status clarification.** Nick / koum, 14 November 2026. **Internal team report and intended scope, not an independent interface test.**
+
+- Nick reports site selection and date changes as working, and describes exact-coordinate entry and clicking the lunar map to choose a location as available. The 3D Moon is removed from scope.
+- Side-by-side comparison is planned, not yet confirmed working. Simpler public/educator and more detailed professional interfaces are planned.
+- An AI feature to help identify locations and times is planned. In follow-up, Nick confirmed that the selection criteria are still being decided. Search coverage, model/provider, numerical method and verification are not established; do not claim a global best site or a validated optimiser.
+- This report does not confirm whether coordinate/map selection analyses the exact point or selects a prepared point, or whether the custom-point terrain treatment has changed since F01. Those are explicit questions for trim/gio.
+- The drafting task did not run the website or test these functions. Use this source to distinguish reported working features from intended work, then update the final submission against the completed project.
