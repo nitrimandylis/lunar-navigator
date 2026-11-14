@@ -75,6 +75,9 @@ Conventions:
 ]
 ```
 
+- `mission` is optional. Real mission targets carry it (`"IM-2"`, `"Artemis III candidate"`).
+  Computed candidates leave it out.
+
 ### `sites/<id>.json`: hourly series for one site
 
 ```json
@@ -106,6 +109,7 @@ Conventions:
       "date": "2027-01-01",
       "sun_hours": 18.0,
       "earth_hours": 9.0,
+      "both_hours": 7.0,
       "max_sun_elev_deg": 1.6,
       "longest_sun_gap_hours": 4.0
     }
@@ -113,7 +117,8 @@ Conventions:
 }
 ```
 
-365 days, each a UTC day. `longest_sun_gap_hours` is the whole dark spell that touches that
+365 days, each a UTC day. `both_hours` counts the hours with the Sun and Earth both visible.
+`longest_sun_gap_hours` is the whole dark spell that touches that
 day, not just the part inside it, so it can be more than 24. A spell that touches the first
 or last day of 2027 is cut there.
 
