@@ -9,7 +9,8 @@ For eight sites near the Moon's south pole, for every hour of 2027:
 
 - where the Sun and Earth are in the sky (azimuth and elevation),
 - the terrain horizon around the site (so we know when a hill hides them),
-- whether each one is visible (Sun = power, Earth = direct-to-Earth comms),
+- whether each one is visible (Sun = power, Earth = direct-to-Earth comms), counting any part of
+  its disc above the horizon,
 - per-day totals for the site-by-day grid.
 
 It also writes `ephemeris.json`, so the app can work out the Sun and Earth for any custom
@@ -120,9 +121,12 @@ Read `elevation_m` from the terrain file.
 
 ## Known simplifications
 
-- The Sun and Earth are treated as points (their centres). The Sun is about 0.5 degrees wide
-  and Earth about 1.9, so rise and set times are off by a few minutes.
-- `longest_sun_gap_hours` is counted inside each UTC day, so a gap across midnight is cut.
+- Sun and Earth are discs, not points. A body is visible when any part of its disc is above the
+  terrain horizon, the same rule as sunrise and sunset. Radii: Sun 695,700 km at 1 au (0.266
+  degrees; its size changes by under 2 percent over a year), Earth 6,378.137 km at the real
+  Earth-Moon distance for each hour (0.9 to 1.0 degrees). Both are the values JPL Horizons uses.
+- `longest_sun_gap_hours` is the whole dark spell that touches the day, so it can be more than 24.
+  A spell that touches the first or last hour of 2027 is cut there.
 - The Moon has no atmosphere, so there is no refraction.
 - Terrain is the LOLA data through September 2011. Nothing is modelled for the lander's height.
 - Custom points on the map get Sun and Earth from `ephemeris.json` but no terrain horizon.
