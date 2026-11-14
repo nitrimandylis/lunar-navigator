@@ -17,6 +17,7 @@ import { SortControl } from "@/components/sort-control";
 import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
+import { TourCard } from "@/components/tour-card";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -34,7 +35,16 @@ import type {
 import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
 import type { SortKey } from "@/lib/sort";
-import { HOURS_IN_YEAR, YEAR, monthOfHour, moveHourToMonth, stepHour } from "@/lib/time";
+import {
+  HOURS_IN_YEAR,
+  HOURS_PER_DAY,
+  YEAR,
+  firstDayOfMonth,
+  monthOfHour,
+  moveHourToMonth,
+  stepHour,
+} from "@/lib/time";
+import { TOUR_STEPS } from "@/lib/tour";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -55,18 +65,25 @@ const PLAY_STEP_MS = 80;
 function Panel({
   title,
   caption,
+  isHighlighted,
   className,
   children,
 }: {
   title: string;
   caption: string;
+  // True while the guided tour points at this panel.
+  isHighlighted: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <section
       aria-label={title}
-      className={cn("rounded-lg border border-line bg-panel px-4 py-3", className)}
+      className={cn(
+        "rounded-lg border border-line bg-panel px-4 py-3",
+        isHighlighted && "ring-2 ring-bright",
+        className,
+      )}
     >
       <div className="mb-1.5 flex items-baseline gap-3">
         <h2 className="shrink-0 text-sm font-medium text-bright">{title}</h2>
@@ -110,6 +127,8 @@ export function Navigator() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   // The About panel is open.
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  // The step of the guided tour on screen, or null when the tour is closed.
+  const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
 
   // Things to remember that should not redraw the page when they change.
   const requestedHourlyIds = useRef<Set<string>>(new Set());
@@ -267,6 +286,22 @@ export function Navigator() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Shows one step of the guided tour and puts the page in the state its text
+  // talks about: the site, the first hour of the month, and playing or not.
+  function showTourStep(index: number) {
+    const step = TOUR_STEPS[index];
+    setTourStepIndex(index);
+    setSortKey("power");
+    selectSite(step.siteId);
+    setSelectedHour(firstDayOfMonth(step.month) * HOURS_PER_DAY);
+    setIsPlaying(step.isPlaying);
+  }
+
+  function closeTour() {
+    setTourStepIndex(null);
+    setIsPlaying(false);
+  }
+
   // Works out a custom point's hourly data and per-day totals in the browser,
   // then adds it as a site. The form checks the numbers before calling this.
   async function addCustomSite(lat: number, lon: number) {
@@ -367,6 +402,12 @@ export function Navigator() {
   const selectedHourlyFailed =
     selectedSiteId !== null && failedHourlyIds.includes(selectedSiteId);
 
+  // The part of the page the guided tour points at, or null.
+  let tourTarget: string | null = null;
+  if (tourStepIndex !== null) {
+    tourTarget = TOUR_STEPS[tourStepIndex].target;
+  }
+
   return (
     <div className="flex h-dvh flex-col">
       <header className="flex items-center gap-6 border-b border-line px-4 py-2">
@@ -374,7 +415,12 @@ export function Navigator() {
           Lunar Landing Site Navigator
         </h1>
 
-        <div className="flex items-center gap-3">
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-lg",
+            tourTarget === "months" && "ring-2 ring-bright ring-offset-4 ring-offset-background",
+          )}
+        >
           <span className="font-mono text-sm tabular-nums text-muted-foreground">
             {YEAR}
           </span>
@@ -387,6 +433,13 @@ export function Navigator() {
 
         <div className="ml-auto flex items-center gap-4">
           <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
+          <button
+            type="button"
+            onClick={() => showTourStep(0)}
+            className="rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background"
+          >
+            Take the tour
+          </button>
           <button
             type="button"
             onClick={() => setIsAboutOpen(true)}
@@ -405,6 +458,7 @@ export function Navigator() {
           <Panel
             title="Sites"
             caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
+            isHighlighted={tourTarget === "sites"}
             className="flex min-h-0 flex-1 flex-col"
           >
             {isLoading && (
@@ -438,6 +492,7 @@ export function Navigator() {
           <Panel
             title="Selected site"
             caption="One place at one hour: where the Sun and Earth are, and how long they stay."
+            isHighlighted={tourTarget === "selected"}
           >
             {/* Numbers on the left, the sky and the charts on the right. */}
             <div className="grid grid-cols-[23rem_minmax(0,1fr)] gap-6">
@@ -482,6 +537,7 @@ export function Navigator() {
           <Panel
             title="South pole"
             caption="Seen from above. Earth is towards the top."
+            isHighlighted={false}
             className="flex min-h-0 flex-1 flex-col"
           >
             {/* The small map is a locator: pins select, anything else opens
@@ -505,7 +561,7 @@ export function Navigator() {
             </div>
           </Panel>
 
-          <Panel title="Custom point" caption="Try any place on the Moon.">
+          <Panel title="Custom point" caption="Try any place on the Moon." isHighlighted={false}>
             <CustomSiteForm
               pickedPoint={pickedPoint}
               customCount={customSites.length}
@@ -517,6 +573,17 @@ export function Navigator() {
       </main>
 
       {isAboutOpen && <AboutOverlay onClose={() => setIsAboutOpen(false)} />}
+
+      {tourStepIndex !== null && (
+        <TourCard
+          step={TOUR_STEPS[tourStepIndex]}
+          stepIndex={tourStepIndex}
+          stepCount={TOUR_STEPS.length}
+          onBack={() => showTourStep(tourStepIndex - 1)}
+          onNext={() => showTourStep(tourStepIndex + 1)}
+          onClose={closeTour}
+        />
+      )}
 
       {isMapOpen && (
         <MapOverlay

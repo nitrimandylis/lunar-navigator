@@ -84,6 +84,20 @@ export function SitesGrid({
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
+  // Keep the selected row in view. The list can scroll on a short screen, and
+  // a site picked on the map or by the tour may be below the fold.
+  const listRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    if (list === null) {
+      return;
+    }
+    const selectedRow = list.querySelector('[data-selected="true"]');
+    if (selectedRow !== null) {
+      selectedRow.scrollIntoView({ block: "nearest" });
+    }
+  }, [selectedSiteId]);
+
   // While a day is open, Escape closes it.
   useEffect(() => {
     if (!isDayOpen) {
@@ -167,7 +181,10 @@ export function SitesGrid({
 
       {/* On a short screen the rows scroll inside the panel. The thin scrollbar
           is always drawn, so it is clear there are more rows below. */}
-      <ul className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]">
+      <ul
+        ref={listRef}
+        className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]"
+      >
         {rows.map((row, rowIndex) => {
           const site = row.site;
           const isSelected = site.id === selectedSiteId;
@@ -202,6 +219,7 @@ export function SitesGrid({
           return (
             <li
               key={site.id}
+              data-selected={isSelected}
               className={cn(
                 ROW_COLUMNS,
                 // Rows share the height. A row that holds a divider takes its
