@@ -14,6 +14,7 @@ import {
   laneOpacity,
   pairLabel,
   pairPartnerId,
+  shortSiteName,
 } from "@/lib/grid";
 import { HOURS_PER_DAY, formatHour } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,10 @@ type Tooltip = {
 };
 
 // The three columns of every row: name, the day cells, the month totals.
-const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_5.5rem] items-center gap-x-3";
+const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_7.5rem] items-center gap-x-3";
+
+// The two month totals, Sun then Earth, in fixed columns so the numbers line up.
+const TOTAL_COLUMNS = "grid grid-cols-2 gap-x-2 text-right";
 
 // The two lanes inside one cell: power on top, comms below. Each lane's
 // opacity is its strength, drawn over the dark cell background.
@@ -148,13 +152,16 @@ export function SitesGrid({
           {monthDays.map((dayOfYear, index) => (
             <span
               key={dayOfYear}
-              className="text-center font-mono text-[10px] tabular-nums text-muted-foreground"
+              className="text-center font-mono text-[11px] tabular-nums text-muted-foreground"
             >
               {index + 1}
             </span>
           ))}
         </div>
-        <span className="text-right text-xs text-muted-foreground">Month hours</span>
+        <span className={cn(TOTAL_COLUMNS, "text-xs")}>
+          <span className="text-power">Sun h</span>
+          <span className="text-comms">Earth h</span>
+        </span>
       </div>
 
       <ul className="flex min-h-0 flex-1 flex-col gap-[3px] overflow-y-auto">
@@ -204,10 +211,15 @@ export function SitesGrid({
                     isPairPartner && "outline-1 outline-offset-2 outline-bright outline-dashed",
                   )}
                 >
-                  {site.name}
+                  {shortSiteName(site.name)}
                 </button>
-                {(pairText !== null || row.isCustom) && (
+                {(pairText !== null || row.isCustom || site.mission !== undefined) && (
                   <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
+                    {site.mission !== undefined && (
+                      <span className="rounded-sm bg-bright px-1.5 font-medium text-background">
+                        {site.mission}
+                      </span>
+                    )}
                     {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
                     {row.isCustom && (
                       <>
@@ -329,16 +341,14 @@ export function SitesGrid({
                 </div>
               )}
 
-              {/* Right: this month's totals. */}
-              <div className="flex items-center justify-end gap-2 font-mono text-xs leading-none tabular-nums">
-                <span className="flex items-center gap-1.5">
-                  <span aria-hidden="true" className="size-2 rounded-xs bg-power" />
-                  <span className="sr-only">Power hours this month: </span>
+              {/* Right: this month's totals, in hours. */}
+              <div className={cn(TOTAL_COLUMNS, "font-mono text-sm leading-none tabular-nums")}>
+                <span className="text-power">
+                  <span className="sr-only">Sun hours this month: </span>
                   {formatHours(monthTotals.sunHours)}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span aria-hidden="true" className="size-2 rounded-xs bg-comms" />
-                  <span className="sr-only">Comms hours this month: </span>
+                <span className="text-comms">
+                  <span className="sr-only">Earth hours this month: </span>
                   {formatHours(monthTotals.earthHours)}
                 </span>
               </div>

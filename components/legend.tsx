@@ -15,6 +15,12 @@ export function Legend() {
         <span aria-hidden="true" className="size-2.5 shrink-0 rounded-xs border border-line bg-neither" />
         Neither
       </span>
+      <span className="flex items-center gap-1.5">
+        <span aria-hidden="true" className="rounded-sm bg-bright px-1.5 text-[11px] font-medium text-background">
+          IM-2
+        </span>
+        Real mission target. Other sites are computed from LOLA terrain.
+      </span>
       <span className="text-muted-foreground">
         Stronger colour means more hours that day. All times are UTC.
       </span>

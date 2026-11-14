@@ -107,7 +107,7 @@ export function CustomSiteForm({
 
       <p className="text-xs text-muted-foreground">
         Latitude <span className="font-mono tabular-nums">-90</span> to{" "}
-        <span className="font-mono tabular-nums">-80</span>. Longitude east,{" "}
+        <span className="font-mono tabular-nums">-82</span>. Longitude east,{" "}
         <span className="font-mono tabular-nums">-180</span> to{" "}
         <span className="font-mono tabular-nums">360</span>.
       </p>
@@ -146,12 +146,8 @@ export function CustomSiteForm({
       )}
 
       <p className="text-xs text-muted-foreground">
-        Near the pole, terrain decides the light. A flat horizon gives about{" "}
-        <span className="font-mono tabular-nums">4,300</span> to{" "}
-        <span className="font-mono tabular-nums">4,450</span> Sun hours at every site we
-        tested, but the shadowed ground near Shackleton gets{" "}
-        <span className="font-mono tabular-nums">0</span> with real terrain. For
-        terrain-aware numbers, use the curated sites.
+        Flat horizon, no terrain: near the pole that gives far too many Sun hours.
+        For real numbers, use the curated sites.
       </p>
     </form>
   );

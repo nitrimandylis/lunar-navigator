@@ -1,5 +1,6 @@
 import type { Hourly, SiteRow } from "@/lib/app-types";
-import { countdownText } from "@/lib/clearance";
+import { clearanceSeries, countdownText } from "@/lib/clearance";
+import { shortSiteName } from "@/lib/grid";
 import { formatHour } from "@/lib/time";
 
 export type SelectedSiteProps = {
@@ -26,12 +27,28 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
 
   const site = row.site;
 
+  // How far the Sun and Earth sit above the terrain horizon this hour, the
+  // same number the clearance charts draw. Above 0 means in view.
+  let sunClearance = 0;
+  let earthClearance = 0;
+  if (hourly !== null) {
+    sunClearance = clearanceSeries(hourly, "sun", selectedHour, selectedHour + 1)[0];
+    earthClearance = clearanceSeries(hourly, "earth", selectedHour, selectedHour + 1)[0];
+  }
+
   return (
+    // The site, then the Sun and the Earth, each with its height above the
+    // terrain, raw elevation and countdown.
     <div className="flex flex-col gap-3 text-sm">
       <div>
         {/* A custom point is named by its numbers, which use the mono font. */}
         <p className={row.isCustom ? "font-mono tabular-nums text-bright" : "text-bright"}>
-          {site.name}
+          {shortSiteName(site.name)}
+          {site.mission !== undefined && (
+            <span className="ml-2 rounded-sm bg-bright px-1.5 align-middle text-[11px] font-medium text-background">
+              {site.mission}
+            </span>
+          )}
         </p>
         <p className="font-mono tabular-nums text-muted-foreground">
           {site.lat.toFixed(4)}°, {site.lon.toFixed(4)}°
@@ -39,6 +56,9 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         <p className="font-mono tabular-nums text-muted-foreground">
           {formatHour(selectedHour)}
         </p>
+        {row.isCustom && (
+          <p className="text-muted-foreground">Flat horizon, no terrain.</p>
+        )}
       </div>
 
       {hourly === null && !hourlyFailed && (
@@ -52,33 +72,30 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
 
       {hourly !== null && (
         <>
-          <div className="flex items-end gap-6">
-            <div>
-              <p className="text-muted-foreground">Sun elevation</p>
-              <p className="font-mono text-4xl tabular-nums text-power">
-                {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Earth elevation</p>
-              <p className="font-mono text-xl tabular-nums text-comms">
-                {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
-              </p>
-            </div>
-          </div>
-
-          <div className="font-mono tabular-nums text-foreground">
-            <p>
+          <div>
+            <p className="text-muted-foreground">Sun above terrain</p>
+            <p className="font-mono text-2xl leading-tight tabular-nums text-power">
+              {sunClearance.toFixed(2)}°
+            </p>
+            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+              elevation {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
+            </p>
+            <p className="font-mono tabular-nums text-foreground">
               {countdownText(hourly.sun_visible, selectedHour, "Sunset", "Sunrise")}
             </p>
-            <p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Earth above terrain</p>
+            <p className="font-mono text-2xl leading-tight tabular-nums text-comms">
+              {earthClearance.toFixed(2)}°
+            </p>
+            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+              elevation {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
+            </p>
+            <p className="font-mono tabular-nums text-foreground">
               {countdownText(hourly.earth_visible, selectedHour, "Earthset", "Earthrise")}
             </p>
           </div>
-
-          {row.isCustom && (
-            <p className="text-muted-foreground">Flat horizon, no terrain.</p>
-          )}
         </>
       )}
     </div>

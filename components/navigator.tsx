@@ -318,26 +318,29 @@ export function Navigator() {
             )}
           </Panel>
 
-          <Panel title="Clearance">
-            <ClearanceCharts
-              row={selectedRow}
-              hourly={selectedHourly}
-              hourlyFailed={selectedHourlyFailed}
-              visibleMonth={visibleMonth}
-              selectedHour={selectedHour}
-            />
+          {/* The selected site's numbers sit next to its charts: both are
+              about the same site and hour. */}
+          <Panel title="Selected site">
+            {/* Numbers on the left, the month's clearance charts on the right. */}
+            <div className="grid grid-cols-[15rem_minmax(0,1fr)] gap-6">
+              <SelectedSite
+                row={selectedRow}
+                hourly={selectedHourly}
+                hourlyFailed={selectedHourlyFailed}
+                selectedHour={selectedHour}
+              />
+              <ClearanceCharts
+                row={selectedRow}
+                hourly={selectedHourly}
+                hourlyFailed={selectedHourlyFailed}
+                visibleMonth={visibleMonth}
+                selectedHour={selectedHour}
+              />
+            </div>
           </Panel>
         </div>
 
         <div className="flex min-h-0 flex-col gap-3">
-          <Panel title="Selected site">
-            <SelectedSite
-              row={selectedRow}
-              hourly={selectedHourly}
-              hourlyFailed={selectedHourlyFailed}
-              selectedHour={selectedHour}
-            />
-          </Panel>
 
           <Panel title="South pole" className="flex min-h-0 flex-1 flex-col">
             <SouthPoleMap

@@ -4,20 +4,31 @@ import type { Site } from "./data.ts";
 import { distanceKm } from "./geometry.ts";
 import { DAYS_IN_MONTH, HOURS_PER_DAY, firstDayOfMonth, formatHour } from "./time.ts";
 
-// How strong a lane is drawn: the share of the available hours, from 0 to 1.
-// 12 hours out of 24 gives 0.5. Values outside 0 to 1 are cut to fit.
+// How strong a lane is drawn, from 0 to 1. No hours gives 0, so an empty lane
+// stays empty. Any hours at all give at least MIN_LANE_OPACITY, so one hour of
+// sunlight never fades into the dark cell. From there it rises in step with
+// the share of the hours: all of them gives 1. Values outside 0 to 1 are cut.
+export const MIN_LANE_OPACITY = 0.3;
+
 export function laneOpacity(hours: number, totalHours: number): number {
-  if (totalHours <= 0) {
+  if (totalHours <= 0 || hours <= 0) {
     return 0;
   }
-  const share = hours / totalHours;
-  if (share < 0) {
-    return 0;
-  }
+  let share = hours / totalHours;
   if (share > 1) {
-    return 1;
+    share = 1;
   }
-  return share;
+  return MIN_LANE_OPACITY + (1 - MIN_LANE_OPACITY) * share;
+}
+
+// A site name without the " (computed)" ending. The grid and the map mark
+// computed sites once, in the legend, instead of on every name.
+export function shortSiteName(name: string): string {
+  const ending = " (computed)";
+  if (name.endsWith(ending)) {
+    return name.slice(0, name.length - ending.length);
+  }
+  return name;
 }
 
 // The day-of-year numbers of every day in a month, in order.
