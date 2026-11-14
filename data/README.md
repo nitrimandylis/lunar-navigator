@@ -5,10 +5,10 @@ The app never calls Python at runtime.
 
 ## What it makes
 
-For eight sites near the Moon's south pole, for every hour of 2027:
+For the sites in `sites.json`, near the Moon's south pole, for every hour of 2027:
 
 - where the Sun and Earth are in the sky (azimuth and elevation),
-- the terrain horizon around the site (so we know when a hill hides them),
+- the terrain horizon around the site, seen from 2 m above the ground (so we know when a hill hides them),
 - whether each one is visible (Sun = power, Earth = direct-to-Earth comms), counting any part of
   its disc above the horizon,
 - per-day totals for the site-by-day grid.
@@ -66,7 +66,8 @@ data/.venv/Scripts/python data/build.py
 ```
 
 Useful options: `--only <site id>` builds one site, `--out <folder>` writes somewhere else,
-`--start 2027-01-01 --days 365 --step-minutes 60` change the time range. The app expects the
+`--start 2027-01-01 --days 365 --step-minutes 60` change the time range, and
+`--observer-height 2` (metres above the ground, the default) changes the viewer height. The app expects the
 defaults, so only change them to experiment. `--only` leaves `ephemeris.json` alone.
 
 Re-run `build.py` whenever `sites.json` or the horizon code changes, and commit the new files
@@ -90,6 +91,10 @@ sites.json ──► build.py ──► public/data/sites/<id>.json    hourly se
 - `terrain.py` looks at full detail out to 25 km, and at a thinned-out copy out to 150 km. A
   5 km mountain can be seen from about 130 km, and ignoring far peaks made the horizon too low
   by up to 8 degrees. The terrain files use a south polar stereographic map projection.
+- The viewer is 2 m above the ground (`terrain.DEFAULT_OBSERVER_HEIGHT_M`, option `--observer-height`),
+  because published polar illumination studies use 2 m (taken from summaries of those studies, not
+  checked against the papers). `rim_search.py` uses the same height, so scans and builds agree.
+  Standing on the ground (0 m) hides more of the Sun, so the heights are not interchangeable.
 - `build.py` uses the 5 m terrain where the whole 25 km search area fits inside it (very near
   the pole) and the 30 m terrain everywhere else.
 
@@ -128,5 +133,6 @@ Read `elevation_m` from the terrain file.
 - `longest_sun_gap_hours` is the whole dark spell that touches the day, so it can be more than 24.
   A spell that touches the first or last hour of 2027 is cut there.
 - The Moon has no atmosphere, so there is no refraction.
-- Terrain is the LOLA data through September 2011. Nothing is modelled for the lander's height.
+- Terrain is the LOLA data through September 2011. The viewer is a fixed 2 m above the ground (a stand-in for a lander's panel or antenna height); the
+  lander itself, and any height other than the one set by `--observer-height`, is not modelled.
 - Custom points on the map get Sun and Earth from `ephemeris.json` but no terrain horizon.

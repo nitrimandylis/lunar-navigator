@@ -5,6 +5,8 @@ points a few tens of km apart. So one Horizons series (from a reference site) is
 direction vectors once, and re-expressed as azimuth/elevation at every candidate point.
 Only the terrain horizon is computed per point.
 
+The viewer is 2 m above the ground (terrain.DEFAULT_OBSERVER_HEIGHT_M), the same as build.py.
+
 Scanning uses a quick 15 km horizon. Distant terrain can only block more sky, never less,
 so the best few points are then re-scored with the full 150 km horizon.
 
@@ -98,6 +100,7 @@ def score_point(x: float, y: float, far: bool = False, ctx: dict | None = None):
             lat,
             lon,
             max_range_m=FINAL_RANGE_M if far else SCAN_RANGE_M,
+            observer_height_m=terrain.DEFAULT_OBSERVER_HEIGHT_M,
             az_step_deg=1.0 if far else 2.0,
             far_dem_path=c["far_dem"] if far else None,
             far_range_m=FAR_RANGE_M,

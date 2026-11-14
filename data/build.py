@@ -5,6 +5,7 @@
 Shapes are described in the Contract section of AGENTS.md. Sun and Earth positions come from JPL
 Horizons (needs internet), horizons from the LOLA DEMs (LRO LOLA DEM v4 S Pole).
 A body counts as visible when any part of its disc is above the terrain horizon.
+The viewer is 2 m above the ground (terrain.DEFAULT_OBSERVER_HEIGHT_M, option --observer-height).
 """
 
 from __future__ import annotations
@@ -91,10 +92,17 @@ def build_site(
     step_minutes: int,
     earth_distance_km: np.ndarray,
     far_dem_path: str | None = None,
+    observer_height_m: float = terrain.DEFAULT_OBSERVER_HEIGHT_M,
 ) -> tuple[dict, dict]:
     count = days * 24 * 60 // step_minutes
     horizon: Horizon = terrain.site_horizon(
-        dem_path, site["lat"], site["lon"], max_range_m=MAX_RANGE_M, far_dem_path=far_dem_path, far_range_m=FAR_RANGE_M
+        dem_path,
+        site["lat"],
+        site["lon"],
+        max_range_m=MAX_RANGE_M,
+        observer_height_m=observer_height_m,
+        far_dem_path=far_dem_path,
+        far_range_m=FAR_RANGE_M,
     )
     sun = horizons.fetch_series(horizons.SUN, site["lon"], site["lat"], start, count, step_minutes)
     earth = horizons.fetch_series(horizons.EARTH, site["lon"], site["lat"], start, count, step_minutes)
@@ -142,6 +150,7 @@ def main() -> None:
     p.add_argument("--start", default="2027-01-01", help="UTC date, YYYY-MM-DD")
     p.add_argument("--days", type=int, default=365)
     p.add_argument("--step-minutes", type=int, default=60)
+    p.add_argument("--observer-height", type=float, default=terrain.DEFAULT_OBSERVER_HEIGHT_M, help="viewer height above the ground, metres")
     p.add_argument("--only", help="build just this site id")
     args = p.parse_args()
 
@@ -160,7 +169,14 @@ def main() -> None:
         dem = pick_dem(site["lat"], site["lon"], args.dem5, args.dem30)
         print(f"{site['id']}: {Path(dem).name}", flush=True)
         series, summary = build_site(
-            site, dem, start, args.days, args.step_minutes, earth_distance_km, far_dem_path=args.dem30
+            site,
+            dem,
+            start,
+            args.days,
+            args.step_minutes,
+            earth_distance_km,
+            far_dem_path=args.dem30,
+            observer_height_m=args.observer_height,
         )
         write_json(out / "sites" / f"{site['id']}.json", series)
         write_json(out / "summary" / f"{site['id']}.json", summary)
