@@ -79,3 +79,20 @@ def test_is_visible_compares_with_the_horizon():
     assert hm.is_visible(h, 90, 10.0)  # above the 5.7 degree wall
     assert not hm.is_visible(h, 90, 3.0)  # behind it
     assert hm.is_visible(h, 270, 0.5)  # clear sky to the west
+
+
+def test_min_range_ignores_nearer_terrain():
+    g = grid()
+    g[:, 250:260] = 100.0  # wall 500-600 m east
+    near_and_far = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500)
+    far_only = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500, min_range_m=1000)
+    assert az(near_and_far, 90) > 5.0
+    assert az(far_only, 90) < 0.0
+
+
+def test_site_height_override():
+    g = grid()
+    g[:, 300:] = 100.0
+    plain = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500)
+    standing_on_a_hill = hm.horizon_profile(g, 200, 200, PIXEL, max_range_m=1500, site_height_m=60.0)
+    assert az(standing_on_a_hill, 90) < az(plain, 90)
