@@ -8,6 +8,7 @@ atmosphere, so there is no refraction. Terrain is handled elsewhere.
 from __future__ import annotations
 
 import re
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
@@ -18,6 +19,9 @@ API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api"
 SUN = "10"
 EARTH = "399"
 MOON_CENTER = "coord@301"
+
+RETRIES = 4
+RETRY_WAIT_S = 5.0
 
 # Horizons rejects very long tables, so a year is fetched in pieces.
 MAX_STEPS_PER_REQUEST = 24 * 30
@@ -66,6 +70,20 @@ def _fmt(t: datetime) -> str:
     return t.strftime("%Y-%m-%d %H:%M")
 
 
+def _get(http, params) -> str:
+    """One Horizons request, retried when the connection fails or times out."""
+    for attempt in range(RETRIES):
+        try:
+            resp = http.get(API_URL, params=params, timeout=60)
+            resp.raise_for_status()
+            return resp.json()["result"]
+        except requests.RequestException:
+            if attempt == RETRIES - 1:
+                raise
+            time.sleep(RETRY_WAIT_S * (attempt + 1))
+    raise AssertionError("unreachable")
+
+
 def fetch_series(
     body: str,
     lon_deg: float,
@@ -103,9 +121,7 @@ def fetch_series(
             "CAL_FORMAT": "'CAL'",
             "REF_SYSTEM": "'ICRF'",
         }
-        resp = http.get(API_URL, params=params, timeout=60)
-        resp.raise_for_status()
-        out.extend(parse_horizons(resp.json()["result"]))
+        out.extend(parse_horizons(_get(http, params)))
     if len(out) != count:
         raise ValueError(f"Asked Horizons for {count} samples, got {len(out)}")
     return out

@@ -18,6 +18,7 @@ from pathlib import Path
 import numpy as np
 import rasterio
 
+import ephemeris
 import horizons
 import terrain
 from horizon_mask import Horizon, visible_mask
@@ -122,6 +123,9 @@ def main() -> None:
     sites = json.loads(Path(args.sites).read_text())
     out = Path(args.out)
     write_json(out / "sites.json", sites)
+    if not args.only:
+        count = args.days * 24 * 60 // args.step_minutes
+        write_json(out / "ephemeris.json", ephemeris.build_ephemeris(start, count, args.step_minutes))
     for site in sites:
         if args.only and site["id"] != args.only:
             continue

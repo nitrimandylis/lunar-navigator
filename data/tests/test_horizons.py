@@ -101,3 +101,35 @@ def test_fetch_series_splits_long_ranges():
     assert len(session.calls) == 3
     assert len(samples) == count
     assert samples[-1].time == START + timedelta(hours=count - 1)
+
+
+def test_fetch_retries_after_a_timeout(monkeypatch):
+    import requests
+
+    monkeypatch.setattr(horizons, "RETRY_WAIT_S", 0.0)
+
+    class Flaky:
+        calls = 0
+
+        def get(self, url, params, timeout):
+            Flaky.calls += 1
+            if Flaky.calls < 3:
+                raise requests.ConnectionError("timed out")
+            return FakeResponse({"result": load("horizons_sun_pole.json")})
+
+    samples = horizons.fetch_series(horizons.SUN, 0.0, -89.9, START, 6, session=Flaky())
+    assert len(samples) == 6
+    assert Flaky.calls == 3
+
+
+def test_fetch_gives_up_after_the_last_retry(monkeypatch):
+    import requests
+
+    monkeypatch.setattr(horizons, "RETRY_WAIT_S", 0.0)
+
+    class Down:
+        def get(self, url, params, timeout):
+            raise requests.ConnectionError("down")
+
+    with pytest.raises(requests.ConnectionError):
+        horizons.fetch_series(horizons.SUN, 0.0, -89.9, START, 6, session=Down())
