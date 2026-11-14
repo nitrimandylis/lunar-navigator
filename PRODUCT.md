@@ -46,6 +46,11 @@ Built now:
   how to read the screen, why the Moon is not like Earth, where the numbers come from, what
   the tool does not tell you, and links the sources.
 
+- Guided tour: five steps from a header button, telling one story (two places 2.1 km apart
+  with opposite lighting, then the date change, then Apollo 11 for contrast). Each step
+  selects the site and month it talks about. A test recomputes every number in the tour
+  text from the data files.
+
 Still open:
 
 - Terrain for custom points. Judged not possible before the deadline.
