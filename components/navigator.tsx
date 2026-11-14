@@ -15,6 +15,7 @@ import { SkyPanorama } from "@/components/sky-panorama";
 import { SortControl } from "@/components/sort-control";
 import { MapOverlay } from "@/components/map-overlay";
 import { SouthPoleMap } from "@/components/south-pole-map";
+import { TimeControls } from "@/components/time-controls";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -31,7 +32,7 @@ import type {
 } from "@/lib/data";
 import { buildRows } from "@/lib/rows";
 import type { SortKey } from "@/lib/sort";
-import { YEAR, moveHourToMonth } from "@/lib/time";
+import { HOURS_IN_YEAR, YEAR, monthOfHour, moveHourToMonth, stepHour } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -42,6 +43,10 @@ async function fetchJson(path: string): Promise<unknown> {
   }
   return response.json();
 }
+
+// How long one hour of data stays on screen while time is playing. At 80 ms
+// a lunar day (about 708 hours) takes a little under a minute.
+const PLAY_STEP_MS = 80;
 
 // A titled box. Every panel on the page uses it.
 function Panel({
@@ -82,7 +87,10 @@ export function Navigator() {
   // What the user is looking at.
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [selectedHour, setSelectedHour] = useState(0);
-  const [visibleMonth, setVisibleMonth] = useState(0);
+  // The month on screen is always the month of the selected hour.
+  const visibleMonth = monthOfHour(selectedHour);
+  // True while the play button is running time forward.
+  const [isPlaying, setIsPlaying] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("power");
   // The big zoomable map is open.
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -168,13 +176,54 @@ export function Navigator() {
     setSelectedHour(hour);
   }
 
-  // Showing another month also moves the selected hour into that month, on the
-  // same day of the month and hour of the day, so the selection is always
-  // inside the month on screen.
+  // Showing another month moves the selected hour into that month, on the
+  // same day of the month and hour of the day.
   function changeMonth(month: number) {
-    setVisibleMonth(month);
     setSelectedHour(moveHourToMonth(selectedHour, month));
   }
+
+  // While playing, move one hour forward every PLAY_STEP_MS. Each new hour
+  // starts the next wait, and the last hour of the year stops the play.
+  useEffect(() => {
+    if (!isPlaying) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (selectedHour >= HOURS_IN_YEAR - 1) {
+        setIsPlaying(false);
+      } else {
+        setSelectedHour(selectedHour + 1);
+      }
+    }, PLAY_STEP_MS);
+    return () => clearTimeout(timer);
+  }, [isPlaying, selectedHour]);
+
+  // The left and right arrow keys step one hour, unless the user is typing in
+  // a field (the slider handles its own arrow keys).
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT";
+      if (isTyping) {
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setSelectedHour((previous) => stepHour(previous, 1));
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setSelectedHour((previous) => stepHour(previous, -1));
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Works out a custom point's hourly data and per-day totals in the browser,
   // then adds it as a site. The form checks the numbers before calling this.
@@ -333,9 +382,18 @@ export function Navigator() {
                 hourlyFailed={selectedHourlyFailed}
                 selectedHour={selectedHour}
               />
-              {/* The sky at the selected hour on top, the month's clearance
-                  charts under it. */}
+              {/* The time controls, then the sky at the selected hour, then
+                  the month's clearance charts. */}
               <div className="flex min-w-0 flex-col gap-1">
+                {selectedHourly !== null && (
+                  <TimeControls
+                    visibleMonth={visibleMonth}
+                    selectedHour={selectedHour}
+                    isPlaying={isPlaying}
+                    onTogglePlay={() => setIsPlaying(!isPlaying)}
+                    onChangeHour={setSelectedHour}
+                  />
+                )}
                 <SkyPanorama
                   row={selectedRow}
                   hourly={selectedHourly}

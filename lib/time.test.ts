@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { DAYS_IN_MONTH, firstDayOfMonth, formatHour, moveHourToMonth } from "./time.ts";
+import {
+  DAYS_IN_MONTH,
+  HOURS_IN_YEAR,
+  firstDayOfMonth,
+  formatHour,
+  monthOfHour,
+  moveHourToMonth,
+  stepHour,
+} from "./time.ts";
 
 test("the months of 2027 add up to 365 days", () => {
   let total = 0;
@@ -44,4 +52,29 @@ test("moveHourToMonth uses the last day of a shorter month", () => {
   // 31 Oct 23:00 to November gives 30 Nov 23:00.
   const october31 = (firstDayOfMonth(9) + 30) * 24 + 23;
   assert.equal(formatHour(moveHourToMonth(october31, 10)), "30 Nov 2027, 23:00 UTC");
+});
+
+test("monthOfHour finds the month on the real 2027 calendar", () => {
+  assert.equal(monthOfHour(0), 0);
+  // 31 January 23:00 is the last hour of January.
+  assert.equal(monthOfHour(31 * 24 - 1), 0);
+  // 2027 is not a leap year, so day 59 is 1 March, not 29 February.
+  assert.equal(monthOfHour(59 * 24), 2);
+  assert.equal(monthOfHour(58 * 24 + 23), 1);
+  // The last hour of the year is in December.
+  assert.equal(monthOfHour(HOURS_IN_YEAR - 1), 11);
+});
+
+test("monthOfHour agrees with moveHourToMonth for every month", () => {
+  for (let month = 0; month < 12; month++) {
+    assert.equal(monthOfHour(moveHourToMonth(5, month)), month);
+  }
+});
+
+test("stepHour moves by hours and stops at both ends of the year", () => {
+  assert.equal(stepHour(100, 1), 101);
+  assert.equal(stepHour(100, -24), 76);
+  assert.equal(stepHour(0, -1), 0);
+  assert.equal(stepHour(HOURS_IN_YEAR - 1, 1), HOURS_IN_YEAR - 1);
+  assert.equal(stepHour(HOURS_IN_YEAR - 3, 24), HOURS_IN_YEAR - 1);
 });

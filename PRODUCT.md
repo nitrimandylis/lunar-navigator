@@ -22,6 +22,9 @@ Built now:
   south, west, north), with the Sun and Earth at their real direction and height for the
   selected hour, and the paths they take during the month. A body hidden by terrain is
   drawn hollow.
+- Time controls: a play button runs time forward (about a lunar day per minute), a slider
+  scrubs through the month, and the left and right arrow keys step one hour. The grid, the
+  panorama, the charts and the countdowns all follow the same hour.
 - Clearance charts: how far the Sun and Earth sit above the terrain horizon, every hour of
   the month, with the selected hour marked.
 - Selected-site numbers beside the charts: Sun and Earth height above the terrain (raw
