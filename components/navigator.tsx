@@ -55,6 +55,7 @@ import {
   yearOfMonth,
 } from "@/lib/time";
 import { TOUR_STEPS } from "@/lib/tour";
+import { MISSION_PRESETS } from "@/lib/windows";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -169,6 +170,8 @@ export function Navigator() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   // The mission planner is open.
   const [isPlannerOpen, setIsPlannerOpen] = useState(false);
+  // The mission preset the planner opens on.
+  const [plannerPresetId, setPlannerPresetId] = useState(MISSION_PRESETS[0].id);
   // The step of the guided tour on screen, or null when the tour is closed.
   const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
 
@@ -271,6 +274,18 @@ export function Navigator() {
         } else if (firstRows.length > 0) {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
+        }
+
+        // "?plan=rover" opens the planner on load. The sites state is not
+        // set yet at this point, so the hourly data is asked for from the
+        // loaded list. The tour and play are always off on load, so this
+        // does not need the rest of openPlanner.
+        if (shared.planPresetId !== null) {
+          setPlannerPresetId(shared.planPresetId);
+          setIsPlannerOpen(true);
+          for (const site of loadedSites) {
+            requestHourly(site.id);
+          }
         }
       } catch {
         if (!wasCancelled) {
@@ -405,12 +420,14 @@ export function Navigator() {
 
   // The planner compares every site hour by hour, so opening it asks for the
   // hourly data of all of them. Time stops playing while it is open, and the
-  // guided tour closes.
-  function openPlanner() {
+  // guided tour closes. siteList is passed in because on page load the
+  // sites state is still empty.
+  function openPlanner(presetId: string, siteList: Site[]) {
     setTourStepIndex(null);
     setIsPlaying(false);
+    setPlannerPresetId(presetId);
     setIsPlannerOpen(true);
-    for (const site of sites) {
+    for (const site of siteList) {
       requestHourly(site.id);
     }
   }
@@ -563,7 +580,7 @@ export function Navigator() {
           {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
           <button
             type="button"
-            onClick={openPlanner}
+            onClick={() => openPlanner(MISSION_PRESETS[0].id, sites)}
             className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
           >
             Plan a mission
@@ -741,6 +758,7 @@ export function Navigator() {
           selectedHour={selectedHour}
           onSelect={selectSiteAndHour}
           onClose={() => setIsPlannerOpen(false)}
+          initialPresetId={plannerPresetId}
         />
       )}
 
