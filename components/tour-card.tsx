@@ -117,14 +117,30 @@ function placeFor(focus: Focus, card: HTMLElement): Place | null {
 
 // the tour guide. A small astronaut that bobs, blinks, waves, hops on
 // each step and looks towards the thing the card points at.
-function Buddy({ stepIndex, looksUp }: { stepIndex: number; looksUp: boolean }) {
+function Buddy({
+  stepIndex,
+  looksUp,
+  isOnTop,
+}: {
+  stepIndex: number;
+  looksUp: boolean;
+  // True when the card floats above what it points at. The buddy then stands
+  // on the card's top edge, over dimmed parts of the page, and not beside the
+  // card, where it would cover the lit part.
+  isOnTop: boolean;
+}) {
   // The step it first stood on. It hops when the step changes, not when it
   // arrives: the opening has just flown it here.
   const [firstStep] = useState(stepIndex);
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute w-14 max-lg:-top-[3.6rem] max-lg:left-1 lg:bottom-0 lg:-left-[3.75rem]"
+      // Below lg it stands inside the card, in the gap between the buttons and
+      // the dots, so it covers nothing in the list behind the card.
+      className={cn(
+        "pointer-events-none absolute max-lg:bottom-3 max-lg:left-44 max-lg:w-9 lg:w-14",
+        isOnTop ? "lg:-top-[3.6rem] lg:left-2" : "lg:bottom-0 lg:-left-[3.75rem]",
+      )}
     >
       <div key={stepIndex} className={stepIndex !== firstStep ? "buddy-hop" : undefined}>
         <BuddyFigure looksUp={looksUp} isGreeting={false} />
@@ -565,7 +581,11 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
         )}
 
         {isShown && intro === "done" && !isLeaving && (
-          <Buddy stepIndex={stepIndex} looksUp={!floats || place.side === "bottom"} />
+          <Buddy
+            stepIndex={stepIndex}
+            looksUp={!floats || place.side === "bottom"}
+            isOnTop={floats && place.side === "top"}
+          />
         )}
 
         <div className="flex items-baseline gap-3">
