@@ -1,0 +1,174 @@
+[
+ {
+  "id": "glaser-spot-1",
+  "lat": -89.4395,
+  "lon": -137.1934,
+  "observer_height_m": 2,
+  "published": 92.0,
+  "committed_point_percent": 83.92,
+  "recomputed_point_percent": 83.92,
+  "variants": {
+   "disc 20 m diameter (r 10 m)": {
+    "pixels": 13,
+    "max": 86.67,
+    "mean": 83.78,
+    "min": 80.72,
+    "max_at_east_m": 7.0,
+    "max_at_north_m": 6.9
+   },
+   "square 20 m x 20 m": {
+    "pixels": 16,
+    "max": 86.67,
+    "mean": 83.61,
+    "min": 80.42,
+    "max_at_east_m": 7.0,
+    "max_at_north_m": 6.9
+   },
+   "disc 40 m diameter (r 20 m)": {
+    "pixels": 52,
+    "max": 87.32,
+    "mean": 83.59,
+    "min": 76.67,
+    "max_at_east_m": 17.0,
+    "max_at_north_m": 6.9
+   },
+   "square 40 m x 40 m": {
+    "pixels": 64,
+    "max": 87.47,
+    "mean": 83.49,
+    "min": 75.81,
+    "max_at_east_m": 17.0,
+    "max_at_north_m": 16.9
+   }
+  }
+ },
+ {
+  "id": "glaser-spot-2",
+  "lat": -89.4399,
+  "lon": -137.1476,
+  "observer_height_m": 2,
+  "published": 92.3,
+  "committed_point_percent": 86.66,
+  "recomputed_point_percent": 86.66,
+  "variants": {
+   "disc 20 m diameter (r 10 m)": {
+    "pixels": 13,
+    "max": 87.23,
+    "mean": 85.44,
+    "min": 82.47,
+    "max_at_east_m": 8.7,
+    "max_at_north_m": 3.8
+   },
+   "square 20 m x 20 m": {
+    "pixels": 16,
+    "max": 87.23,
+    "mean": 85.52,
+    "min": 82.47,
+    "max_at_east_m": 8.7,
+    "max_at_north_m": 3.8
+   },
+   "disc 40 m diameter (r 20 m)": {
+    "pixels": 52,
+    "max": 90.45,
+    "mean": 84.32,
+    "min": 52.27,
+    "max_at_east_m": 13.7,
+    "max_at_north_m": 3.8
+   },
+   "square 40 m x 40 m": {
+    "pixels": 64,
+    "max": 90.45,
+    "mean": 81.14,
+    "min": 16.51,
+    "max_at_east_m": 13.7,
+    "max_at_north_m": 3.8
+   }
+  }
+ },
+ {
+  "id": "glaser-spot-3",
+  "lat": -89.4516,
+  "lon": -137.2419,
+  "observer_height_m": 10,
+  "published": 95.6,
+  "committed_point_percent": 95.95,
+  "recomputed_point_percent": 95.95,
+  "variants": {
+   "disc 20 m diameter (r 10 m)": {
+    "pixels": 12,
+    "max": 96.05,
+    "mean": 95.87,
+    "min": 95.62,
+    "max_at_east_m": 2.3,
+    "max_at_north_m": -7.7
+   },
+   "square 20 m x 20 m": {
+    "pixels": 16,
+    "max": 96.05,
+    "mean": 95.87,
+    "min": 95.62,
+    "max_at_east_m": 2.3,
+    "max_at_north_m": -7.7
+   },
+   "disc 40 m diameter (r 20 m)": {
+    "pixels": 52,
+    "max": 96.05,
+    "mean": 95.84,
+    "min": 95.62,
+    "max_at_east_m": 2.3,
+    "max_at_north_m": -7.7
+   },
+   "square 40 m x 40 m": {
+    "pixels": 64,
+    "max": 96.05,
+    "mean": 95.84,
+    "min": 95.62,
+    "max_at_east_m": 2.3,
+    "max_at_north_m": -7.7
+   }
+  }
+ },
+ {
+  "id": "glaser-spot-4",
+  "lat": -89.4544,
+  "lon": -137.15549999999996,
+  "observer_height_m": 10,
+  "published": 95.66,
+  "committed_point_percent": 95.97,
+  "recomputed_point_percent": 95.97,
+  "variants": {
+   "disc 20 m diameter (r 10 m)": {
+    "pixels": 13,
+    "max": 96.04,
+    "mean": 95.9,
+    "min": 95.74,
+    "max_at_east_m": 8.0,
+    "max_at_north_m": -2.0
+   },
+   "square 20 m x 20 m": {
+    "pixels": 16,
+    "max": 96.05,
+    "mean": 95.9,
+    "min": 95.68,
+    "max_at_east_m": 8.0,
+    "max_at_north_m": -7.0
+   },
+   "disc 40 m diameter (r 20 m)": {
+    "pixels": 52,
+    "max": 96.14,
+    "mean": 95.83,
+    "min": 95.29,
+    "max_at_east_m": 13.0,
+    "max_at_north_m": -2.0
+   },
+   "square 40 m x 40 m": {
+    "pixels": 64,
+    "max": 96.14,
+    "mean": 95.8,
+    "min": 94.79,
+    "max_at_east_m": 13.0,
+    "max_at_north_m": -2.0
+   }
+  }
+ }
+]
