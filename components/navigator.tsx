@@ -277,9 +277,15 @@ export function Navigator() {
         }
 
         // "?plan=rover" opens the planner on load. The sites state is not
-        // set yet at this point, so the planner gets the loaded list.
+        // set yet at this point, so the hourly data is asked for from the
+        // loaded list. The tour and play are always off on load, so this
+        // does not need the rest of openPlanner.
         if (shared.planPresetId !== null) {
-          openPlanner(shared.planPresetId, loadedSites);
+          setPlannerPresetId(shared.planPresetId);
+          setIsPlannerOpen(true);
+          for (const site of loadedSites) {
+            requestHourly(site.id);
+          }
         }
       } catch {
         if (!wasCancelled) {
