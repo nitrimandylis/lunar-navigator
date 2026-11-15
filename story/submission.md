@@ -135,7 +135,7 @@ Source code: https://github.com/nitrimandylis/lunar-navigator
 
 ## Use of artificial intelligence
 
-Yes. Claude Code (Anthropic) assisted with writing and editing the website, the data-processing scripts, the tests and the documentation, working from the team's instructions. It also built the slide deck with us: it captured the screenshots from the live site and laid out the slides. The automated pull-request review also uses Claude Code, after deterministic checks. ChatGPT and Codex (OpenAI) assisted with reading the rules, source synthesis and drafting this submission text.
+Yes. Claude Code (Anthropic) assisted with writing and editing the website, the data-processing scripts, the tests and the documentation, working from the team's instructions. We also made the slide deck with Claude: we chose the story, the slide split and the wording, and Claude Code captured the screenshots from the live site and laid out the slides. The automated pull-request review also uses Claude Code, after deterministic checks. The Claude models used were Claude Sonnet 5.5, Claude Opus 5.5 and Claude Fable 5.2. ChatGPT and Codex (OpenAI) assisted with reading the rules, source synthesis and drafting this submission text, using GPT-6.1 Sol.
 
 The scientific workflow uses NASA positions and terrain. Table sorting and mission-window rankings are explicit numerical calculations, not AI-generated recommendations. No AI model runs when the website is used.
 

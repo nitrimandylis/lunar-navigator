@@ -76,10 +76,13 @@ Both fonts load from their CDN stylesheets. No font files are in the repository.
 ## AI assistance
 
 - **Claude Code (Anthropic)** wrote and edited most of the website code, the data scripts,
-  the tests and the documentation, working from our instructions. It also built the slide
-  deck with us and reviews every pull request after the automated checks.
+  the tests and the documentation, working from our instructions. It reviews every pull
+  request after the automated checks. Models: Claude Sonnet 5.5, Claude Opus 5.5 and
+  Claude Fable 5.2.
+- **The slide deck was made with Claude.** We chose the story, the slide split and the
+  wording. Claude Code took the screenshots from the live site and laid out the slides.
 - **ChatGPT and Codex (OpenAI)** helped with reading the rules, drafting the submission text
-  and keeping these notes.
+  and keeping these notes. Model: GPT-6.1 Sol.
 - The site ranks, sorts and plans with plain arithmetic on NASA data. Nothing a user sees is
   produced by an AI model at run time.
 - What we checked ourselves: we chose the sites, the features and the story, tested each
