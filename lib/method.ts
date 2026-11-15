@@ -1,4 +1,4 @@
-// The sources and the published check the homepage and the About panel show.
+// The sources and the published check the homepage shows.
 
 // The outside pages the method section links to.
 export const SOURCE_LINKS = [

@@ -33,7 +33,7 @@ Built now:
 - Site facts on the selected site's card, from optional fields in `sites.json`: the Sun
   share of 2027 to 2030 from a 10 m mast next to the 2 m figure for the same years (`sun_pct_10m`), the ground
   slope of the 30 m LOLA cell (`slope_deg`) and the distance to the nearest permanent
-  shadow (`psr_km`). The About panel says what each one means.
+  shadow (`psr_km`). The homepage says what each one means.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
   Rows glide to their new place when the sort or the month changes, and the day cells fade
   to the new month. All motion is off when the system asks for reduced motion.
@@ -72,8 +72,9 @@ Built now:
   pole gives far too many Sun hours.
 
 - Plain-language layer: every panel has a one-sentence caption, and an About panel explains
-  how to read the screen, why the Moon is not like Earth, where the numbers come from, what
-  the tool does not tell you, and links the sources.
+  how to read the screen and what the tool does not tell you. Why the pole is not like
+  Earth, where the numbers come from and the sources are on the homepage, which About
+  links to.
 
 - Share link and CSV: under the selected site, "Copy link" copies a link that opens the
   page on the same site and hour (`/app?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
