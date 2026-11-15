@@ -1,10 +1,10 @@
 # trim's answers for the story draft questions
 
-These are trim's answers to the questions in the "TEAM NOTES AND QUESTIONS - DO NOT SUBMIT" sections of the story drafts. They are kept here because story/ is koum's; koum copies each answer under its question. gio's answers are in data/ANSWERS-FOR-STORY.md.
+These are trim's answers to the questions in the "TEAM NOTES AND QUESTIONS - DO NOT SUBMIT" sections of the story drafts. Koum copied each answer under its question in the drafts. gio's answers are in [answers-gio.md](answers-gio.md).
 
 Everything here was read from the app code on main at 8d9c2e2, not from a live test of the website. "Not yet confirmed" means trim has not decided or checked it yet.
 
-## story/drafts/detailed-description.md
+## story/notes/drafts/detailed-description.md
 
 ### Questions about location/date selection - trim and gio
 
@@ -101,7 +101,7 @@ Q: - What are the final public links, permitted member credits and complete AI/a
 
 Answer - trim/2026-11-14: Links and credits: Not yet confirmed. App-side assets are listed under the submission-fields answers below.
 
-## story/drafts/high-level-summary.md
+## story/notes/drafts/high-level-summary.md
 
 ### Questions corresponding to this summary
 
@@ -117,21 +117,21 @@ Q: 4. **Team:** What will the AI optimise, over which sites and times, and how w
 
 Answer - trim/2026-11-14: Not yet confirmed. Keep the planned-feature wording.
 
-## story/drafts/submission-fields.md
+## story/notes/drafts/submission-fields.md
 
 ### NASA data - questions and source limits
 
-Q: - **Gio/trim:** do custom-coordinate/map-click points still lack local terrain horizons, or do they map to prepared points? The draft follows [F01](../sources.md#f01) until corrected.
+Q: - **Gio/trim:** do custom-coordinate/map-click points still lack local terrain horizons, or do they map to prepared points? The draft follows [F01](sources.md#f01) until corrected.
 
 Answer - trim/2026-11-14: They still lack terrain and do not map to prepared points. The draft is correct.
 
-Q: - Confirm that the final website exposes the described data. [F02](../sources.md#f02) supports site/date selection, but does not certify every metric or scientific output.
+Q: - Confirm that the final website exposes the described data. [F02](sources.md#f02) supports site/date selection, but does not certify every metric or scientific output.
 
 Answer - trim/2026-11-14: See detailed-description question 3 for exactly what is shown. Simultaneous hours, max solar elevation and the longest dark spell are not shown.
 
 ### Other references - questions and source limits
 
-Q: - **Gio/trim:** reconcile Gazetteer access paths for the separate uses. [A03](../sources.md#a03) reports direct Gazetteer use for locator outlines; F01 reports scan starting points through Wikipedia.
+Q: - **Gio/trim:** reconcile Gazetteer access paths for the separate uses. [A03](sources.md#a03) reports direct Gazetteer use for locator outlines; F01 reports scan starting points through Wikipedia.
 
 Answer - trim/2026-11-14: App side: the crater names, centres and diameters drawn on the south pole map come straight from the IAU Gazetteer of Planetary Nomenclature (https://planetarynames.wr.usgs.gov), checked 2026-11-14 (comment in components/south-pole-map.tsx). The data side is gio's.
 
@@ -146,7 +146,7 @@ Answer - trim/2026-11-14: App side, from package.json and the code:
 
 Licence names are from the packages' usual licences, not rechecked file by file: Not yet confirmed.
 
-Q: - Existing font credits come from trim's recorded [A01](../sources.md#a01) and [A02](../sources.md#a02); confirm the final asset inventory and licences.
+Q: - Existing font credits come from trim's recorded [A01](sources.md#a01) and [A02](sources.md#a02); confirm the final asset inventory and licences.
 
 Answer - trim/2026-11-14: Still Excon and JetBrains Mono only, loaded from CDN links in app/layout.tsx. No font files in the repo.
 
@@ -160,7 +160,7 @@ Q: - **Team:** what does the planned AI feature actually search or calculate, wi
 
 Answer - trim/2026-11-14: Not yet confirmed. Nothing is built.
 
-Q: - Complete any applicable visible acknowledgements and metadata for generated code/data. Inventory any generated images, video or audio and follow [N02 p. 8](../sources.md#n02).
+Q: - Complete any applicable visible acknowledgements and metadata for generated code/data. Inventory any generated images, video or audio and follow [N02 p. 8](sources.md#n02).
 
 Answer - trim/2026-11-14: App side: no generated images, video or audio. The app code was written with AI help (above). A visible acknowledgement in the app: Not yet confirmed.
 
