@@ -106,3 +106,30 @@ export function stepHour(hourIndex: number, hours: number): number {
   }
   return moved;
 }
+
+const MS_PER_HOUR = 3_600_000;
+
+// Hour 0 as a timestamp: 2027-01-01 00:00 UTC.
+const YEAR_START_MS = Date.UTC(YEAR, 0, 1);
+
+// An hour index as ISO 8601 text, for example "2027-03-14T05:00Z".
+// Used in share links and in the CSV export.
+export function hourToIso(hourIndex: number): string {
+  const date = new Date(YEAR_START_MS + hourIndex * MS_PER_HOUR);
+  // "2027-03-14T05:00:00.000Z" cut down to "2027-03-14T05:00", then "Z" again.
+  return date.toISOString().slice(0, 16) + "Z";
+}
+
+// The opposite of hourToIso. Returns null unless the text is a whole hour of
+// 2027 written exactly like "2027-03-14T05:00Z".
+export function isoToHour(text: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:00Z$/.test(text)) {
+    return null;
+  }
+  const hourIndex = (Date.parse(text) - YEAR_START_MS) / MS_PER_HOUR;
+  // Date.parse gives NaN for a date that does not exist, like month 13.
+  if (!Number.isInteger(hourIndex) || hourIndex < 0 || hourIndex > HOURS_IN_YEAR - 1) {
+    return null;
+  }
+  return hourIndex;
+}

@@ -48,6 +48,11 @@ Built now:
   how to read the screen, why the Moon is not like Earth, where the numbers come from, what
   the tool does not tell you, and links the sources.
 
+- Share link and CSV: under the selected site, "Copy link" copies a link that opens the
+  page on the same site and hour (`?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
+  saves the site's 8760 hourly rows (Sun and Earth elevation, azimuth and visibility).
+  Custom points have no link, because they only exist in the browser tab.
+
 - Guided tour: five steps from a header button, telling one story (two places 2.1 km apart
   with opposite lighting, then the date change, then Apollo 11 for contrast). Each step
   selects the site and month it talks about. A test recomputes every number in the tour

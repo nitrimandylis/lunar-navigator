@@ -11,6 +11,7 @@ import { CustomSiteForm } from "@/components/custom-site-form";
 import { Legend } from "@/components/legend";
 import { MonthChips } from "@/components/month-chips";
 import { SelectedSite } from "@/components/selected-site";
+import { SiteActions } from "@/components/site-actions";
 import { SitesGrid } from "@/components/sites-grid";
 import { SkyPanorama } from "@/components/sky-panorama";
 import { SortControl } from "@/components/sort-control";
@@ -34,6 +35,7 @@ import type {
 } from "@/lib/data";
 import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
+import { parseShareQuery } from "@/lib/share";
 import type { SortKey } from "@/lib/sort";
 import {
   HOURS_IN_YEAR,
@@ -217,9 +219,26 @@ export function Navigator() {
         setSummaries(loadedSummaries);
         setHourlyBySite((previous) => ({ ...previous, ...referenceHourly }));
 
-        // Start with the top row selected.
+        // A share link names a site and an hour. Custom points are not in
+        // links, so only curated sites and past landings count as known.
+        const knownSiteIds: string[] = [];
+        for (const site of loadedSites) {
+          knownSiteIds.push(site.id);
+        }
+        for (const site of REFERENCE_SITES) {
+          knownSiteIds.push(site.id);
+        }
+        const shared = parseShareQuery(window.location.search, knownSiteIds);
+        if (shared.hour !== null) {
+          setSelectedHour(shared.hour);
+        }
+
+        // Start with the shared site selected, or else the top row.
         const firstRows = buildRows(loadedSites, [], [], loadedSummaries, "power", 0);
-        if (firstRows.length > 0) {
+        if (shared.siteId !== null) {
+          setSelectedSiteId(shared.siteId);
+          requestHourly(shared.siteId);
+        } else if (firstRows.length > 0) {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
         }
@@ -568,12 +587,20 @@ export function Navigator() {
             {/* Numbers on the left, the sky and the charts on the right. On a
                 narrow screen the numbers sit above the sky and the charts. */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[23rem_minmax(0,1fr)]">
-              <SelectedSite
-                row={selectedRow}
-                hourly={selectedHourly}
-                hourlyFailed={selectedHourlyFailed}
-                selectedHour={selectedHour}
-              />
+              <div className="flex flex-col gap-3">
+                <SelectedSite
+                  row={selectedRow}
+                  hourly={selectedHourly}
+                  hourlyFailed={selectedHourlyFailed}
+                  selectedHour={selectedHour}
+                />
+                <SiteActions
+                  site={selectedRow === null ? null : selectedRow.site}
+                  isCustom={selectedRow !== null && selectedRow.isCustom}
+                  hourly={selectedHourly}
+                  selectedHour={selectedHour}
+                />
+              </div>
               {/* The time controls, then the sky at the selected hour, then
                   the month's clearance charts. */}
               <div className="flex min-w-0 flex-col gap-1">
