@@ -26,7 +26,7 @@ export type SkyPanoramaProps = {
 // wide and flat. Below lg a narrower, taller drawing is used instead: the wide
 // one squeezed onto a phone would make its labels about 5 px tall.
 const WIDE_WIDTH = 620;
-const WIDE_HEIGHT = 116;
+const WIDE_HEIGHT = 150;
 const PHONE_WIDTH = 360;
 const PHONE_HEIGHT = 150;
 // Margins around the plot, the same in both drawings.

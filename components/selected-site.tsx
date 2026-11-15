@@ -49,6 +49,10 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
     earthClearance = clearanceSeries(hourly, "earth", selectedHour, selectedHour + 1)[0];
   }
 
+  // What the two big numbers are measured from: the terrain, or a flat
+  // horizon for a site with no terrain.
+  const aboveWhat = row.isReference || row.isCustom ? "above horizon" : "above terrain";
+
   return (
     // The verdict first, then where and when, then the Sun and the Earth,
     // each with its height above the terrain, raw elevation and countdown.
@@ -114,10 +118,8 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         // Sun and Earth side by side: height above the terrain, raw
         // elevation, and the countdown to the next change.
         <div className="grid grid-cols-2 gap-x-4 max-lg:order-2">
-          <p className="col-span-2 text-muted-foreground">
-            {row.isReference || row.isCustom ? "Above the horizon" : "Above terrain"}
-          </p>
           <div>
+            <p className="text-muted-foreground">Sun {aboveWhat}</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-power">
               {sunClearance.toFixed(2)}°
             </p>
@@ -129,6 +131,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
             </p>
           </div>
           <div>
+            <p className="text-muted-foreground">Earth {aboveWhat}</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-comms">
               {earthClearance.toFixed(2)}°
             </p>
