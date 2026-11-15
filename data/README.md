@@ -79,6 +79,38 @@ defaults, so only change them to experiment. `--only` leaves `ephemeris.json` an
 Re-run `build.py` whenever `sites.json` or the horizon code changes, and commit the new files
 in `public/data/`. After adding or changing one site, `build.py --only <site id>` is enough.
 
+## Basemap image
+
+`basemap.py` renders the real south pole terrain as a grey hillshade picture for the app map.
+It writes `public/data/basemap.png` (30 m DEM, out to latitude -82) and `basemap-87.5.png` (5 m DEM,
+out to latitude -87.5, for zooming near the pole), each with a `.json` next to it that says how to place it.
+Both are 2048 x 2048, 8-bit greyscale with alpha; pixels outside the edge circle are transparent.
+
+```bash
+data/.venv/Scripts/python data/basemap.py --dem5 <5 m .tif> --dem30 <30 m .tif> --out public/data
+```
+
+(`--size` changes the pixels across, `--only basemap` renders one tile. It reads the DEMs in a
+window, averaged down, so it never loads the 3.7 GB file whole. About 20 seconds.)
+
+Projection: the same as the app map (`projectSouthPole` in `lib/geometry.ts`): azimuthal
+equidistant, distance from the centre proportional to degrees from the pole, longitude 0 up,
+east longitude clockwise (lon 90 to the right). The DEMs are polar stereographic, so each pixel
+is looked up in the DEM through `terrain.lonlat_to_xy`. For an image of `size` pixels with
+outer latitude `edge`, with angles in degrees:
+
+```
+r = (size / 2) * (lat + 90) / (edge + 90)
+x = size / 2 + r * sin(lon)        y = size / 2 - r * cos(lon)       (x right, y down)
+lat = -90 + hypot(x - size/2, size/2 - y) / (size/2) * (edge + 90)
+lon = atan2(x - size/2, size/2 - y)
+```
+
+Hillshade: light from azimuth 315 degrees (upper left), 20 degrees up, heights stretched 2x.
+The real Sun at the pole is under 2 degrees high, so this is a made-up light chosen to make craters readable,
+not an illumination map. Credit: LRO LOLA DEM v4 S Pole (30 m and 5 m), NASA Moon Trek.
+The JSON files hold all the numbers (extent, pixel size, settings).
+
 ## How the pieces fit
 
 ```

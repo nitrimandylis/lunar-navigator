@@ -1,0 +1,109 @@
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+import basemap
+import terrain
+
+ROOT = Path(__file__).resolve().parents[2]
+PUBLIC = ROOT / "public" / "data"
+
+
+def test_pole_is_the_image_centre():
+    assert basemap.latlon_to_pixel(-90, 0, 2048, -82) == (1024.0, 1024.0)
+    assert basemap.latlon_to_pixel(-90, 123, 2048, -82) == pytest.approx((1024.0, 1024.0))
+
+
+def test_edge_latitude_on_lon_0_is_top_middle():
+    x, y = basemap.latlon_to_pixel(-82, 0, 2048, -82)
+    assert (x, y) == pytest.approx((1024.0, 0.0))
+
+
+def test_east_is_clockwise_lon_90_right_lon_180_down_lon_minus_90_left():
+    assert basemap.latlon_to_pixel(-82, 90, 2048, -82) == pytest.approx((2048.0, 1024.0))
+    assert basemap.latlon_to_pixel(-82, 180, 2048, -82) == pytest.approx((1024.0, 2048.0))
+    assert basemap.latlon_to_pixel(-82, -90, 2048, -82) == pytest.approx((0.0, 1024.0))
+
+
+def test_matches_lib_map_test_numbers():
+    # lib/map.test.ts: unprojectSouthPole(100, 0, 200, -70) is lat -80, lon 90.
+    x, y = basemap.latlon_to_pixel(-80, 90, 400, -70)
+    assert (x - 200, y - 200) == pytest.approx((100.0, 0.0))
+    # lib/map.test.ts: projectSouthPole(-85, 270, 150) comes back as lon -90 (default edge -80).
+    x, y = basemap.latlon_to_pixel(-85, 270, 300, -80)
+    assert (x - 150, y - 150) == pytest.approx((-75.0, 0.0), abs=1e-9)
+    lat, lon = basemap.pixel_to_latlon(x, y, 300, -80)
+    assert (lat, lon) == pytest.approx((-85.0, -90.0))
+
+
+@pytest.mark.parametrize("lat, lon", [(-89.3277, 116.8355), (-88.3355, -69.5771), (-85.9166, -4.067), (-83.9405, 100.11), (-81, 179)])
+def test_pixel_round_trip(lat, lon):
+    x, y = basemap.latlon_to_pixel(lat, lon, 2048, -82)
+    back = basemap.pixel_to_latlon(x, y, 2048, -82)
+    assert back == pytest.approx((lat, lon), abs=1e-9)
+
+
+def test_extent_and_pixel_size():
+    # 8 degrees of a 1,737,400 m sphere: 242,588 m (lib/map.test.ts: 10 degrees = 303.2335 km).
+    assert basemap.edge_extent_m(-80) == pytest.approx(303233.5, abs=1.0)
+    assert basemap.edge_extent_m(-82) == pytest.approx(242586.8, abs=1.0)
+    assert basemap.pixel_size_m(2048, -82) == pytest.approx(2 * 242586.8 / 2048, abs=0.01)
+    assert basemap.edge_extent_m(-87.5) == pytest.approx(75808.4, abs=1.0)
+
+
+def test_grid_directions_match_the_dem_projection():
+    colat, lon, inside = basemap.pixel_grid_latlon(8, -82)
+    # the pixel just right of the vertical centre line, in the top row: lon a little east of 0
+    assert 0 < lon[0, 4] < 0.2
+    # right-hand middle: lon near 90 degrees
+    assert math.degrees(lon[4, 7]) == pytest.approx(90, abs=10)
+    # corners are outside the circle, middle of each side's neighbour is inside
+    assert not inside[0, 0] and inside[0, 4]
+    # DEM x/y agree with terrain.lonlat_to_xy
+    x, y = basemap.colat_to_dem_xy(np.array([math.radians(8.0)]), np.array([math.radians(37.0)]))
+    ex, ey = terrain.lonlat_to_xy(-82.0, 37.0)
+    assert (x[0], y[0]) == pytest.approx((ex, ey))
+
+
+def test_hillshade_flat_and_slopes():
+    flat = np.zeros((5, 5))
+    assert np.allclose(basemap.hillshade(flat, 10.0, 315, 20, 2), math.sin(math.radians(20)))
+    # a ramp rising to the upper left faces away from a light at the lower right (azimuth 135) and
+    # towards a light at the upper left (azimuth 315)
+    rows, cols = np.mgrid[0:9, 0:9]
+    ramp = -(cols + rows) * 5.0  # lower to the lower right, so the slope faces the lower right
+    lit = basemap.hillshade(ramp, 10.0, 135, 20, 1)[4, 4]
+    dark = basemap.hillshade(ramp, 10.0, 315, 20, 1)[4, 4]
+    assert lit > math.sin(math.radians(20)) > dark
+
+
+def test_resample_known_heights():
+    # a synthetic DEM in the real layout: height = distance east of the pole in km
+    grid = np.fromfunction(lambda r, c: (c + 0.5 - 50) * 100.0 / 1000.0, (100, 100))
+    col = np.array([50.0, 75.5])
+    row = np.array([50.0, 10.0])
+    assert basemap.sample_bilinear(grid, col, row) == pytest.approx([0.0, 2.55], abs=1e-9)
+
+
+def test_png_round_trip_header():
+    img = basemap.to_gray_alpha(np.full((4, 6), 0.5), np.ones((4, 6), dtype=bool))
+    data = basemap.encode_png_gray_alpha(img)
+    assert basemap.png_size(data) == (6, 4)
+    assert img[0, 0].tolist() == [128, 255]
+
+
+@pytest.mark.parametrize("stem, edge", [("basemap", -82.0), ("basemap-87.5", -87.5)])
+def test_committed_basemap_matches_json(stem, edge):
+    png = PUBLIC / f"{stem}.png"
+    info = json.loads((PUBLIC / f"{stem}.json").read_text())
+    assert png.exists()
+    assert basemap.png_size(png.read_bytes()[:64]) == (info["image"]["width"], info["image"]["height"])
+    assert info["size_px"] == info["image"]["width"]
+    assert info["edge_lat_deg"] == edge
+    assert info["extent"]["radius_m"] == pytest.approx(basemap.edge_extent_m(edge), abs=0.01)
+    assert info["pixel_size_m"] == pytest.approx(basemap.pixel_size_m(info["size_px"], edge), abs=1e-3)
+    assert info["projection"]["moon_radius_m"] == 1_737_400.0
+    assert "generated by data/basemap.py" in info["generated_by"]
