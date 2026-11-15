@@ -219,8 +219,13 @@ data/.venv/Scripts/python data/repick_pair.py --dem5 data/raw/LRO_LOLA_DEM_SPole
 
 `rim_candidates.json` keeps the scan results behind the computed sites (its `note` says which
 were re-scanned). To change the site list, edit `sites.json` by hand (id, name, lat, lon,
-elevation, source, and `mission` for a real mission site, left out otherwise), then run
+elevation, source, `mission` for a real mission site, and the optional `note`, left out otherwise), then run
 `build.py`. Read `elevation_m` from the terrain file.
+
+An optional `note` string may carry a caveat the app shows with the site. Only `artemis3-haworth` has one
+(its centre is on the shadowed crater floor and gets 0 h of Sun). It goes after `mission` in `sites.json`,
+`build.py` copies it through to `public/data/sites.json`, and the data tests require it to be a non-empty
+string when present.
 
 ## Known simplifications
 
