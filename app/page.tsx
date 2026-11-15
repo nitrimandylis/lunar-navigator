@@ -190,7 +190,7 @@ export default function Home() {
                   <BuddyFigure looksUp={false} isGreeting={false} />
                 </span>
                 <span className="underline decoration-muted-foreground underline-offset-4 group-hover:decoration-bright">
-                  New here? Our guide walks you through it in five steps.
+                  New here? Selini, our guide, walks you through it in five steps.
                 </span>
               </Link>
             </div>

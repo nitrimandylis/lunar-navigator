@@ -1,4 +1,4 @@
-// The tour's guide: a small astronaut, drawn as one SVG. The tour card moves it
+// Selini, the tour's guide: a small astronaut, drawn as one SVG. The tour card moves it
 // around (components/tour-card.tsx) and the homepage shows it standing still.
 // Its motion is the buddy- classes in app/globals.css.
 

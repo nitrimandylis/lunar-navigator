@@ -496,7 +496,7 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
           </div>
           {intro === "hi" && (
             <span className="buddy-pop absolute -top-3 left-[88%] rounded-full rounded-bl-none bg-bright px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-background">
-              Hi!
+              Hi, I&apos;m Selini!
             </span>
           )}
         </div>

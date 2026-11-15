@@ -38,7 +38,7 @@ export const SOURCE_LINKS = [
     note: "the coordinates of the four spots we check",
   },
   {
-    href: "https://github.com/nitrimandylis/lunar-navigator",
+    href: "https://github.com/nitrimandylis/moon-from-earth",
     label: "Source code and data",
     note: "everything behind this page",
   },

@@ -20,7 +20,7 @@ With existing tools, each lunar site and date is a separate lookup. MoonFromEart
 
 It is built on NASA/JPL Horizons Sun and Earth positions and LRO LOLA terrain. One table compares every site by sunlight (power), Earth visibility (radio) or both. Selecting a site and hour shows the Sun and Earth against the real terrain skyline, with countdowns to sunset and Earthset, so each number has a visible reason.
 
-The reason matters. A ridge near Shackleton is sunlit for 90.6% of 2027, yet goes dark for 162 hours in a row in May. A point 2.1 km away gets no Sun at all that month. A guided tour, led by a small astronaut guide, walks educators and the public through that story in five steps. Planners get adjustable requirements, share links and CSV export.
+The reason matters. A ridge near Shackleton is sunlit for 90.6% of 2027, yet goes dark for 162 hours in a row in May. A point 2.1 km away gets no Sun at all that month. A guided tour, led by Selini, a small astronaut guide, walks educators and the public through that story in five steps. Planners get adjustable requirements, share links and CSV export.
 
 Results describe Sun and Earth visibility. Spacecraft power, radio performance and landing safety need further engineering assessment.
 
@@ -99,7 +99,7 @@ Across 2027, the ridge has sunlight at 7,936 of 8,760 hourly samples, or 90.6%. 
 
 ### A guide for first-time visitors
 
-The guided tour tells that story in five steps and ends at Apollo 11 for contrast. Each step selects the site and month it talks about, the part of the page it points at stays lit while the rest dims, and on a laptop screen the tour card moves next to it. A small astronaut guide stands by the card, greets the visitor and points them to the About page at the end. A test recomputes every number in the tour text from the data files.
+The guided tour tells that story in five steps and ends at Apollo 11 for contrast. Each step selects the site and month it talks about, the part of the page it points at stays lit while the rest dims, and on a laptop screen the tour card moves next to it. Selini, a small astronaut guide, stands by the card, greets the visitor and points them to the About page at the end. A test recomputes every number in the tour text from the data files.
 
 Every panel carries a one-sentence caption, and the About panel explains how to read the screen. Share links preserve a selected site and time, and CSV export gives the site's hourly data for inspection.
 
@@ -134,7 +134,7 @@ What the results are, and are not:
 
 The website uses Next.js, React and TypeScript with Tailwind and UI components. Python prepares the scientific data. The next steps would be further validation at the standard 2 m height and observing first-time users.
 
-Source code: https://github.com/nitrimandylis/lunar-navigator
+Source code: https://github.com/nitrimandylis/moon-from-earth
 
 ## Use of artificial intelligence
 
@@ -142,7 +142,7 @@ Yes. Claude Code (Anthropic) assisted with writing and editing the website, the 
 
 The scientific workflow uses NASA positions and terrain. Table sorting and mission-window rankings are explicit numerical calculations, not AI-generated recommendations. No AI model runs when the website is used.
 
-One image is AI-generated: the team logo on slide 1 of the deck, made with GPT Image 2 and carrying a visible "AI-generated" mark. The astronaut tour guide is not an image-model output: it is a vector drawing written as code with Claude Code, and the deck says so. There is no AI-generated video or audio. The map relief is computed from LOLA data.
+One image is AI-generated: the team logo on slide 1 of the deck, made with GPT Image 2 and carrying a visible "AI-generated" mark. Selini, the astronaut tour guide, is not an image-model output: it is a vector drawing written as code with Claude Code, acknowledged like the rest of the code. There is no AI-generated video or audio. The map relief is computed from LOLA data.
 
 What we checked ourselves: we chose the sites, the features and the story, tested each feature in the browser, and read the results and benchmark tables. We did not read every line of generated code; automated tests and a benchmark against published results cover the rest. The repository README and story/sources.md carry the same acknowledgement.
 
@@ -192,5 +192,5 @@ The documented analytical inputs are the NASA resources above. Other recorded re
 - Website: [Next.js](https://nextjs.org/), [React/React DOM](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/), [shadcn](https://ui.shadcn.com/), [Base UI](https://base-ui.com/), [class-variance-authority](https://www.npmjs.com/package/class-variance-authority), [cn](https://www.npmjs.com/package/cn) and [tw-animate-css](https://www.npmjs.com/package/tw-animate-css); [npm](https://www.npmjs.com/) for packages and [ESLint](https://eslint.org/) for checks.
 - Data preparation/checks: [Python](https://www.python.org/), [NumPy](https://numpy.org/), [Rasterio](https://rasterio.readthedocs.io/), [Requests](https://requests.readthedocs.io/) and [pytest](https://docs.pytest.org/).
 - AI-assisted development/writing: [Claude Code](https://code.claude.com/docs/en/overview) (Anthropic) and [ChatGPT](https://chatgpt.com/)/[Codex](https://openai.com/codex/) (OpenAI), described in the AI field.
-- Slide deck: one HTML file printed to PDF with headless Chromium, set in the site's fonts (Excon and JetBrains Mono), with screenshots taken from the running site through [Playwright](https://playwright.dev/). The team logo on slide 1 was generated with GPT Image 2 (OpenAI) and is marked as AI-generated. The tour guide on slides 1 and 7 is the site's own vector drawing.
-- Exact dependency declarations and the project licence are recorded in the repository: https://github.com/nitrimandylis/lunar-navigator
+- Slide deck: one HTML file printed to PDF with headless Chromium, set in the site's fonts (Excon and JetBrains Mono), with screenshots taken from the running site through [Playwright](https://playwright.dev/). The team logo on slide 1 was generated with GPT Image 2 (OpenAI) and is marked as AI-generated. Selini, the tour guide on slides 1 and 7, is the site's own vector drawing.
+- Exact dependency declarations and the project licence are recorded in the repository: https://github.com/nitrimandylis/moon-from-earth

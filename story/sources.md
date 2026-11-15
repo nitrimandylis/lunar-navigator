@@ -69,7 +69,7 @@ Both fonts load from their CDN stylesheets. No font files are in the repository.
   JetBrains Mono). Its screenshots were taken from the running site with Playwright.
 - The team logo on slide 1 was generated with GPT Image 2 and carries a visible
   "AI-generated" mark. It is the only AI-generated image in the project.
-- The astronaut tour guide on slides 1 and 7 is the site's own vector drawing
+- Selini, the astronaut tour guide on slides 1 and 7, is the site's own vector drawing
   (`components/buddy.tsx`), written as code with Claude Code.
 
 ## AI assistance

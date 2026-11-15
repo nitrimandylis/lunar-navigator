@@ -82,11 +82,11 @@ Built now:
   visibility).
   Custom points have no link, because they only exist in the browser tab.
 
-- Tour guide: a small astronaut (`components/buddy.tsx`) stands by the tour card. From a
+- Tour guide: Selini, a small astronaut (`components/buddy.tsx`), stands by the tour card. From a
   laptop screen up the card floats next to what each step talks about, and the guide greets
   the visitor at the start and says goodbye on Finish. The same drawing stands under the
   two buttons on the homepage, by a line that starts the tour, and is on slides 1 and 7 of
-  the deck.
+  the deck and at the top of the README (`docs/selini.svg`).
 
 - Loading screen: shown until the site data is in.
 
