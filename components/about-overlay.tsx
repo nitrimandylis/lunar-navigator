@@ -203,12 +203,6 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 The Sun and Earth are discs, not points. A body counts as in view when any
                 part of its disc is above the ground.
               </li>
-              <li>
-                As a check, our best-lit point on the Connecting Ridge is sunlit for 91.3
-                percent of 2027. A published study (Glaser et al. 2014) reports about 92
-                percent for the same ridge over 19 years. The two agree in size. It is a
-                plausibility check, not a replication.
-              </li>
             </ul>
 
             <h4 className="mt-2 text-bright">Checked against published numbers</h4>
