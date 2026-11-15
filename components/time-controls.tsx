@@ -31,7 +31,8 @@ export function TimeControls({
         type="button"
         onClick={onTogglePlay}
         aria-pressed={isPlaying}
-        className="flex shrink-0 items-center gap-1.5 rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+        // min-h-10 makes the button 40 px tall on a narrow screen, big enough for a thumb.
+        className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
       >
         {isPlaying && <Pause aria-hidden="true" className="size-3.5" />}
         {!isPlaying && <Play aria-hidden="true" className="size-3.5" />}
@@ -52,7 +53,9 @@ export function TimeControls({
         className="h-1.5 min-w-0 flex-1 cursor-pointer accent-bright"
       />
 
-      <span className="shrink-0 text-xs text-muted-foreground">
+      {/* Hidden on a narrow screen: a phone has no arrow keys, and the slider
+          needs the room. */}
+      <span className="hidden shrink-0 text-xs text-muted-foreground lg:inline">
         Arrow keys step one hour
       </span>
     </div>

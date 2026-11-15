@@ -53,6 +53,11 @@ Built now:
   selects the site and month it talks about. A test recomputes every number in the tour
   text from the data files.
 
+- Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
+  Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
+  panel, the header wraps, and the header and play buttons are 40 px tall. The desktop
+  layout is unchanged.
+
 Still open:
 
 - Terrain for custom points. Judged not possible before the deadline.
