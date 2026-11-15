@@ -353,7 +353,7 @@ This section records **actual usage**, unlike the research register above.
 | --- | --- | --- |
 | Horizons Sun/Earth positions | Previously listed; implementation not verified in this documentation task | gio confirms exact query, observer, time conventions, output and use |
 | LOLA terrain | Background reviewed; actual processing not confirmed | Exact product/version/resolution, method, licence and output role |
-| Moon imagery/textures/site coordinates | Pending | Creator/mission/product, source URL, permissions and where used |
+| Moon imagery/textures/site coordinates | Past landing coordinates and the map relief picture recorded below (A04, A05); other site coordinates are in the data handoff | Permissions re-read before hand-in |
 | Other libraries/tools/icons/fonts/media | Fonts and crater outlines recorded below (A01 to A03); the rest pending whole-team inventory | Exact source and applicable attribution/licensing |
 | Screenshots/results | Pending final evidence | App revision, scenario, date, verifier and original capture |
 | AI/SI assistance | Codex used for research/synthesis, Markdown drafts and earlier setup | Whole team adds all actual tools/uses, media indicators and metadata as required |
@@ -362,7 +362,7 @@ Do not promote a researched source into an implemented-data claim. Cite borrowed
 
 ### Confirmed in the app (interface)
 
-Recorded by trim on 14 November 2026 from the code on `main`. These three are in actual use.
+Recorded by trim from the code on `main`: A01 to A03 on 14 November 2026, A04 and A05 on 15 November 2026. All five are in actual use.
 
 #### A01
 
@@ -390,6 +390,25 @@ Recorded by trim on 14 November 2026 from the code on `main`. These three are in
 - Location: Moon feature search results, read 14 November 2026.
 - Used for the names, centre coordinates and diameters of the craters outlined on the south pole locator map (`components/south-pole-map.tsx`).
 - Not used for landing site coordinates or for any Sun or Earth calculation.
+
+#### A04
+
+**Table of Anthropogenic Impacts and Spacecraft on the Moon.** NASA Space Science Data Coordinated Archive (NSSDCA), Goddard Space Flight Center.
+
+- https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html
+- Read 14 November 2026.
+- Used for the landing coordinates of the five past landings listed for comparison (`lib/reference-sites.ts`): Apollo 11, Blue Ghost Mission 1, SLIM, Chandrayaan-3 and Chang'e 6.
+- Coordinates only. The Sun and Earth angles for these sites are computed in the app on a smooth Moon with no terrain.
+
+#### A05
+
+**LRO LOLA DEM v4, South Pole (30 m and 5 m).** NASA Lunar Reconnaissance Orbiter, Lunar Orbiter Laser Altimeter, downloaded through NASA Moon Trek.
+
+- https://trek.nasa.gov/moon/
+- Files `LRO_LOLA_DEM_SPole75_30mp_v04.tif` (30 m) and `LRO_LOLA_DEM_SPole875_5mp_v04.tif` (5 m). The raw files are not in the repository.
+- Used for the shaded relief picture under the south pole map: `public/data/basemap.png` (out to latitude -82) and `public/data/basemap-87.5.png` (out to -87.5), made by gio's `data/basemap.py` and drawn in `components/south-pole-map.tsx`.
+- The shading uses a made-up light (azimuth 315 degrees, 20 degrees up, heights doubled) so that crater walls are readable. It is not a sunlight map and says nothing about real illumination.
+- Credit line from gio: `data/FACTS-FOR-STORY.md`, section 9. Licence of the Moon Trek product not re-checked: re-read before hand-in.
 
 ## Earlier setup references retained for provenance
 
