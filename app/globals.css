@@ -172,7 +172,9 @@
 @keyframes tour-card-in { from { opacity: 0; scale: 0.96; } }
 .tour-card-in { animation: tour-card-in 0.7s cubic-bezier(0.23, 1, 0.32, 1) both; }
 .tour-ring.tour-card-in { animation: tour-card-in 0.7s cubic-bezier(0.23, 1, 0.32, 1) both, tour-ring 1.6s ease-out 0.7s infinite; }
+@keyframes loading-bar { from { transform: translateX(-110%); } to { transform: translateX(310%); } }
+.loading-bar { animation: loading-bar 1.3s ease-in-out infinite; }
 .tour-ring { animation: tour-ring 1.6s ease-out infinite; transition: left 0.5s, top 0.5s, width 0.5s, height 0.5s; }
 @media (prefers-reduced-motion: reduce) {
-  .buddy-bob, .buddy-eye, .buddy-hop, .buddy-arm, .buddy-arm-hi, .buddy-pop, .buddy-light, .buddy-float, .buddy-flame, .tour-ring, .tour-card-in, .tour-ring.tour-card-in { animation: none; transition: none; }
+  .buddy-bob, .buddy-eye, .buddy-hop, .buddy-arm, .buddy-arm-hi, .buddy-pop, .buddy-light, .buddy-float, .buddy-flame, .tour-ring, .tour-card-in, .tour-ring.tour-card-in, .loading-bar { animation: none; transition: none; }
 }

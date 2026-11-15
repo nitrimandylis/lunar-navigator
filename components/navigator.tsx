@@ -20,6 +20,7 @@ import { SortControl } from "@/components/sort-control";
 import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
+import { LoadingScreen } from "@/components/loading-screen";
 import { TourCard } from "@/components/tour-card";
 import { YearPicker } from "@/components/year-picker";
 import {
@@ -946,6 +947,9 @@ export function Navigator() {
           initialPresetId={plannerPresetId}
         />
       )}
+
+      {/* Covers the page until the site data is in. */}
+      <LoadingScreen isDone={!isLoading} />
 
       {tourStepIndex !== null && (
         <TourCard

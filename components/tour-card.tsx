@@ -133,7 +133,7 @@ function Buddy({ stepIndex, looksUp }: { stepIndex: number; looksUp: boolean }) 
 }
 
 // The drawing itself. While it greets, the arm waves fast.
-function BuddyFigure({
+export function BuddyFigure({
   looksUp,
   isGreeting,
   lookX = 0,
