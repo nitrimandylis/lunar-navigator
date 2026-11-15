@@ -131,6 +131,12 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 next sunset and the next time Earth sets.
               </li>
               <li>
+                <span className="text-bright">Plan a mission.</span> Pick a kind of
+                mission and how much Sun and Earth it needs. Every site is then checked
+                hour by hour for the whole year, and ranked by how many days have a
+                landing time that works. Click a site or a day to see it on the main page.
+              </li>
+              <li>
                 <span className="text-bright">Map.</span> The south pole seen from above.
                 Click it to zoom in and pick your own place. The grey relief shows the
                 shape of the ground. It is lit from one side by a made-up light, so its

@@ -55,6 +55,15 @@ Built now:
   dims to 30% and cannot be clicked, fading between steps. Right and Left arrows move
   between steps, Escape closes, and on a phone each step scrolls its target into view.
 
+- Mission planner: a header button opens a panel that answers "where and when can this
+  mission land?" for every site at once. Three starting missions (short lander 14 days,
+  crewed stay 7 days, long rover 100 days with at most 50 h of dark, as planned for VIPER),
+  each with editable needs: length of stay, share of the stay with the Sun and with Earth
+  in view, longest dark spell. Every site is checked hour by hour for all of 2027 and
+  ranked by the number of days with a landing time that works, with a year strip per site
+  and its next landing time. Clicking a site or a day shows it on the main page. Past
+  landings and custom points are listed apart, not ranked.
+
 - Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
   Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
   panel, the header wraps, and the header and play buttons are 40 px tall. The desktop
