@@ -237,13 +237,40 @@ data/.venv/Scripts/python data/repick_pair.py --dem5 data/raw/LRO_LOLA_DEM_SPole
 
 `rim_candidates.json` keeps the scan results behind the computed sites (its `note` says which
 were re-scanned). To change the site list, edit `sites.json` by hand (id, name, lat, lon,
-elevation, source, `mission` for a real mission site, and the optional `note`, left out otherwise), then run
+elevation, source, `mission` for a real mission site, the optional `slope_deg` and the optional `note`, left out otherwise), then run
 `build.py`. Read `elevation_m` from the terrain file.
 
 An optional `note` string may carry a caveat the app shows with the site. Only `artemis3-haworth` has one
 (its centre is on the shadowed crater floor and gets 0 h of Sun). It goes after `mission` in `sites.json`,
 `build.py` copies it through to `public/data/sites.json`, and the data tests require it to be a non-empty
 string when present.
+
+## Ground slope (`slope_deg`)
+
+An optional number on every site: the ground slope at the site in degrees, 0 to under 90, rounded to
+1 decimal. The app shows it on the site card. `slope.py` computes it and can write both `sites.json`
+files (`--write`); `build.py` copies it through, so no rebuild of the hourly files is needed.
+
+- **DEM**: LRO LOLA DEM v4 S Pole, 30 m per pixel (75 deg to the pole). One method for all sites, so
+  the numbers are comparable. The 5 m DEM only reaches 87.5 S, so 9 of the 18 sites have no 5 m cover.
+- **Method**: Horn (1981) 3x3 slope on the 30 m DEM, so the baseline is the 30 m pixel spacing. The
+  gradient is worked out at the four pixel centres around the site and blended bilinearly to the exact
+  point.
+- **Scale**: pixel spacing is the true ground distance, `30 m / terrain.scale_factor(lat)`, as in
+  `terrain.py` (the factor is 1.0 at the pole and about 1.002 at 85 S).
+- **Cross-check** (`slope.py --dem5 ...`): the 5 m DEM averaged into 30 m cells centred on the site,
+  then the same Horn formula. For the 9 sites both DEMs cover, it differs from the 30 m method by
+  0.15 to 1.02 degrees (mean absolute 0.53; largest: `shackleton-shadow` 3.61 vs 2.59 and
+  `shackleton-ridge` 0.97 vs 1.59). Both read the same terrain, so the gap is mostly where the 30 m
+  cell grid falls, and it shows how uncertain a slope this small is. `elevation_m` agrees with the
+  DEM height to a few metres.
+- **Caveat**: this is the slope of a 30 m cell, not of a lander footprint (a few metres). Boulders,
+  small craters and rough ground inside the cell are averaged out, so the slope under a lander can
+  be much steeper or flatter. It also inherits the DEM's error (LOLA data through September 2011).
+
+```bash
+data/.venv/Scripts/python data/slope.py --dem30 <30 m .tif> --dem5 <5 m .tif> --write
+```
 
 ## Known simplifications
 

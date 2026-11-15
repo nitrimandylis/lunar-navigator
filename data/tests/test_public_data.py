@@ -190,6 +190,17 @@ def test_source_site_fields(site):
     if "note" in site:
         assert isinstance(site["note"], str) and site["note"], f"{name}: note must be a non-empty string"
 
+    if "slope_deg" in site:
+        v = site["slope_deg"]
+        assert isinstance(v, (int, float)) and not isinstance(v, bool), f"{name}: slope_deg must be a number"
+        assert 0 <= v < 90, f"{name}: slope_deg {v} not in [0, 90)"
+        assert 0 <= v <= 45, f"{name}: slope_deg {v} implausible for a 30 m LOLA cell (expected 0-45)"
+
+
+def test_slope_deg_public_matches_source():
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("slope_deg") for s in public] == [s.get("slope_deg") for s in SITES]
+
 
 def test_only_haworth_has_note():
     with_note = sorted(s["id"] for s in SITES if "note" in s)
