@@ -120,3 +120,30 @@ export function zoomView(
     size: newSize,
   };
 }
+
+// Which side of a crater its name goes on.
+export type LabelSide = "above" | "below" | "left" | "right";
+
+// Where a crater's name is drawn: just outside its outline, on the chosen
+// side, with the text anchor that goes with that side. centre and radius are
+// the crater's outline in SVG units, gap is the space between the outline and
+// the text, and labelSize is the font size. y is the text baseline.
+export function craterLabelSpot(
+  centre: { x: number; y: number },
+  radius: number,
+  side: LabelSide,
+  gap: number,
+  labelSize: number,
+): { x: number; y: number; anchor: "start" | "middle" | "end" } {
+  if (side === "above") {
+    return { x: centre.x, y: centre.y - radius - gap, anchor: "middle" };
+  }
+  if (side === "left") {
+    return { x: centre.x - radius - gap, y: centre.y + gap, anchor: "end" };
+  }
+  if (side === "right") {
+    return { x: centre.x + radius + gap, y: centre.y + gap, anchor: "start" };
+  }
+  // Below: a full line of text under the outline.
+  return { x: centre.x, y: centre.y + radius + labelSize, anchor: "middle" };
+}

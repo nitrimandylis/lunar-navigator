@@ -13,7 +13,8 @@ Hackathon build, 14-15 Nov 2026. South pole only, calendar years 2027 to 2040, h
 Built now:
 
 - Homepage at `/`: one sentence on what the tool is, the LOLA relief of the south pole with
-  a dot per site (each dot opens that site), one door per kind of visitor (mission planners
+  a dot per site (each dot opens that site), crater names and latitude rings, a ribbon of
+  one real site's Sun and Earth hours for every day of 2027, one door per kind of visitor (mission planners
   to the planner, educators to the tour, everyone else to a site), How it works in three
   steps with the published check and the site card numbers folded away, and the sources.
   It is drawn on the server, with one load-in when it opens. The tool itself lives at

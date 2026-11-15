@@ -2,15 +2,32 @@
 // part made for them, and explains where the numbers come from. It is drawn
 // on the server and ships no JavaScript of its own.
 
+import { CalendarRange, GraduationCap, Telescope } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import type { Site } from "@/lib/data";
-import { projectForMap } from "@/lib/map";
+import { CRATERS } from "@/lib/craters";
+import type { DaySummary, Site } from "@/lib/data";
+import { laneOpacity, shortSiteName } from "@/lib/grid";
+import { craterLabelSpot, kmToMapPx, projectForMap } from "@/lib/map";
 import { GLASER_CHECKS, SOURCE_LINKS } from "@/lib/method";
+import { MONTH_NAMES } from "@/lib/time";
 import sitesJson from "@/public/data/sites.json";
+import ribbonJson from "@/public/data/summary/shackleton-ridge.json";
 
 const SITES: Site[] = sitesJson;
+
+// The year ribbon under the hero shows one real site: every day of 2027 at
+// the lit ridge near Shackleton, from the same file the tool reads.
+const RIBBON_SITE_ID = "shackleton-ridge";
+const RIBBON_DAYS: DaySummary[] = ribbonJson.days;
+const HOURS_PER_DAY = 24;
+
+// The latitude rings drawn on the relief.
+const RING_LATS = [-85, -88];
+// The rings are labelled along this longitude, where no site sits. The map in
+// the tool uses the same one.
+const RING_LABEL_LON = 160;
 
 // The relief picture is round, with the pole in the middle, longitude 0 at
 // the top and latitude -82 at its edge. These are the same numbers the map in
@@ -29,6 +46,7 @@ const DOORS = [
       "checked hour by hour, 2027 to 2040, and ranked by the days you could land.",
     linkText: "Open the planner",
     href: "/app?plan=lander",
+    Icon: CalendarRange,
   },
   {
     audience: "Educators",
@@ -37,6 +55,7 @@ const DOORS = [
       "Ends at Apollo 11 for contrast.",
     linkText: "Start the tour",
     href: "/app?tour=1",
+    Icon: GraduationCap,
   },
   {
     audience: "Everyone else",
@@ -45,6 +64,7 @@ const DOORS = [
       "in one spot.",
     linkText: "Explore a site",
     href: "/app?site=shackleton-ridge",
+    Icon: Telescope,
   },
 ];
 
@@ -74,6 +94,32 @@ const SETTLE =
   LOAD_IN_EASE;
 
 export default function Home() {
+  // The ribbon: the site's name, the year, and its hours of Sun and of Earth
+  // in view, added up over the days.
+  let ribbonSiteName = "";
+  for (const site of SITES) {
+    if (site.id === RIBBON_SITE_ID) {
+      ribbonSiteName = shortSiteName(site.name);
+    }
+  }
+  const ribbonYear = RIBBON_DAYS[0].date.slice(0, 4);
+  let ribbonSunHours = 0;
+  let ribbonEarthHours = 0;
+  // How many days each month has, in order, so the month names can sit under
+  // their own days.
+  const daysInMonth: number[] = [];
+  for (const day of RIBBON_DAYS) {
+    ribbonSunHours = ribbonSunHours + day.sun_hours;
+    ribbonEarthHours = ribbonEarthHours + day.earth_hours;
+    // "2027-03-14" is in month 3, which is index 2.
+    const monthIndex = Number(day.date.slice(5, 7)) - 1;
+    if (daysInMonth.length <= monthIndex) {
+      daysInMonth.push(0);
+    }
+    daysInMonth[monthIndex] = daysInMonth[monthIndex] + 1;
+  }
+  const ribbonTotalHours = RIBBON_DAYS.length * HOURS_PER_DAY;
+
   return (
     <div className="flex flex-col">
       <header className="flex items-center gap-6 border-b border-line px-4 py-3 lg:px-8">
@@ -101,8 +147,10 @@ export default function Home() {
               Where to land at the Moon&apos;s south pole, and when.
             </h1>
             <p className="mt-6 max-w-[34rem] text-lg leading-relaxed">
-              Compare landing sites by hours of sunlight for power and hours of Earth in
-              view for radio. Every hour from 2027 to 2040, with real terrain.
+              Compare landing sites by{" "}
+              <span className="text-power">hours of sunlight for power</span> and{" "}
+              <span className="text-comms">hours of Earth in view for radio</span>. Every
+              hour from 2027 to 2040, with real terrain.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -142,6 +190,71 @@ export default function Home() {
                       className="fill-none stroke-line"
                       strokeWidth={0.5}
                     />
+
+                    {/* Latitude rings and crater names, as on the map in the
+                        tool. The text is too small to read below lg. */}
+                    <g aria-hidden="true">
+                      {RING_LATS.map((lat) => {
+                        const ringRadius = projectForMap(lat, 180, RELIEF_RADIUS, RELIEF_EDGE_LAT).y;
+                        const labelSpot = projectForMap(
+                          lat,
+                          RING_LABEL_LON,
+                          RELIEF_RADIUS,
+                          RELIEF_EDGE_LAT,
+                        );
+                        return (
+                          <g key={lat}>
+                            <circle
+                              cx={0}
+                              cy={0}
+                              r={ringRadius}
+                              className="fill-none stroke-bright/45"
+                              strokeWidth={0.4}
+                              strokeDasharray="1.5 1.5"
+                            />
+                            <text
+                              x={labelSpot.x + 1.5}
+                              y={labelSpot.y + 1.5}
+                              fontSize={3.4}
+                              paintOrder="stroke"
+                              strokeWidth={1.2}
+                              className="fill-foreground stroke-background font-mono max-lg:hidden"
+                            >
+                              {-lat + "° S"}
+                            </text>
+                          </g>
+                        );
+                      })}
+                      {CRATERS.map((crater) => {
+                        const centre = projectForMap(
+                          crater.lat,
+                          crater.lon,
+                          RELIEF_RADIUS,
+                          RELIEF_EDGE_LAT,
+                        );
+                        const craterRadius = kmToMapPx(
+                          crater.diameterKm / 2,
+                          RELIEF_RADIUS,
+                          RELIEF_EDGE_LAT,
+                        );
+                        const label = craterLabelSpot(centre, craterRadius, crater.labelSide, 1.5, 4);
+                        return (
+                          <text
+                            key={crater.name}
+                            x={label.x}
+                            y={label.y}
+                            fontSize={4}
+                            textAnchor={label.anchor}
+                            paintOrder="stroke"
+                            strokeWidth={1.4}
+                            className="fill-bright stroke-background italic max-lg:hidden"
+                          >
+                            {crater.name}
+                          </text>
+                        );
+                      })}
+                    </g>
+
                     {SITES.map((site) => {
                       const spot = projectForMap(site.lat, site.lon, RELIEF_RADIUS, RELIEF_EDGE_LAT);
                       const isMission = site.mission !== undefined;
@@ -189,22 +302,93 @@ export default function Home() {
               </div>
             </div>
             <figcaption className="z-10 px-4 py-3 text-xs text-muted-foreground lg:absolute lg:bottom-5 lg:left-8 lg:max-w-[34rem] lg:p-0">
-              LOLA terrain out to 82° S, lit by a made-up light, not the real Sun. Each
-              dot is a site in the tool. Ringed dots are real mission targets.
+              LOLA terrain out to 82° S, seen from above with Earth towards the top. It
+              is lit by a made-up light, not the real Sun. Each dot is a site in the
+              tool. Ringed dots are real mission targets.
             </figcaption>
           </figure>
         </section>
 
-        {/* One door per kind of visitor. */}
+        {/* A year of real data for one site, drawn the way the tool draws a
+            day: an orange lane for the Sun and a blue lane for Earth. */}
+        <section className="flex flex-col gap-3 border-b border-line bg-panel/50 px-4 py-6 lg:px-8">
+          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-1 text-sm">
+            <p className="text-bright">
+              {ribbonSiteName}, every day of {ribbonYear}
+            </p>
+            <p className="lg:ml-auto">
+              <span className="text-power">
+                {Math.round(ribbonSunHours).toLocaleString("en-US")}
+              </span>{" "}
+              hours of Sun and{" "}
+              <span className="text-comms">
+                {Math.round(ribbonEarthHours).toLocaleString("en-US")}
+              </span>{" "}
+              with Earth in view, out of {ribbonTotalHours.toLocaleString("en-US")}
+            </p>
+          </div>
+          <svg
+            role="img"
+            aria-label={
+              "Hours of Sun and hours with Earth in view at " +
+              ribbonSiteName +
+              ", for each day of " +
+              ribbonYear +
+              "."
+            }
+            viewBox={"0 0 " + RIBBON_DAYS.length + " 21"}
+            preserveAspectRatio="none"
+            shapeRendering="crispEdges"
+            className="h-12 w-full"
+          >
+            {/* The two empty lanes, then one mark per day with any hours.
+                Stronger colour means more hours, as in the tool. */}
+            <rect x={0} y={0} width={RIBBON_DAYS.length} height={10} className="fill-neither" />
+            <rect x={0} y={11} width={RIBBON_DAYS.length} height={10} className="fill-neither" />
+            {RIBBON_DAYS.map((day, index) => {
+              const power = laneOpacity(day.sun_hours, HOURS_PER_DAY);
+              const comms = laneOpacity(day.earth_hours, HOURS_PER_DAY);
+              return (
+                <g key={day.date}>
+                  {power > 0 && (
+                    <rect x={index} y={0} width={1} height={10} className="fill-power" opacity={power} />
+                  )}
+                  {comms > 0 && (
+                    <rect x={index} y={11} width={1} height={10} className="fill-comms" opacity={comms} />
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+          {/* Each month name is as wide as its days. */}
+          <div aria-hidden="true" className="flex text-xs text-muted-foreground">
+            {daysInMonth.map((days, monthIndex) => (
+              <span
+                key={monthIndex}
+                style={{ flexGrow: days }}
+                className="basis-0 border-l border-line pl-1 max-sm:overflow-hidden"
+              >
+                {MONTH_NAMES[monthIndex]}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* One door per kind of visitor. The whole door is the link. */}
         <section className="grid divide-y divide-line border-b border-line lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           {DOORS.map((door) => (
-            <div key={door.audience} className="flex flex-col gap-3 px-4 py-8 lg:px-8 lg:py-10">
+            <Link
+              key={door.audience}
+              href={door.href}
+              className="group flex flex-col gap-3 px-4 py-8 transition-colors duration-150 ease-out hover:bg-panel motion-reduce:transition-none lg:px-8 lg:py-10"
+            >
+              <door.Icon aria-hidden="true" strokeWidth={1.5} className="size-6 text-power" />
               <h2 className="text-xl font-medium text-bright">{door.audience}</h2>
               <p className="max-w-[34rem] leading-relaxed">{door.text}</p>
-              <Link href={door.href} className={"mt-auto self-start pt-2 " + TEXT_LINK}>
+              <span className="mt-auto self-start pt-2 text-bright underline decoration-muted-foreground underline-offset-4 group-hover:decoration-power">
                 {door.linkText}
-              </Link>
-            </div>
+              </span>
+            </Link>
           ))}
         </section>
 
@@ -214,11 +398,17 @@ export default function Home() {
         >
           <h2 className="text-2xl font-medium text-bright">How it works</h2>
           <div className="flex flex-col gap-8 leading-relaxed">
-            <ol className="flex flex-col gap-4">
+            {/* The steps are a sequence, so a line joins each number to the next. */}
+            <ol className="flex flex-col">
               {STEPS.map((step, index) => (
                 <li key={step} className="flex gap-5">
-                  <span className="font-mono text-bright">{index + 1}</span>
-                  <p>{step}</p>
+                  <div className="flex flex-col items-center">
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-sm border border-line bg-panel font-mono text-sm text-bright">
+                      {index + 1}
+                    </span>
+                    {index < STEPS.length - 1 && <span className="w-px flex-1 bg-line" />}
+                  </div>
+                  <p className="pt-1 pb-6">{step}</p>
                 </li>
               ))}
             </ol>
