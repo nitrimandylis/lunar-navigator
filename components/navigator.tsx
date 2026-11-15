@@ -107,6 +107,8 @@ function Panel({
   isHighlighted,
   isDimmed,
   className,
+  headerRight,
+  isHero,
   children,
 }: {
   title: string;
@@ -116,6 +118,11 @@ function Panel({
   // True while the guided tour points somewhere else.
   isDimmed: boolean;
   className?: string;
+  // Controls on the right of the title line, from lg up. Optional.
+  headerRight?: React.ReactNode;
+  // True for the main panel of the page. From lg up it is the only panel with
+  // a border, and its title is bigger, so the eye lands on it first.
+  isHero?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -123,7 +130,9 @@ function Panel({
       aria-label={title}
       inert={isDimmed}
       className={cn(
-        "rounded-lg border border-line bg-panel px-4 py-3",
+        "rounded-lg border border-line bg-panel px-4 py-3 lg:px-5",
+        // The border stays 1 px wide and turns see-through, so nothing moves.
+        isHero !== true && "lg:border-transparent",
         TOUR_FADE,
         isHighlighted && "ring-2 ring-bright",
         isDimmed && TOUR_DIM,
@@ -133,10 +142,15 @@ function Panel({
       {/* On a narrow screen a long caption wraps under the title. From lg up
           it stays on the title's line and is cut short. */}
       <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 lg:flex-nowrap lg:gap-3">
-        <h2 className="shrink-0 text-sm font-medium text-bright">{title}</h2>
+        <h2 className={cn("shrink-0 text-sm font-medium text-bright", isHero === true && "lg:text-base")}>
+          {title}
+        </h2>
         <p className="min-w-0 text-xs text-muted-foreground lg:truncate" title={caption}>
           {caption}
         </p>
+        {headerRight !== undefined && (
+          <div className="ml-auto shrink-0 self-center max-lg:hidden">{headerRight}</div>
+        )}
       </div>
       {children}
     </section>
@@ -518,6 +532,9 @@ export function Navigator() {
       setSelectedSiteId(id);
       setPickedPoint(null);
       showTab("site");
+      // The big map holds the form from lg up. It stays open if adding failed,
+      // so the error shows next to the fields.
+      setIsMapOpen(false);
     } catch {
       setCustomError("Could not load the Sun and Earth positions. Try again.");
     }
@@ -584,36 +601,35 @@ export function Navigator() {
   }
   const isTourOpen = tourStepIndex !== null;
 
-  // Sort and the planner only matter next to the grid. From lg up they sit in
-  // the header; below lg at the top of the Sites tab.
-  const sortAndPlan = (
-    <>
-      <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
-      {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
-      <button
-        type="button"
-        onClick={() => openPlanner(MISSION_PRESETS[0].id, sites)}
-        className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
-      >
-        Plan a mission
-      </button>
-    </>
+  // Sort only orders the grid, so from lg up it sits on the Sites panel's
+  // title line. The planner button sits in the header. Below lg both are at
+  // the top of the Sites tab.
+  const sortControl = <SortControl sortKey={sortKey} onChangeSort={setSortKey} />;
+  const planButton = (
+    // min-h-10 makes the button 40 px tall on a narrow screen, big enough for a thumb.
+    <button
+      type="button"
+      onClick={() => openPlanner(MISSION_PRESETS[0].id, sites)}
+      className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
+    >
+      Plan a mission
+    </button>
   );
 
   return (
     // Below lg (1024 px) the page is as tall as its panels and scrolls. From lg
     // up it is exactly one screen tall.
     <div className="flex flex-col lg:h-dvh">
-      {/* The header wraps onto as many lines as it needs. Only from 2xl
-          (1536 px) up is the screen wide enough to hold it all on one line.
+      {/* The header wraps onto as many lines as it needs. From "wide"
+          (1344 px) up the screen holds it all on one line.
           Below lg it is two lines: the title with Tour and About, then the
           months in one row that scrolls sideways. */}
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 2xl:flex-nowrap 2xl:gap-6">
+      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 lg:px-8 wide:flex-nowrap wide:gap-4">
         {/* Below lg the title takes the room the buttons leave, and wraps
             onto a second line rather than push them down. */}
         <h1
           className={cn(
-            "text-base font-medium text-bright max-lg:min-w-0 max-lg:flex-1 lg:text-lg",
+            "text-base font-medium text-bright max-lg:min-w-0 max-lg:flex-1 lg:text-lg wide:whitespace-nowrap",
             TOUR_FADE,
             isTourOpen && TOUR_DIM,
           )}
@@ -641,12 +657,12 @@ export function Navigator() {
         <div
           inert={isTourOpen}
           className={cn(
-            "ml-auto flex shrink-0 items-center gap-2 lg:gap-4",
+            "ml-auto flex shrink-0 items-center gap-2 lg:gap-3",
             TOUR_FADE,
             isTourOpen && TOUR_DIM,
           )}
         >
-          <div className="contents max-lg:hidden">{sortAndPlan}</div>
+          <div className="contents max-lg:hidden">{planButton}</div>
           <button
             type="button"
             onClick={() => showTourStep(0)}
@@ -671,13 +687,17 @@ export function Navigator() {
           From lg up the page is exactly one screen tall. Each column fills the
           space under the header: the Sites panel and the map take what the other
           panels leave, so the rows and the map shrink instead of the page scrolling. */}
-      <main className="flex flex-col gap-3 p-3 max-lg:pb-20 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
+      <main className="flex flex-col gap-3 p-3 max-lg:pb-20 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1fr)_520px]">
         <div className={cn("flex flex-col gap-3 lg:min-h-0", phoneTab === "map" && "max-lg:hidden")}>
           <Panel
             title="Sites"
-            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view. Stronger colour means more hours. Times are UTC."
+            // The legend under the grid names the colours, so the caption does
+            // not: with Sort on the same line it has to stay short.
+            caption="Each row is a place, each square a day. Stronger colour means more hours. Times are UTC."
             isHighlighted={tourTarget === "sites"}
             isDimmed={isTourOpen && tourTarget !== "sites"}
+            headerRight={sortControl}
+            isHero
             // Stacked, a tooltip near the right edge is cut off at the panel's
             // side, so it never makes the page scroll sideways.
             className={cn(
@@ -685,7 +705,10 @@ export function Navigator() {
               phoneTab !== "sites" && "max-lg:hidden",
             )}
           >
-            <div className="mb-2 flex flex-wrap items-center gap-2 lg:hidden">{sortAndPlan}</div>
+            <div className="mb-2 flex flex-wrap items-center gap-2 lg:hidden">
+              {sortControl}
+              {planButton}
+            </div>
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
             )}
@@ -721,12 +744,14 @@ export function Navigator() {
             isDimmed={isTourOpen && tourTarget !== "selected"}
             className={cn(phoneTab !== "site" && "max-lg:hidden")}
           >
-            {/* From lg: numbers on the left, the sky and the charts on the right.
-                Below lg the two columns dissolve ("contents") and the order
-                classes put everything in one column: name and verdict, time
-                controls, sky, the two numbers, charts, then the buttons. */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[23rem_minmax(0,1fr)] lg:gap-6">
-              <div className="flex flex-col gap-3 max-lg:contents">
+            {/* Below lg everything is one column, put in order by the order
+                classes: name and verdict, time controls, sky, the two numbers,
+                charts, then the buttons.
+                From lg the verdict and the numbers are not here: they have
+                their own panel, top right, and this one keeps the sky and
+                the charts. */}
+            <div className="grid grid-cols-1 gap-4 lg:block">
+              <div className="max-lg:contents lg:hidden">
                 <SelectedSite
                   row={selectedRow}
                   hourly={selectedHourly}
@@ -743,8 +768,9 @@ export function Navigator() {
                 </div>
               </div>
               {/* The time controls, then the sky at the selected hour, then
-                  the month's clearance charts. */}
-              <div className="flex min-w-0 flex-col gap-1 max-lg:contents">
+                  the month's clearance charts. From "wide" the charts stand
+                  in their own column on the right, one above the other. */}
+              <div className="flex min-w-0 flex-col gap-1 max-lg:contents wide:grid wide:grid-cols-[minmax(0,1fr)_300px] wide:grid-rows-[auto_minmax(0,1fr)] wide:gap-x-6 2xl:grid-cols-[minmax(0,1fr)_420px]">
                 {selectedHourly !== null && (
                   // Below lg the page scrolls, so the controls stick to the
                   // top of the screen and stay in reach of a thumb.
@@ -766,7 +792,7 @@ export function Navigator() {
                     selectedHour={selectedHour}
                   />
                 </div>
-                <div className="min-w-0 max-lg:order-3">
+                <div className="min-w-0 max-lg:order-3 wide:col-start-2 wide:row-span-2 wide:row-start-1">
                   <ClearanceCharts
                     row={selectedRow}
                     hourly={selectedHourly}
@@ -781,6 +807,30 @@ export function Navigator() {
         </div>
 
         <div className={cn("flex flex-col gap-3 lg:min-h-0", phoneTab !== "map" && "max-lg:hidden")}>
+          {/* From lg only: the selected site in words and numbers. Below lg
+              the same two components sit in the Selected site tab instead. */}
+          <Panel
+            title="Verdict"
+            caption="The selected site this month, then this hour."
+            isHighlighted={tourTarget === "selected"}
+            isDimmed={isTourOpen && tourTarget !== "selected"}
+            className="max-lg:hidden"
+          >
+            <div className="flex flex-col gap-3">
+              <SelectedSite
+                row={selectedRow}
+                hourly={selectedHourly}
+                hourlyFailed={selectedHourlyFailed}
+                selectedHour={selectedHour}
+              />
+              <SiteActions
+                site={selectedRow === null ? null : selectedRow.site}
+                isCustom={selectedRow !== null && selectedRow.isCustom}
+                hourly={selectedHourly}
+                selectedHour={selectedHour}
+              />
+            </div>
+          </Panel>
 
           <Panel
             title="South pole"
@@ -793,30 +843,37 @@ export function Navigator() {
                 the big map, where points are picked. Stacked, the grid no
                 longer gives the map a height, so it is a square as wide as
                 the panel, at most 480 px tall. */}
-            <div className="relative aspect-square max-h-[480px] cursor-zoom-in lg:aspect-auto lg:max-h-none lg:min-h-0 lg:flex-1">
-              <SouthPoleMap
-                rows={mapRows}
-                selectedSiteId={selectedSiteId}
-                pickedPoint={pickedPoint}
-                onSelectSite={pickSite}
-                onEmptyClick={() => setIsMapOpen(true)}
-                emptyClickHint="Click empty ground to open the big map and pick a point."
-              />
+            <div className="relative flex flex-col lg:min-h-0 lg:flex-1">
+              <div className="aspect-square max-h-[480px] cursor-zoom-in lg:aspect-auto lg:max-h-none lg:min-h-0 lg:flex-1">
+                <SouthPoleMap
+                  rows={mapRows}
+                  selectedSiteId={selectedSiteId}
+                  pickedPoint={pickedPoint}
+                  onSelectSite={pickSite}
+                  onEmptyClick={() => setIsMapOpen(true)}
+                  emptyClickHint="Click empty ground to open the big map and pick a point."
+                />
+              </div>
+              {/* Below lg the button sits on the map's top right corner. From
+                  lg it has its own line under the map, so it covers nothing. */}
               <button
                 type="button"
                 onClick={() => setIsMapOpen(true)}
-                className="absolute top-0 right-0 rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+                className="absolute top-0 right-0 rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:static lg:mt-2 lg:self-end"
               >
-                Zoom in
+                <span className="lg:hidden">Zoom in</span>
+                <span className="max-lg:hidden">Zoom in or add a point</span>
               </button>
             </div>
           </Panel>
 
+          {/* Below lg only. From lg up the same form is inside the big map. */}
           <Panel
             title="Custom point"
             caption="Try any place on the Moon."
             isHighlighted={false}
             isDimmed={isTourOpen}
+            className="lg:hidden"
           >
             <CustomSiteForm
               pickedPoint={pickedPoint}
@@ -888,13 +945,11 @@ export function Navigator() {
           rows={mapRows}
           selectedSiteId={selectedSiteId}
           pickedPoint={pickedPoint}
-          isCustomFull={customSites.length >= MAX_CUSTOM_SITES}
+          customCount={customSites.length}
+          customError={customError}
           onSelectSite={selectSite}
           onPickPoint={(lat, lon) => setPickedPoint({ lat: lat, lon: lon })}
-          onAddPoint={(lat, lon) => {
-            addCustomSite(lat, lon);
-            setIsMapOpen(false);
-          }}
+          onAddPoint={addCustomSite}
           onClose={() => setIsMapOpen(false)}
         />
       )}

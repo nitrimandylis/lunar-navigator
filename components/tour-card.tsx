@@ -11,7 +11,7 @@ export type TourCardProps = {
 };
 
 // The card that tells the guided tour, one step at a time. It sits in the
-// bottom right corner, over the custom point form, which no step points at.
+// bottom right corner, over the map, which no step points at.
 // It fades and slides up when the tour opens. On each step the title and the
 // text fade in: their key is the step number, so React draws them afresh and
 // the fade plays again. The buttons stay still, so Next never moves away from

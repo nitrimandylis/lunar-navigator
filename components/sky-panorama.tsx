@@ -26,7 +26,7 @@ export type SkyPanoramaProps = {
 // wide and flat. Below lg a narrower, taller drawing is used instead: the wide
 // one squeezed onto a phone would make its labels about 5 px tall.
 const WIDE_WIDTH = 620;
-const WIDE_HEIGHT = 116;
+const WIDE_HEIGHT = 150;
 const PHONE_WIDTH = 360;
 const PHONE_HEIGHT = 150;
 // Margins around the plot, the same in both drawings.
@@ -110,7 +110,7 @@ function BodyMarker({
         x={labelX}
         y={labelY}
         textAnchor="middle"
-        className="fill-bright text-[11px]"
+        className="fill-bright text-xs"
       >
         {name}
       </text>
@@ -212,7 +212,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
               x={LEFT - 6}
               y={yFor(tick) + 4}
               textAnchor="end"
-              className="fill-muted-foreground font-mono text-[11px] tabular-nums"
+              className="fill-muted-foreground font-mono text-xs tabular-nums"
             >
               {tick + "°"}
             </text>
@@ -267,7 +267,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
                 x={xAt(label.azDeg)}
                 y={height - 2}
                 textAnchor={label.anchor}
-                className="fill-muted-foreground font-mono text-[11px]"
+                className="fill-muted-foreground font-mono text-xs"
               >
                 {label.word}
               </text>

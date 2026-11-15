@@ -24,12 +24,12 @@ test("isoToHour reads the later years too", () => {
   assert.equal(isoToHour("2028-01-01T00:00Z"), 365 * 24);
   assert.equal(isoToHour("2028-02-29T07:00Z"), (365 + 31 + 28) * 24 + 7);
   assert.equal(hourToIso((365 + 31 + 28) * 24 + 7), "2028-02-29T07:00Z");
-  assert.equal(isoToHour("2030-12-31T23:00Z"), 1461 * 24 - 1);
+  assert.equal(isoToHour("2040-12-31T23:00Z"), 5114 * 24 - 1);
 });
 
 test("isoToHour rejects anything that is not a whole hour inside the data", () => {
   assert.equal(isoToHour("2026-12-31T23:00Z"), null);
-  assert.equal(isoToHour("2031-01-01T00:00Z"), null);
+  assert.equal(isoToHour("2041-01-01T00:00Z"), null);
   // 2027 is not a leap year, so it has no 29 February.
   assert.equal(isoToHour("2027-02-29T00:00Z"), null);
   assert.equal(isoToHour("2027-03-01T05:30Z"), null);

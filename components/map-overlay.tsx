@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { PickedPoint, SiteRow } from "@/lib/app-types";
+import { CustomSiteForm } from "@/components/custom-site-form";
+import { MAX_CUSTOM_SITES, type PickedPoint, type SiteRow } from "@/lib/app-types";
 import { clampView, zoomView, type MapView } from "@/lib/map";
 import { FULL_VIEW, MAP_RADIUS, SouthPoleMap, latLonAt, screenToMap } from "@/components/south-pole-map";
 
@@ -10,8 +11,10 @@ export type MapOverlayProps = {
   rows: SiteRow[];
   selectedSiteId: string | null;
   pickedPoint: PickedPoint | null;
-  // True when no more custom points can be added.
-  isCustomFull: boolean;
+  // How many custom points exist already. The limit is MAX_CUSTOM_SITES.
+  customCount: number;
+  // A message when adding a custom point failed, or null.
+  customError: string | null;
   onSelectSite: (siteId: string) => void;
   onPickPoint: (lat: number, lon: number) => void;
   // Add the picked point as a custom site.
@@ -35,12 +38,14 @@ export function MapOverlay({
   rows,
   selectedSiteId,
   pickedPoint,
-  isCustomFull,
+  customCount,
+  customError,
   onSelectSite,
   onPickPoint,
   onAddPoint,
   onClose,
 }: MapOverlayProps) {
+  const isCustomFull = customCount >= MAX_CUSTOM_SITES;
   const [view, setView] = useState<MapView>(FULL_VIEW);
   const [pointerLatLon, setPointerLatLon] = useState<PickedPoint | null>(null);
   // How many pixels across the map is drawn. Measured once it is on screen
@@ -191,9 +196,9 @@ export function MapOverlay({
       role="dialog"
       aria-modal="true"
       aria-label="South pole map, zoomed"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-background/85 p-4 backdrop-blur-sm duration-200 fade-in motion-reduce:animate-none"
     >
-      <div className="flex h-full max-h-[calc(100dvh-2rem)] w-full max-w-[min(100%,calc(100dvh+12rem))] flex-col rounded-lg border border-line bg-panel">
+      <div className="flex h-full max-h-[calc(100dvh-2rem)] w-full max-w-[min(100%,calc(100dvh+12rem))] animate-in duration-200 fade-in slide-in-from-bottom-2 motion-reduce:animate-none flex-col rounded-lg border border-line bg-panel lg:max-w-[min(100%,calc(100dvh+30rem))]">
         <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 text-sm">
           <h2 className="font-medium text-bright">South pole</h2>
           <p className="font-mono tabular-nums text-muted-foreground">
@@ -240,36 +245,51 @@ export function MapOverlay({
           </div>
         </header>
 
-        <div
-          ref={boxRef}
-          className="min-h-0 flex-1 cursor-crosshair touch-none p-2"
-          onWheel={handleWheel}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onPointerLeave={() => setPointerLatLon(null)}
-        >
-          <SouthPoleMap
-            rows={rows}
-            selectedSiteId={selectedSiteId}
-            pickedPoint={pickedPoint}
-            view={view}
-            drawnSizePx={drawnSizePx / OVERLAY_TEXT_SCALE}
-            onSelectSite={handleSelectSite}
-            onEmptyClick={handleEmptyClick}
-            emptyClickHint="Scroll to zoom, drag to move, click empty ground to pick a point."
-          />
+        {/* The map, and from lg the custom point form in a strip on its right. */}
+        <div className="flex min-h-0 flex-1">
+          <div
+            ref={boxRef}
+            className="min-h-0 min-w-0 flex-1 cursor-crosshair touch-none p-2"
+            onWheel={handleWheel}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerLeave={() => setPointerLatLon(null)}
+          >
+            <SouthPoleMap
+              rows={rows}
+              selectedSiteId={selectedSiteId}
+              pickedPoint={pickedPoint}
+              view={view}
+              drawnSizePx={drawnSizePx / OVERLAY_TEXT_SCALE}
+              onSelectSite={handleSelectSite}
+              onEmptyClick={handleEmptyClick}
+              emptyClickHint="Scroll to zoom, drag to move, click empty ground to pick a point."
+            />
+          </div>
+          {/* A click on the map fills the two fields. Typing reaches the whole
+              Moon; clicks stay inside this map. Below lg the form has its own
+              panel under the small map, so it is not shown here. */}
+          <aside className="w-72 shrink-0 overflow-y-auto border-l border-line p-4 max-lg:hidden">
+            <h3 className="mb-2 text-sm font-medium text-bright">Add a custom point</h3>
+            <CustomSiteForm
+              pickedPoint={pickedPoint}
+              customCount={customCount}
+              error={customError}
+              onAdd={onAddPoint}
+            />
+          </aside>
         </div>
 
         <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line px-4 py-2 text-sm">
-          {pickedPoint === null && (
-            <p className="text-muted-foreground">
-              Scroll to zoom, drag to move. Click empty ground to pick a point.
-            </p>
-          )}
+          {/* From lg the hint is always here: the picked point shows in the
+              form on the right, which has its own Add button. */}
+          <p className={pickedPoint === null ? "text-muted-foreground" : "text-muted-foreground max-lg:hidden"}>
+            Scroll to zoom, drag to move. Click empty ground to pick a point.
+          </p>
           {pickedPoint !== null && (
-            <>
+            <div className="contents lg:hidden">
               <p className="font-mono tabular-nums text-bright">
                 Picked {pickedPoint.lat.toFixed(3)}°, {pickedPoint.lon.toFixed(3)}°
               </p>
@@ -286,7 +306,12 @@ export function MapOverlay({
                   3 custom points already. Remove one in the grid first.
                 </p>
               )}
-            </>
+              {customError !== null && (
+                <p role="alert" className="text-bright">
+                  {customError}
+                </p>
+              )}
+            </div>
           )}
         </footer>
       </div>

@@ -5,11 +5,11 @@ export function Legend() {
       <h3 className="sr-only">Legend</h3>
       <span className="flex items-center gap-1.5">
         <span aria-hidden="true" className="size-2.5 shrink-0 rounded-xs bg-power" />
-        Power: hours of sunlight
+        Power: sunlight
       </span>
       <span className="flex items-center gap-1.5">
         <span aria-hidden="true" className="size-2.5 shrink-0 rounded-xs bg-comms" />
-        Comms: hours Earth is in view for radio contact
+        Comms: Earth in view for radio contact
       </span>
       <span className="flex items-center gap-1.5">
         <span aria-hidden="true" className="size-2.5 shrink-0 rounded-xs border border-line bg-neither" />
@@ -17,7 +17,7 @@ export function Legend() {
       </span>
       <span className="flex items-center gap-1.5">
         {/* shrink-0 keeps the tag on one line when the text beside it wraps. */}
-        <span aria-hidden="true" className="shrink-0 rounded-sm bg-bright px-1.5 text-[11px] font-medium text-background">
+        <span aria-hidden="true" className="shrink-0 rounded-sm bg-bright px-1.5 text-xs font-medium text-background">
           IM-2
         </span>
         Real mission target. Other sites are computed from LOLA terrain.

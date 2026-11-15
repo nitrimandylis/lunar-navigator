@@ -97,9 +97,9 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
       role="dialog"
       aria-modal="true"
       aria-label="About this page"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-background/85 p-4 backdrop-blur-sm duration-200 fade-in motion-reduce:animate-none"
     >
-      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-3xl flex-col rounded-lg border border-line bg-panel">
+      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-3xl animate-in duration-200 fade-in slide-in-from-bottom-2 motion-reduce:animate-none flex-col rounded-lg border border-line bg-panel">
         <header className="flex items-center gap-4 border-b border-line px-5 py-3">
           <h2 className="font-medium text-bright">About this page</h2>
           <button
@@ -152,7 +152,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
               <li>
                 <span className="text-bright">Plan a mission.</span> Pick a kind of
                 mission and how much Sun and Earth it needs. Every site is then checked
-                hour by hour for all four years, and ranked by how many days have a
+                hour by hour for every year, and ranked by how many days have a
                 landing time that works. Click a site or a day to see it on the main page.
               </li>
               <li>
@@ -196,7 +196,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
             <ul className="flex list-disc flex-col gap-1.5 pl-5">
               <li>
                 Sun and Earth positions come from NASA/JPL Horizons, for every hour from
-                2027 to 2030, as seen from each site.
+                2027 to 2040, as seen from each site.
               </li>
               <li>
                 The ground comes from the LOLA laser altimeter on NASA&apos;s Lunar
@@ -290,7 +290,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 It is geometry only: when the Sun and Earth are above the ground. It is not
                 a power budget, a temperature model or a radio link budget.
               </li>
-              <li>It covers 2027 to 2030, one sample per hour, in UTC.</li>
+              <li>It covers 2027 to 2040, one sample per hour, in UTC.</li>
               <li>
                 Past landings and custom points use a smooth Moon with no terrain, so they
                 are shown apart and never ranked against the south pole sites.

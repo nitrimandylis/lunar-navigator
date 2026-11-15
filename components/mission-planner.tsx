@@ -52,7 +52,7 @@ type SiteResult = {
   goodDays: number;
 };
 
-// "2027 to 2030", for the texts below.
+// "2027 to 2040", for the texts below.
 const YEARS_TEXT = FIRST_YEAR + " to " + LAST_YEAR;
 
 // The day index on which a year starts. 2028 gives 365.
@@ -149,7 +149,7 @@ function NumberField({
   );
 }
 
-// Every day of the four years as one thin strip: a bright bar on every day
+// Every day of all the years as one thin strip: a bright bar on every day
 // with a landing hour that works. Clicking the strip shows that day on the main page.
 function YearStrip({
   result,
@@ -204,7 +204,7 @@ function YearStrip({
 
 // A full-screen panel that answers "where and when can this mission land?"
 // for every site at once. The user picks a kind of mission, and the panel
-// ranks the sites by how many days from 2027 to 2030 have a landing time
+// ranks the sites by how many days from 2027 to 2040 have a landing time
 // that works.
 export function MissionPlanner({
   rows,
@@ -393,7 +393,7 @@ export function MissionPlanner({
         >
           <span className="truncate">{shortSiteName(site.name)}</span>
           {site.mission !== undefined && (
-            <span className="shrink-0 rounded-sm bg-bright px-1.5 text-[11px] font-medium text-background">
+            <span className="shrink-0 rounded-sm bg-bright px-1.5 text-xs font-medium text-background">
               {site.mission}
             </span>
           )}
@@ -426,9 +426,9 @@ export function MissionPlanner({
       role="dialog"
       aria-modal="true"
       aria-label="Mission planner"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-background/85 p-4 backdrop-blur-sm duration-200 fade-in motion-reduce:animate-none"
     >
-      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col rounded-lg border border-line bg-panel">
+      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl animate-in duration-200 fade-in slide-in-from-bottom-2 motion-reduce:animate-none flex-col rounded-lg border border-line bg-panel">
         <header className="flex items-center gap-4 border-b border-line px-5 py-3">
           <h2 className="font-medium text-bright">Mission planner</h2>
           <p className="hidden text-xs text-muted-foreground sm:block">
@@ -520,9 +520,11 @@ export function MissionPlanner({
               <div className="grid grid-cols-[1.5rem_17rem_minmax(14rem,1fr)_3.5rem_13rem_6.5rem] items-end gap-x-3 pb-1 text-xs text-muted-foreground">
                 <span />
                 <span>Site</span>
-                {/* The years sit over the strips, each where its year starts. */}
+                {/* The years sit over the strips, each where its year starts.
+                    Only every other year gets a label, so 14 labels do not
+                    run into each other on a narrow strip. */}
                 <span className="relative block h-4 font-mono tabular-nums">
-                  {YEARS.map((year) => (
+                  {YEARS.filter((year) => (year - FIRST_YEAR) % 2 === 0).map((year) => (
                     <span
                       key={year}
                       className="absolute"

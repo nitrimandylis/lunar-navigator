@@ -101,7 +101,7 @@ function ClearanceChart({
           <text
             x={x + 2}
             y={HEIGHT - 4}
-            className="fill-muted-foreground font-mono text-[11px] tabular-nums"
+            className="fill-muted-foreground font-mono text-xs tabular-nums"
           >
             {day + 1}
           </text>
@@ -133,7 +133,7 @@ function ClearanceChart({
               x={LEFT - 6}
               y={yFor(tick) + 4}
               textAnchor="end"
-              className="fill-muted-foreground font-mono text-[11px] tabular-nums"
+              className="fill-muted-foreground font-mono text-xs tabular-nums"
             >
               {tick + "°"}
             </text>
@@ -223,7 +223,7 @@ export function ClearanceCharts({
 
   return (
     // Side by side from lg. Below lg one chart per row, so each is twice as big.
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 wide:grid-cols-1 wide:gap-2">
       <ClearanceChart
         title="Sun"
         body="sun"

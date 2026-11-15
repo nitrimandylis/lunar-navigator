@@ -2,8 +2,17 @@ import type { Hourly, SiteRow } from "@/lib/app-types";
 import { clearanceSeries, countdownText } from "@/lib/clearance";
 import { sunPercent } from "@/lib/data";
 import { daysOfMonth, shortSiteName } from "@/lib/grid";
-import { formatHour, monthName, monthOfHour } from "@/lib/time";
+import {
+  firstDayOfMonth,
+  firstMonthOfYear,
+  formatHour,
+  monthName,
+  monthOfHour,
+} from "@/lib/time";
 import { monthVerdict } from "@/lib/verdict";
+
+// The days of 2027 to 2030, the years sun_pct_10m in sites.json covers.
+const DAYS_2027_TO_2030 = firstDayOfMonth(firstMonthOfYear(2031));
 
 export type SelectedSiteProps = {
   // The selected site, or null when nothing is selected.
@@ -49,6 +58,10 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
     earthClearance = clearanceSeries(hourly, "earth", selectedHour, selectedHour + 1)[0];
   }
 
+  // What the two big numbers are measured from: the terrain, or a flat
+  // horizon for a site with no terrain.
+  const aboveWhat = row.isReference || row.isCustom ? "above horizon" : "above terrain";
+
   return (
     // The verdict first, then where and when, then the Sun and the Earth,
     // each with its height above the terrain, raw elevation and countdown.
@@ -56,7 +69,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
     // between the verdict and the numbers.
     <div className="flex flex-col gap-3 text-sm max-lg:contents">
       {verdict !== "" && (
-        <p className="text-xl leading-snug text-bright">{verdict}</p>
+        <p className="text-xl leading-snug text-bright lg:text-base">{verdict}</p>
       )}
 
       <div className="text-xs">
@@ -64,7 +77,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         {verdict === "" && <p className="text-sm text-bright">{shortSiteName(site.name)}</p>}
         <p className="font-mono tabular-nums text-muted-foreground">
           {site.mission !== undefined && (
-            <span className="mr-2 rounded-sm bg-bright px-1.5 font-sans text-[11px] font-medium text-background">
+            <span className="mr-2 rounded-sm bg-bright px-1.5 font-sans text-xs font-medium text-background">
               {site.mission}
             </span>
           )}
@@ -78,14 +91,15 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         )}
         {/* Facts that do not change with the hour, from optional fields of
             sites.json, in one paragraph to keep the card short. row.days
-            holds every day of 2027 to 2030, worked out from 2 m up. */}
+            holds every day of 2027 to 2040, worked out from 2 m up. sun_pct_10m
+            only covers 2027 to 2030, so the 2 m figure uses those days too. */}
         {(site.sun_pct_10m !== undefined ||
           site.slope_deg !== undefined ||
           site.psr_km !== undefined) && (
           <p className="text-muted-foreground">
             {site.sun_pct_10m !== undefined && (
               <>
-                Sun 2027 to 2030: {sunPercent(row.days).toFixed(1)}% at 2 m,{" "}
+                Sun 2027 to 2030: {sunPercent(row.days.slice(0, DAYS_2027_TO_2030)).toFixed(1)}% at 2 m,{" "}
                 {site.sun_pct_10m.toFixed(1)}% at 10 m.{" "}
               </>
             )}
@@ -114,28 +128,27 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         // Sun and Earth side by side: height above the terrain, raw
         // elevation, and the countdown to the next change.
         <div className="grid grid-cols-2 gap-x-4 max-lg:order-2">
-          <p className="col-span-2 text-muted-foreground">
-            {row.isReference || row.isCustom ? "Above the horizon" : "Above terrain"}
-          </p>
           <div>
+            <p className="text-muted-foreground">Sun {aboveWhat}</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-power">
               {sunClearance.toFixed(2)}°
             </p>
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            <p className="text-xs tabular-nums text-muted-foreground">
               Sun elev. {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono text-[13px] tabular-nums text-foreground">
+            <p className="text-sm tabular-nums text-foreground">
               {countdownText(hourly.sun_visible, selectedHour, "Sunset", "Sunrise")}
             </p>
           </div>
           <div>
+            <p className="text-muted-foreground">Earth {aboveWhat}</p>
             <p className="font-mono text-2xl leading-tight tabular-nums text-comms">
               {earthClearance.toFixed(2)}°
             </p>
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            <p className="text-xs tabular-nums text-muted-foreground">
               Earth elev. {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono text-[13px] tabular-nums text-foreground">
+            <p className="text-sm tabular-nums text-foreground">
               {countdownText(hourly.earth_visible, selectedHour, "Earthset", "Earthrise")}
             </p>
           </div>
