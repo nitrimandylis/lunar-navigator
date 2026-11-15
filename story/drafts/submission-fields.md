@@ -123,7 +123,13 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
    Answer - Trim, date: Pending.
 
-   Answer - Gio, date: Pending.
+   Answer - Gio, 2026-11-15: The AI-use account above is accurate for the data work. Claude Code (Anthropic) wrote and ran the data scripts in `data/`, the tests, the documentation and the JSON in `public/data/`, working from my instructions. Several tasks ran in parallel as Claude Code sub-agents, each opening its own PR. The numbers themselves come from NASA JPL Horizons and the LRO LOLA DEM, computed by those scripts and not written by an AI.
+
+   Automated checks that took place: the pytest suite (about 1,490 tests: file layout, sample counts, internal consistency of the visibility data, and known-answer checks against Glaser et al. 2014). The comparison is in `data/KNOWN-ANSWERS.md`. It matches within 0.4 points at 10 m observer height. Two spots at 2 m are 5 to 8 points lower, and a 20 m neighbourhood maximum does not close that gap. The automated PR review also uses Claude Code. It is not a human review.
+
+   Human checking that actually took place: I chose the sites and supplied the source pages (LROC IM-2, Lunar Resources Registry). I decided to drop the computed Haworth point and add a note instead, and I approved the Connecting Ridge scan. I read the agents' summaries and tables. I did not independently recompute any value or open the data files myself.
+
+   Model versions: not recorded in the data files. Recent commits carry a `Co-Authored-By` trailer naming Claude Sonnet 5.5. Earlier commits may not. Descriptive AI acknowledgements/metadata for the data work: not yet confirmed. The method and sources are documented in `data/README.md` and `data/KNOWN-ANSWERS.md`.
 
 ### Credit completion and release checks
 
