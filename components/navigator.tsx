@@ -20,7 +20,7 @@ import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import { TourCard } from "@/components/tour-card";
-import { YearChips } from "@/components/year-chips";
+import { YearPicker } from "@/components/year-picker";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -543,7 +543,7 @@ export function Navigator() {
             isTourOpen && tourTarget !== "months" && TOUR_DIM,
           )}
         >
-          <YearChips visibleYear={yearOfMonth(visibleMonth)} onChangeYear={changeYear} />
+          <YearPicker visibleYear={yearOfMonth(visibleMonth)} onChangeYear={changeYear} />
           <MonthChips
             visibleMonth={visibleMonth}
             selectedRow={selectedRow}
