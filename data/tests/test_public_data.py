@@ -187,6 +187,32 @@ def test_source_site_fields(site):
     assert -180 <= site["lon"] <= 180, f"{name}: lon {site['lon']} not in -180..180"
     if "mission" in site:
         assert isinstance(site["mission"], str) and site["mission"], f"{name}: mission must be a non-empty string"
+    if "note" in site:
+        assert isinstance(site["note"], str) and site["note"], f"{name}: note must be a non-empty string"
+
+    if "slope_deg" in site:
+        v = site["slope_deg"]
+        assert isinstance(v, (int, float)) and not isinstance(v, bool), f"{name}: slope_deg must be a number"
+        assert 0 <= v < 90, f"{name}: slope_deg {v} not in [0, 90)"
+        assert 0 <= v <= 45, f"{name}: slope_deg {v} implausible for a 30 m LOLA cell (expected 0-45)"
+
     if "psr_km" in site:
         v = site["psr_km"]
         assert isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0, f"{name}: psr_km must be a number >= 0"
+
+
+def test_slope_deg_public_matches_source():
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("slope_deg") for s in public] == [s.get("slope_deg") for s in SITES]
+
+
+def test_only_haworth_has_note():
+    with_note = sorted(s["id"] for s in SITES if "note" in s)
+    assert with_note == ["artemis3-haworth"], with_note
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("note") for s in public] == [s.get("note") for s in SITES]
+
+
+def test_psr_km_public_matches_source():
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("psr_km") for s in public] == [s.get("psr_km") for s in SITES]

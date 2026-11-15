@@ -5,6 +5,7 @@
     "lat": -89.43865,
     "lon": -137.49989,
     "elevation_m": 1960,
+    "slope_deg": 1.0,
     "source": "Lit member of a lit/dark pair about 2100 m apart, re-found with a finer scan (50 m grid) by the repick scripts using the 2 m observer; about 7936 h of Sun in 2027. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 6.12
   },
@@ -14,6 +15,7 @@
     "lat": -89.36899,
     "lon": -136.5882,
     "elevation_m": 1591,
+    "slope_deg": 3.6,
     "source": "Dark member of a lit/dark pair about 2100 m apart (0 h of Sun in 2027), partner of shackleton-ridge. Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 5.93
   },
@@ -23,6 +25,7 @@
     "lat": -88.3355,
     "lon": -69.5771,
     "elevation_m": 1298,
+    "slope_deg": 10.9,
     "source": "Best Sun plus Earth hours in the area scanned around the de Gerlache crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 7.28
   },
@@ -32,6 +35,7 @@
     "lat": -85.962,
     "lon": -2.3833,
     "elevation_m": 4994,
+    "slope_deg": 2.1,
     "source": "Best Sun plus Earth hours in the area scanned around the Haworth crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 13.37
   },
@@ -41,6 +45,7 @@
     "lat": -85.7378,
     "lon": 3.6101,
     "elevation_m": 4017,
+    "slope_deg": 10.8,
     "source": "Best Sun plus Earth hours in the area scanned around the Malapert crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 18.69
   },
@@ -50,6 +55,7 @@
     "lat": -84.2273,
     "lon": 47.4917,
     "elevation_m": 5402,
+    "slope_deg": 15.5,
     "source": "Best Sun plus Earth hours in the area scanned around the Nobile crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 7.47
   },
@@ -59,6 +65,7 @@
     "lat": -88.1542,
     "lon": 73.3088,
     "elevation_m": -276,
+    "slope_deg": 11.4,
     "source": "Best Sun plus Earth hours in the area scanned around the Faustini crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 5.65
   },
@@ -68,6 +75,7 @@
     "lat": -82.7489,
     "lon": 72.9299,
     "elevation_m": 2805,
+    "slope_deg": 12.4,
     "source": "Best Sun plus Earth hours in the area scanned around the Amundsen crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 2.34
   },
@@ -77,6 +85,7 @@
     "lat": -84.3857,
     "lon": -26.8578,
     "elevation_m": 400,
+    "slope_deg": 9.4,
     "source": "Best Sun plus Earth hours in the area scanned around the Cabeus crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 2.22
   },
@@ -86,6 +95,7 @@
     "lat": -88.1042,
     "lon": -164.2726,
     "elevation_m": -516,
+    "slope_deg": 26.1,
     "source": "Best Sun plus Earth hours in the area scanned around the Sverdrup crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 5.03
   },
@@ -95,6 +105,7 @@
     "lat": -87.717,
     "lon": 115.1188,
     "elevation_m": 60,
+    "slope_deg": 6.5,
     "source": "Best Sun plus Earth hours in the area scanned around the Slater crater centre by data/rim_search.py craters (may sit on a neighbouring ridge or peak). Positions scanned on LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 3.78
   },
@@ -104,6 +115,7 @@
     "lat": -88.8259,
     "lon": -158.662,
     "elevation_m": -258,
+    "slope_deg": 7.3,
     "source": "Lit member of a lit/dark pair about 2500 m apart, found by data/rim_search.py pair (centre at Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 8.14
   },
@@ -113,6 +125,7 @@
     "lat": -88.8053,
     "lon": -162.5642,
     "elevation_m": -272,
+    "slope_deg": 13.5,
     "source": "Dark member of a lit/dark pair about 2500 m apart, found by data/rim_search.py pair (centre at Sverdrup crater). Positions scanned on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 8.8
   },
@@ -123,6 +136,7 @@
     "lat": -84.78,
     "lon": 29.13,
     "elevation_m": 5312,
+    "slope_deg": 1.4,
     "source": "Intuitive Machines IM-2 intended landing site, as published by the LROC team (Robinson, 26 Feb 2025, https://lroc.im-ldi.com/images/1401): 84.78 S, 29.13 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 9.33
   },
@@ -130,9 +144,11 @@
     "id": "artemis3-haworth",
     "name": "Haworth region centre",
     "mission": "Artemis III candidate",
+    "note": "Centre of NASA's Haworth region (15 km x 15 km). The centre is on the shadowed crater floor: the horizon is never below 3.7 deg and the Sun peaks at 4.1 deg, so it gets 0 h of Sun in 2027 (Earth is visible part of the time). A scan of the whole region on a 250 m grid found no lit point.",
     "lat": -87.45,
     "lon": -5.0,
     "elevation_m": -3318,
+    "slope_deg": 4.8,
     "source": "Centre point of the NASA Artemis III candidate region Haworth, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 87.45 S, 5.0 W. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027 (a scan of the whole region around the centre, about 15 km x 15 km on a 500 m grid, found no point with any Sun in 2027).",
     "psr_km": 0.0
   },
@@ -143,6 +159,7 @@
     "lat": -86.0,
     "lon": 2.7,
     "elevation_m": 5142,
+    "slope_deg": 1.3,
     "source": "Centre point of the NASA Artemis III candidate region Malapert Massif, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 86.0 S, 2.7 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 10.5
   },
@@ -153,6 +170,7 @@
     "lat": -85.3,
     "lon": 31.5,
     "elevation_m": 6145,
+    "slope_deg": 9.4,
     "source": "Centre point of the NASA Artemis III candidate region Nobile Rim 1, as listed on the Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's regions): 85.3 S, 31.5 E. Elevation sampled from LRO LOLA DEM v4 S Pole (30 m, 75 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027.",
     "psr_km": 5.2
   },
@@ -162,6 +180,7 @@
     "lat": -89.4739,
     "lon": -137.3158,
     "elevation_m": 1950,
+    "slope_deg": 3.1,
     "source": "Best-lit point found by scanning within about 6 km of the registry centre of the Connecting Ridge between Shackleton and de Gerlache, -89.45, -136.0 (Lunar Resources Registry south pole map, https://lunarresourcesregistry.com/south-pole-map/, a third-party map of NASA's 2022 candidate regions), on LRO LOLA DEM v4 S Pole (5 m, 87.5 deg, NASA Moon Trek) with a 2 m observer height; Sun and Earth hours are for 2027. Kept as a plausibility check against Glaser et al. 2014 (Icarus 243, 78, https://elib.dlr.de/94242), who report this ridge about 92% sunlit at 2 m over 19 years; their exact point is unknown, so this is not a replication.",
     "psr_km": 5.87
   }

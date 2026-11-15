@@ -72,6 +72,9 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         {(row.isReference || row.isCustom) && (
           <p className="text-muted-foreground">Smooth Moon, no terrain.</p>
         )}
+        {site.note !== undefined && (
+          <p className="mt-1 text-muted-foreground">{site.note}</p>
+        )}
       </div>
 
       {hourly === null && !hourlyFailed && (
