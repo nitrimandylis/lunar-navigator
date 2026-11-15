@@ -68,8 +68,8 @@ found out why. The full comparison is in [`data/KNOWN-ANSWERS.md`](data/KNOWN-AN
 | `data/` | Python that builds the data from Horizons and LOLA, with its tests and method notes ([`data/README.md`](data/README.md)). |
 | `public/data/` | The built JSON the website reads: one folder per year, 2027 to 2040. |
 | `public/deck.pdf` | The demo deck. |
-| `story/` | [`sources.md`](story/sources.md): everything we used and credit. [`submission.md`](story/submission.md): the project page text. `notes/`: working notes from the weekend. |
-| `docs/evidence/` | Screenshots of the live site, taken signed out. |
+| `story/` | [`sources.md`](story/sources.md): the sources we used and credit, and the team's working notes for the submission. |
+| `docs/` | Screenshots of the live site, taken signed out, in `evidence/`. |
 | `AGENTS.md`, `CLAUDE.md` | The rules our AI coding agents and the review bot read: who owns which folder, and the data contract. |
 | `.github/` | The check and the AI review that run on every pull request. |
 
@@ -86,12 +86,18 @@ The data is already built and committed. To rebuild or test it, see
 
 ## Sources and AI use
 
-Every source, with what it is used for, is in [`story/sources.md`](story/sources.md).
+The sources are listed in [`story/sources.md`](story/sources.md). The main ones:
+
+- [NASA/JPL Horizons](https://ssd.jpl.nasa.gov/horizons/): Sun and Earth positions.
+- LRO LOLA DEM v4, South Pole, 5 m and 30 m, through [NASA Moon Trek](https://trek.nasa.gov/moon/): terrain.
+- [NASA PGDA product 90](https://pgda.gsfc.nasa.gov/products/90): permanently shadowed regions.
+- [NASA NSSDCA](https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html): past landing coordinates.
+- Gläser et al., EPSC 2014 ([paper](https://elib.dlr.de/94242/1/EPSC2014-136-1.pdf)): the published results we compare against.
 
 We built this with AI coding tools and say so. Claude Code wrote most of the code and tests
 from our instructions and reviews each pull request. ChatGPT and Codex helped draft the
 submission text. The numbers on the site come from NASA data and plain arithmetic, not from
-an AI model. The details are in the AI assistance section of the sources file.
+an AI model. The logo on slide 1 of the deck is AI-generated and marked as such.
 
 ## Licence
 

@@ -57,10 +57,10 @@ These checks are requested, not marked as completed:
 Use [NASA rules and rubric](nasa-rules-and-rubric.md) and [submission-page guide](submission-page-guide.md) for current requirements. Their status is separate from this evidence log.
 
 - [ ] Proposed wording matches the final public build and all placeholders are resolved.
-- [ ] Final English slide demo has no more than seven slides total and opens publicly.
+- [ ] Final English slide demo has no more than seven slides total and opens publicly. The deck placeholder stays empty until Nick resumes it.
 - [ ] NASA data, literature, software/assets and AI assistance are credited accurately.
 - [ ] Applicable permission, member-credit and disclosure questions are resolved.
 - [ ] Final-project, deck and NASA-page links work while signed out.
 - [ ] NASA's Submit for Judging action is completed and the published confirmation checked.
 
-Athens follows the NASA submission format; no separate local live pitch is being prepared.
+Athens follows the NASA submission format; no separate local live pitch is being prepared. The older rehearsal timing in pitch.md is historical.
