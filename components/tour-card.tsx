@@ -12,6 +12,10 @@ export type TourCardProps = {
 
 // The card that tells the guided tour, one step at a time. It sits in the
 // bottom right corner, over the custom point form, which no step points at.
+// It fades and slides up when the tour opens. On each step the title and the
+// text fade in: their key is the step number, so React draws them afresh and
+// the fade plays again. The buttons stay still, so Next never moves away from
+// the pointer.
 export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }: TourCardProps) {
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === stepCount - 1;
@@ -20,13 +24,18 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
     <aside
       aria-label="Guided tour"
       aria-live="polite"
-      className="fixed right-3 bottom-3 z-40 flex w-[min(380px,calc(100vw-1.5rem))] flex-col gap-2 rounded-lg border-2 border-bright bg-panel px-4 py-3 text-sm shadow-xl"
+      className="fixed right-3 bottom-3 z-40 flex animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none w-[min(380px,calc(100vw-1.5rem))] flex-col gap-2 rounded-lg border-2 border-bright bg-panel px-4 py-3 text-sm shadow-xl"
     >
       <div className="flex items-baseline gap-3">
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
           {stepIndex + 1} of {stepCount}
         </p>
-        <h2 className="font-medium text-bright">{step.title}</h2>
+        <h2
+          key={stepIndex}
+          className="animate-in fade-in duration-300 font-medium text-bright motion-reduce:animate-none"
+        >
+          {step.title}
+        </h2>
         <button
           type="button"
           aria-label="Close the tour"
@@ -39,7 +48,12 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
         </button>
       </div>
 
-      <p className="leading-relaxed text-foreground">{step.text}</p>
+      <p
+        key={stepIndex}
+        className="animate-in fade-in duration-300 leading-relaxed text-foreground motion-reduce:animate-none"
+      >
+        {step.text}
+      </p>
 
       <div className="flex items-center gap-2">
         <button
@@ -51,24 +65,17 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
         >
           Back
         </button>
-        {!isLast && (
-          <button
-            type="button"
-            onClick={onNext}
-            className="min-h-10 rounded-md bg-bright px-3 py-1 font-medium text-background lg:min-h-0"
-          >
-            Next
-          </button>
-        )}
-        {isLast && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-10 rounded-md bg-bright px-3 py-1 font-medium text-background lg:min-h-0"
-          >
-            Finish
-          </button>
-        )}
+        {/* One button for Next and Finish, so the keyboard focus stays on it
+            through the last step. It takes the focus when the tour opens: the
+            header button that opened the tour is dimmed and cannot keep it. */}
+        <button
+          type="button"
+          autoFocus
+          onClick={isLast ? onClose : onNext}
+          className="min-h-10 rounded-md bg-bright px-3 py-1 font-medium text-background lg:min-h-0"
+        >
+          {isLast ? "Finish" : "Next"}
+        </button>
       </div>
     </aside>
   );
