@@ -27,6 +27,8 @@ Built now:
   slope of the 30 m LOLA cell (`slope_deg`) and the distance to the nearest permanent
   shadow (`psr_km`). The About panel says what each one means.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
+  Rows glide to their new place when the sort or the month changes, and the day cells fade
+  to the new month. All motion is off when the system asks for reduced motion.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
 - Sky panorama: the terrain horizon all the way round the selected site (north, east,

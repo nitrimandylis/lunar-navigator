@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { NEAR_PAIRS, type Hourly, type SiteRow } from "@/lib/app-types";
 import { totalsByMonth } from "@/lib/data";
@@ -62,13 +62,19 @@ const DAYS_CELL = "max-lg:order-1 max-lg:col-span-full";
 // The two month totals, Sun then Earth, in fixed columns so the numbers line up.
 const TOTAL_COLUMNS = "grid grid-cols-2 gap-x-2 text-right";
 
+// A lane fades to its new strength when the month changes.
+const LANE_FADE = "transition-opacity duration-300 motion-reduce:transition-none";
+
+// How long a row takes to glide to its new place when the order changes.
+const ROW_GLIDE_MS = 300;
+
 // The two lanes inside one cell: power on top, comms below. Each lane's
 // opacity is its strength, drawn over the dark cell background.
 function Lanes({ power, comms }: { power: number; comms: number }) {
   return (
     <>
-      <span className="flex-1 rounded-[1px] bg-power" style={{ opacity: power }} />
-      <span className="flex-1 rounded-[1px] bg-comms" style={{ opacity: comms }} />
+      <span className={cn("flex-1 rounded-[1px] bg-power", LANE_FADE)} style={{ opacity: power }} />
+      <span className={cn("flex-1 rounded-[1px] bg-comms", LANE_FADE)} style={{ opacity: comms }} />
     </>
   );
 }
@@ -116,6 +122,37 @@ export function SitesGrid({
       list.scrollTop += rowRect.bottom - listRect.bottom;
     }
   }, [selectedSiteId]);
+
+  // Rows glide to their new place when the order changes (another sort, or
+  // another month). After every render this compares where each row is with
+  // where it was last time. A row that moved starts from its old place and
+  // slides to the new one.
+  const rowTops = useRef<Map<string, number>>(new Map());
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (list === null) {
+      return;
+    }
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = list.querySelectorAll<HTMLElement>("li[data-site-id]");
+    for (const item of items) {
+      const siteId = item.dataset.siteId;
+      if (siteId === undefined) {
+        continue;
+      }
+      // offsetTop is the row's place in the list. Scrolling and the glide
+      // itself do not change it.
+      const newTop = item.offsetTop;
+      const oldTop = rowTops.current.get(siteId);
+      rowTops.current.set(siteId, newTop);
+      if (oldTop !== undefined && oldTop !== newTop && !reduceMotion) {
+        item.animate(
+          [{ transform: "translateY(" + (oldTop - newTop) + "px)" }, { transform: "translateY(0)" }],
+          { duration: ROW_GLIDE_MS, easing: "ease-out" },
+        );
+      }
+    }
+  });
 
   // While a day is open, Escape closes it.
   useEffect(() => {
@@ -256,6 +293,7 @@ export function SitesGrid({
                 )}
                 <li
                   data-selected={isSelected}
+                  data-site-id={site.id}
                   className={cn(
                     ROW_COLUMNS,
                     // From lg rows share the height, and a row is never under
@@ -264,7 +302,10 @@ export function SitesGrid({
                     "min-h-4 max-lg:py-1 lg:max-h-[26px] lg:min-h-[21px] lg:flex-1 lg:basis-0",
                     // From lg a band behind the selected row ties it to the
                     // Verdict panel on the right.
-                    isSelected && "lg:bg-line/70",
+                    // The band fades in and out, and a fainter one follows
+                    // the pointer.
+                    "transition-colors duration-200 motion-reduce:transition-none",
+                    isSelected ? "lg:bg-line/70" : "lg:hover:bg-line/30",
                   )}
                 >
                   {/* Name, with its tags on the same line. From lg a long name is
@@ -313,7 +354,7 @@ export function SitesGrid({
                   {/* Middle: the days of the month, or one opened day as 24 hours. */}
                   {!showHours && (
                     <div className={cn("grid h-5 max-h-[22px] gap-px lg:h-full", DAYS_CELL)} style={dayColumns}>
-                      {monthDays.map((dayOfYear) => {
+                      {monthDays.map((dayOfYear, dayIndex) => {
                         const day = row.days[dayOfYear];
                         let sunHours = 0;
                         let earthHours = 0;
@@ -329,7 +370,10 @@ export function SitesGrid({
                           " h Earth in view";
                         return (
                           <button
-                            key={dayOfYear}
+                            // Keyed by its place in the month, not by the day:
+                            // the same cell stays on screen when the month
+                            // changes, so its lanes fade to the new values.
+                            key={dayIndex}
                             type="button"
                             aria-label={dayCellLabel(site.name, dayOfYear, sunHours, earthHours)}
                             onClick={() => openDayCell(site.id, dayOfYear)}

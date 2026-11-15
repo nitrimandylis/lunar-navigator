@@ -426,9 +426,9 @@ export function MissionPlanner({
       role="dialog"
       aria-modal="true"
       aria-label="Mission planner"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-background/85 p-4 backdrop-blur-sm duration-200 fade-in motion-reduce:animate-none"
     >
-      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl flex-col rounded-lg border border-line bg-panel">
+      <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-5xl animate-in duration-200 fade-in slide-in-from-bottom-2 motion-reduce:animate-none flex-col rounded-lg border border-line bg-panel">
         <header className="flex items-center gap-4 border-b border-line px-5 py-3">
           <h2 className="font-medium text-bright">Mission planner</h2>
           <p className="hidden text-xs text-muted-foreground sm:block">
