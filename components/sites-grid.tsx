@@ -48,13 +48,13 @@ type Tooltip = {
 };
 
 // From lg every row is one line of three columns: name, the day cells, the
-// month totals. leading-tight lets rows shrink to 17.5 px, so 21 rows still
-// fit one screen.
+// month totals. Below "wide" the name column is narrower and long names are
+// cut short, so the days keep enough room.
 // Below lg a row is two lines, so the whole month fits a phone without
 // scrolling sideways: the name and the totals, then the days across the full
 // width (DAYS_CELL moves them there with col-span-full and order-1).
 const ROW_COLUMNS =
-  "grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-x-3 gap-y-1 leading-tight lg:grid-cols-[22rem_minmax(0,1fr)_7.5rem] lg:gap-y-0";
+  "grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-x-3 gap-y-1 leading-tight lg:grid-cols-[15rem_minmax(0,1fr)_7.5rem] lg:gap-y-0 wide:grid-cols-[22rem_minmax(0,1fr)_7.5rem]";
 
 // Where the days go: the second line below lg, the middle column from lg.
 const DAYS_CELL = "max-lg:order-1 max-lg:col-span-full";
@@ -192,9 +192,9 @@ export function SitesGrid({
                 key={dayOfYear}
                 className={cn(
                   "text-center font-mono text-[11px] tabular-nums text-muted-foreground",
-                  // Below lg a day is about 10 px wide, too narrow for every
-                  // number. Show the 1st and every 5th.
-                  index !== 0 && (index + 1) % 5 !== 0 && "max-lg:invisible",
+                  // Below "wide" a day is about 10 px wide, too narrow for
+                  // every number. Show the 1st and every 5th.
+                  index !== 0 && (index + 1) % 5 !== 0 && "max-wide:invisible",
                 )}
               >
                 {index + 1}
@@ -256,7 +256,11 @@ export function SitesGrid({
                   // takes its own full height instead, as does every row below
                   // lg, where the page scrolls rather than the list.
                   "max-lg:py-1",
-                  dividerText !== null ? "flex-none" : "min-h-4 lg:max-h-[26px] lg:flex-1 lg:basis-0",
+                  // From lg a row is never under 21 px, so the names stay easy
+                  // to read. On a short screen the list scrolls instead.
+                  dividerText !== null
+                    ? "flex-none"
+                    : "min-h-4 lg:max-h-[26px] lg:min-h-[21px] lg:flex-1 lg:basis-0",
                 )}
               >
                 {/* The divider spans all three columns, above the first row of its group. */}

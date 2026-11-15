@@ -55,7 +55,9 @@ Built now:
   the browser on a smooth Moon with no terrain, listed under their own divider, and never
   ranked against the polar sites.
 - Custom points: up to 3, anywhere on the Moon by typing (map clicks stay inside the polar
-  map), with a flat horizon and no terrain. They are listed apart from the curated sites,
+  map), with a flat horizon and no terrain. On a laptop or bigger the form sits beside the
+  big map, opened with "Zoom in or add a point" under the small map; on a phone it has its
+  own panel on the Map tab. They are listed apart from the curated sites,
   under their own divider, and never ranked against them, because a flat horizon near the
   pole gives far too many Sun hours.
 

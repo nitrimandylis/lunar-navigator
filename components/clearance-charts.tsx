@@ -223,7 +223,7 @@ export function ClearanceCharts({
 
   return (
     // Side by side from lg. Below lg one chart per row, so each is twice as big.
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 wide:grid-cols-1 wide:gap-2">
       <ClearanceChart
         title="Sun"
         body="sun"

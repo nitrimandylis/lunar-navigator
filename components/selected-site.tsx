@@ -56,7 +56,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
     // between the verdict and the numbers.
     <div className="flex flex-col gap-3 text-sm max-lg:contents">
       {verdict !== "" && (
-        <p className="text-xl leading-snug text-bright">{verdict}</p>
+        <p className="text-xl leading-snug text-bright lg:text-base">{verdict}</p>
       )}
 
       <div className="text-xs">
