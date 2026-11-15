@@ -132,7 +132,9 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
               </li>
               <li>
                 <span className="text-bright">Map.</span> The south pole seen from above.
-                Click it to zoom in and pick your own place.
+                Click it to zoom in and pick your own place. The grey relief shows the
+                shape of the ground. It is lit from one side by a made-up light, so its
+                shadows are not real sunlight.
               </li>
             </ul>
           </Part>

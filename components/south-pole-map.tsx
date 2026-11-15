@@ -34,6 +34,12 @@ export const VIEW_SIZE = 340;
 // lies inside -82, so the map spends its space on the sites, not empty ground.
 export const MAP_RADIUS = 152;
 export const EDGE_LAT = -82;
+// The shaded relief pictures under the map, made by data/basemap.py from the
+// LOLA terrain. The first reaches the map edge. The second is sharper and
+// reaches only to latitude -87.5, so it is drawn on top once zoomed in.
+const BASEMAP_URL = "/data/basemap.png";
+const FINE_BASEMAP_URL = "/data/basemap-87.5.png";
+const FINE_BASEMAP_EDGE_LAT = -87.5;
 export const FULL_VIEW: MapView = { x: -VIEW_SIZE / 2, y: -VIEW_SIZE / 2, size: VIEW_SIZE };
 
 // Latitude rings every 2 degrees on the whole map, every degree once zoomed in
@@ -54,6 +60,9 @@ const SMALL_MAP_PX = 300;
 // Text sizes in SVG units.
 const CRATER_LABEL_SIZE = 11;
 const SMALL_LABEL_SIZE = 10;
+// Labels on the map get a dark outline this wide, so they stay readable over
+// the relief picture.
+const LABEL_OUTLINE = 3;
 const SPOKE_LONGITUDES = [0, 90, 180, 270];
 
 // Craters near the curated sites, for context.
@@ -260,7 +269,9 @@ export function SouthPoleMap({
           y={label.y + 3}
           fontSize={CRATER_LABEL_SIZE * k}
           textAnchor={label.anchor}
-          className="fill-foreground tabular-nums"
+          paintOrder="stroke"
+          strokeWidth={LABEL_OUTLINE * k}
+          className="fill-foreground stroke-background tabular-nums"
         >
           {"pair, " + km.toFixed(1) + " km apart"}
         </text>
@@ -275,6 +286,11 @@ export function SouthPoleMap({
   if (hoveredSiteId !== null) {
     labelledIds.push(hoveredSiteId);
   }
+
+  // How far the sharper relief picture reaches from the pole, in map units.
+  const fineRadius = projectForMap(FINE_BASEMAP_EDGE_LAT, 180, MAP_RADIUS, EDGE_LAT).y;
+  // The sharper picture is a big file, so it loads only once zoomed in.
+  const showFineBasemap = view.size < VIEW_SIZE / 2;
 
   let pickedCross: { x: number; y: number } | null = null;
   if (pickedPoint !== null) {
@@ -299,6 +315,28 @@ export function SouthPoleMap({
         className="fill-background stroke-line"
         strokeWidth={k}
       />
+
+      {/* Shaded relief of the ground. Both pictures are round, with the pole
+          in the middle and longitude 0 at the top, like the map itself. They
+          are dimmed together, so no edge shows where the sharper one ends. */}
+      <g aria-hidden="true" className="pointer-events-none opacity-45">
+        <image
+          href={BASEMAP_URL}
+          x={-MAP_RADIUS}
+          y={-MAP_RADIUS}
+          width={2 * MAP_RADIUS}
+          height={2 * MAP_RADIUS}
+        />
+        {showFineBasemap && (
+          <image
+            href={FINE_BASEMAP_URL}
+            x={-fineRadius}
+            y={-fineRadius}
+            width={2 * fineRadius}
+            height={2 * fineRadius}
+          />
+        )}
+      </g>
 
       {/* Longitude spokes. */}
       {SPOKE_LONGITUDES.map((lon) => {
@@ -335,7 +373,9 @@ export function SouthPoleMap({
               x={labelSpot.x + 3 * k}
               y={labelSpot.y + 4 * k}
               fontSize={SMALL_LABEL_SIZE * k}
-              className="fill-muted-foreground/70 font-mono tabular-nums"
+              paintOrder="stroke"
+              strokeWidth={LABEL_OUTLINE * k}
+              className="fill-muted-foreground stroke-background font-mono tabular-nums"
             >
               {lat + "°"}
             </text>
@@ -401,7 +441,9 @@ export function SouthPoleMap({
               y={labelY}
               fontSize={labelSize}
               textAnchor={labelAnchor}
-              className="fill-muted-foreground/60 italic"
+              paintOrder="stroke"
+              strokeWidth={LABEL_OUTLINE * k}
+              className="fill-foreground stroke-background italic"
             >
               {crater.name}
             </text>
