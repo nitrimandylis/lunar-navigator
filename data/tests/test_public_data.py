@@ -187,3 +187,6 @@ def test_source_site_fields(site):
     assert -180 <= site["lon"] <= 180, f"{name}: lon {site['lon']} not in -180..180"
     if "mission" in site:
         assert isinstance(site["mission"], str) and site["mission"], f"{name}: mission must be a non-empty string"
+    if "psr_km" in site:
+        v = site["psr_km"]
+        assert isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0, f"{name}: psr_km must be a number >= 0"
