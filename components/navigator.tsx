@@ -203,6 +203,16 @@ export function Navigator() {
       const parts = (await fetchEveryYear("sites/" + siteId + ".json")) as SiteHourly[];
       const hourly = joinHourly(parts);
       setHourlyBySite((previous) => ({ ...previous, [siteId]: hourly }));
+      // The summary files cut a dark spell at the first and last hour of each
+      // year. Work the per-day totals out again from the joined hours, so a
+      // spell that crosses New Year is whole.
+      const wholeDays = summarizeDays(
+        hourly.start_utc,
+        hourly.sun_elev_deg,
+        hourly.sun_visible,
+        hourly.earth_visible,
+      );
+      setSummaries((previous) => ({ ...previous, [siteId]: wholeDays }));
     } catch {
       // Forget the request so a later click can try again, and say it failed.
       requestedHourlyIds.current.delete(siteId);
