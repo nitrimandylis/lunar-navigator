@@ -16,6 +16,9 @@ export type Site = {
   // Only on real mission targets, for example "IM-2" or "Artemis III candidate".
   // Computed candidates leave it out.
   mission?: string;
+  // Optional caveat shown under the site, for example why a mission region
+  // centre gets no Sun. Most sites leave it out.
+  note?: string;
 };
 
 // sites/<id>.json: one value per hour for one site.
