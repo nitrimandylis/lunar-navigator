@@ -86,11 +86,12 @@ const CRATERS = [
 
 // Where each near pair's callout text sits, in SVG units, in the same order
 // as NEAR_PAIRS. anchor "start" puts the text right of x, "end" left of it.
-// Shackleton's goes lower right, which is empty ground. Sverdrup's goes left of
-// its pins, between the "de Gerlache" name and the -88 ring label.
+// Both go lower left, which is empty ground, one under the other in the same
+// order as the pairs themselves (Shackleton's is nearer the pole). That keeps
+// each leader line short and stops it passing over the other pair.
 const PAIR_LABELS: { x: number; y: number; anchor: "start" | "end" }[] = [
-  { x: 62, y: 62, anchor: "start" },
-  { x: -32, y: 14, anchor: "end" },
+  { x: -44, y: 20, anchor: "end" },
+  { x: -52, y: 38, anchor: "end" },
 ];
 
 // The selected pin's label: font size and a rough width per letter, in SVG
