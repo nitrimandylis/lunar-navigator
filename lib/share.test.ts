@@ -45,6 +45,7 @@ test("a share link gives back the site and hour it was made from", () => {
     siteId: "shackleton-ridge",
     hour: 3240,
     planPresetId: null,
+    startsTour: false,
   });
 });
 
@@ -53,17 +54,20 @@ test("parseShareQuery ignores what it does not know", () => {
     siteId: null,
     hour: null,
     planPresetId: null,
+    startsTour: false,
   });
   assert.deepEqual(parseShareQuery("?site=nowhere&time=soon", KNOWN_IDS), {
     siteId: null,
     hour: null,
     planPresetId: null,
+    startsTour: false,
   });
   // One good part is kept even when the other is bad.
   assert.deepEqual(parseShareQuery("?site=ref-apollo-11&time=soon", KNOWN_IDS), {
     siteId: "ref-apollo-11",
     hour: null,
     planPresetId: null,
+    startsTour: false,
   });
 });
 
@@ -79,8 +83,14 @@ test("the plan part names a mission preset to open the planner on", () => {
 test("the plan part works together with a site and a time", () => {
   assert.deepEqual(
     parseShareQuery("?plan=crew&site=shackleton-ridge&time=2027-05-16T00:00Z", KNOWN_IDS),
-    { siteId: "shackleton-ridge", hour: 3240, planPresetId: "crew" },
+    { siteId: "shackleton-ridge", hour: 3240, planPresetId: "crew", startsTour: false },
   );
+});
+
+test("the tour part starts the guided tour", () => {
+  assert.equal(parseShareQuery("", KNOWN_IDS).startsTour, false);
+  assert.equal(parseShareQuery("?site=shackleton-ridge", KNOWN_IDS).startsTour, false);
+  assert.equal(parseShareQuery("?tour=1", KNOWN_IDS).startsTour, true);
 });
 
 test("hourlyCsv writes a header and one line per hour", () => {

@@ -12,6 +12,13 @@ Hackathon build, 14-15 Nov 2026. South pole only, calendar years 2027 to 2040, h
 
 Built now:
 
+- Homepage at `/`: one sentence on what the tool is, the LOLA relief of the south pole with
+  a dot per site (each dot opens that site), one door per kind of visitor (mission planners
+  to the planner, educators to the tour, everyone else to a site), How it works in three
+  steps with the published check and the site card numbers folded away, and the sources.
+  It is drawn on the server, with one load-in when it opens. The tool itself lives at
+  `/app`. A link made before the move (`/?site=`, `/?time=`, `/?plan=`) is sent on to `/app`
+  with the same query, and `/app?tour=1` starts the guided tour.
 - Sites grid: one row per site, two lanes per day (orange power, blue comms), one month at
   a time. Click a day to open its 24 hours; Escape or the close button shuts it.
 - Year picker and month chips in the header: a drop-down list of the years with data (2027
@@ -68,7 +75,7 @@ Built now:
   the tool does not tell you, and links the sources.
 
 - Share link and CSV: under the selected site, "Copy link" copies a link that opens the
-  page on the same site and hour (`?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
+  page on the same site and hour (`/app?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
   saves the site's 122,736 hourly rows, 2027 to 2040 (Sun and Earth elevation, azimuth and
   visibility).
   Custom points have no link, because they only exist in the browser tab.

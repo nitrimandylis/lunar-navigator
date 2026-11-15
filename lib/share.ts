@@ -7,11 +7,13 @@ import { MISSION_PRESETS } from "./windows.ts";
 // What a share link carries: the selected site and hour. A part that is
 // missing or not valid is null, and the page keeps its usual start for it.
 // planPresetId says the link opens the mission planner on that preset. It is
-// null when the link has no plan part.
+// null when the link has no plan part. startsTour is true when the link has a
+// tour part ("?tour=1"), which starts the guided tour.
 export type SharedView = {
   siteId: string | null;
   hour: number | null;
   planPresetId: string | null;
+  startsTour: boolean;
 };
 
 // The query part of a share link, for example
@@ -49,7 +51,10 @@ export function parseShareQuery(query: string, knownSiteIds: string[]): SharedVi
     }
   }
 
-  return { siteId: siteId, hour: hour, planPresetId: planPresetId };
+  // "?tour=1" starts the guided tour. Any value counts.
+  const startsTour = params.get("tour") !== null;
+
+  return { siteId: siteId, hour: hour, planPresetId: planPresetId, startsTour: startsTour };
 }
 
 const CSV_HEADER =
