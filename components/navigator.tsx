@@ -18,6 +18,7 @@ import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import { TourCard } from "@/components/tour-card";
+import { WholeMoonMap } from "@/components/whole-moon-map";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -111,6 +112,9 @@ export function Navigator() {
   // Real past landings elsewhere on the Moon. Empty until their Sun and Earth
   // hours have been worked out from the ephemeris.
   const [referenceSites, setReferenceSites] = useState<Site[]>([]);
+  // Where the Sun and Earth are overhead, hour by hour. null until it has
+  // loaded. It is kept in state so the whole Moon map redraws when it arrives.
+  const [ephemeris, setEphemeris] = useState<Ephemeris | null>(null);
 
   // Points the user added.
   const [customSites, setCustomSites] = useState<Site[]>([]);
@@ -125,6 +129,9 @@ export function Navigator() {
   // True while the play button is running time forward.
   const [isPlaying, setIsPlaying] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("power");
+  // The map panel shows the whole Moon instead of the south pole. It only
+  // changes when the user presses one of the panel's two buttons.
+  const [isWholeMoon, setIsWholeMoon] = useState(false);
   // The big zoomable map is open.
   const [isMapOpen, setIsMapOpen] = useState(false);
   // The About panel is open.
@@ -134,7 +141,6 @@ export function Navigator() {
 
   // Things to remember that should not redraw the page when they change.
   const requestedHourlyIds = useRef<Set<string>>(new Set());
-  const ephemerisCache = useRef<Ephemeris | null>(null);
   const nextCustomNumber = useRef(1);
 
   // Loads one curated site's hourly file, unless it was asked for before.
@@ -174,13 +180,13 @@ export function Navigator() {
 
         // The reference landings have no data files. Work out their hours
         // from the ephemeris, the same way as a custom point.
-        const ephemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        const loadedEphemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
         const referenceHourly: Record<string, Hourly> = {};
         for (const site of REFERENCE_SITES) {
-          const hourly = customSiteHourly(site.lat, site.lon, ephemeris);
+          const hourly = customSiteHourly(site.lat, site.lon, loadedEphemeris);
           referenceHourly[site.id] = hourly;
           loadedSummaries[site.id] = summarizeDays(
-            ephemeris.start_utc,
+            loadedEphemeris.start_utc,
             hourly.sun_elev_deg,
             hourly.sun_visible,
             hourly.earth_visible,
@@ -190,7 +196,7 @@ export function Navigator() {
         if (wasCancelled) {
           return;
         }
-        ephemerisCache.current = ephemeris;
+        setEphemeris(loadedEphemeris);
         for (const site of REFERENCE_SITES) {
           // Their hourly data is already here, so it never needs to be fetched.
           requestedHourlyIds.current.add(site.id);
@@ -313,14 +319,17 @@ export function Navigator() {
     setCustomError(null);
 
     try {
-      if (ephemerisCache.current === null) {
-        ephemerisCache.current = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+      // The ephemeris is normally here already, loaded with the sites. It is
+      // only fetched now if that first load failed.
+      let loadedEphemeris = ephemeris;
+      if (loadedEphemeris === null) {
+        loadedEphemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        setEphemeris(loadedEphemeris);
       }
-      const ephemeris = ephemerisCache.current;
 
-      const hourly = customSiteHourly(lat, lon, ephemeris);
+      const hourly = customSiteHourly(lat, lon, loadedEphemeris);
       const days = summarizeDays(
-        ephemeris.start_utc,
+        loadedEphemeris.start_utc,
         hourly.sun_elev_deg,
         hourly.sun_visible,
         hourly.earth_visible,
@@ -389,6 +398,17 @@ export function Navigator() {
   const rows = buildRows(sites, referenceSites, customSites, summaries, sortKey, visibleMonth);
   // The map only reaches EDGE_LAT, so sites further north are left off it.
   const mapRows = rows.filter((row) => row.site.lat <= EDGE_LAT);
+  // The whole Moon map draws the past landings and the custom points. The
+  // curated sites all sit at its bottom edge, so it shows them as one strip.
+  const wholeMoonRows = rows.filter((row) => row.isReference || row.isCustom);
+
+  // The map panel's title and caption say which map is on screen.
+  let mapTitle = "South pole";
+  let mapCaption = "Seen from above. Earth is towards the top.";
+  if (isWholeMoon) {
+    mapTitle = "Whole Moon";
+    mapCaption = "Unrolled flat. Shaded: night right now.";
+  }
 
   let selectedRow: SiteRow | null = null;
   for (const row of rows) {
@@ -546,31 +566,80 @@ export function Navigator() {
         <div className="flex flex-col gap-3 lg:min-h-0">
 
           <Panel
-            title="South pole"
-            caption="Seen from above. Earth is towards the top."
+            title={mapTitle}
+            caption={mapCaption}
             isHighlighted={false}
             className="flex flex-col lg:min-h-0 lg:flex-1"
           >
-            {/* The small map is a locator: pins select, anything else opens
-                the big map, where points are picked. Stacked, the grid no
-                longer gives the map a height, so it is a square as wide as
-                the panel, at most 480 px tall. */}
-            <div className="relative aspect-square max-h-[480px] cursor-zoom-in lg:aspect-auto lg:max-h-none lg:min-h-0 lg:flex-1">
-              <SouthPoleMap
-                rows={mapRows}
-                selectedSiteId={selectedSiteId}
-                pickedPoint={pickedPoint}
-                onSelectSite={selectSite}
-                onEmptyClick={() => setIsMapOpen(true)}
-                emptyClickHint="Click empty ground to open the big map and pick a point."
-              />
+            {/* Two buttons choose which map the panel shows. They look like the
+                sort buttons in the header: the one in use has a bright ring,
+                and min-h-10 makes them 40 px tall on a narrow screen. */}
+            <div role="group" aria-label="Map view" className="mb-2 flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setIsMapOpen(true)}
-                className="absolute top-0 right-0 rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+                aria-pressed={!isWholeMoon}
+                onClick={() => setIsWholeMoon(false)}
+                className={cn(
+                  "min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm lg:min-h-0",
+                  !isWholeMoon && "font-medium text-bright ring-2 ring-bright",
+                )}
               >
-                Zoom in
+                South pole
               </button>
+              <button
+                type="button"
+                aria-pressed={isWholeMoon}
+                onClick={() => setIsWholeMoon(true)}
+                className={cn(
+                  "min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm lg:min-h-0",
+                  isWholeMoon && "font-medium text-bright ring-2 ring-bright",
+                )}
+              >
+                Whole Moon
+              </button>
+            </div>
+            {/* The small map is a locator: pins select, anything else opens
+                the big map, where points are picked. Stacked, the grid no
+                longer gives the south pole map a height, so it is a square as
+                wide as the panel, at most 480 px tall. The whole Moon map
+                only selects: it has no big version, so no zoom cursor, and
+                stacked it takes its height from its own width. */}
+            <div
+              className={cn(
+                "relative lg:min-h-0 lg:flex-1",
+                !isWholeMoon &&
+                  "aspect-square max-h-[480px] cursor-zoom-in lg:aspect-auto lg:max-h-none",
+              )}
+            >
+              {!isWholeMoon && (
+                <>
+                  <SouthPoleMap
+                    rows={mapRows}
+                    selectedSiteId={selectedSiteId}
+                    pickedPoint={pickedPoint}
+                    onSelectSite={selectSite}
+                    onEmptyClick={() => setIsMapOpen(true)}
+                    emptyClickHint="Click empty ground to open the big map and pick a point."
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsMapOpen(true)}
+                    className="absolute top-0 right-0 rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+                  >
+                    Zoom in
+                  </button>
+                </>
+              )}
+              {isWholeMoon && (
+                <WholeMoonMap
+                  rows={wholeMoonRows}
+                  selectedSiteId={selectedSiteId}
+                  ephemeris={ephemeris}
+                  selectedHour={selectedHour}
+                  onSelectSite={selectSite}
+                  onShowSouthPole={() => setIsWholeMoon(false)}
+                />
+              )}
             </div>
           </Panel>
 

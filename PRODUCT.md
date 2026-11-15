@@ -35,6 +35,12 @@ Built now:
   lit and a shadowed site). Click empty ground to pick a custom point. Under it sits a
   shaded relief picture made from the LOLA terrain (lit by a made-up light, not the real
   Sun), with a sharper one inside -87.5 once zoomed in.
+- Whole Moon map: a second view in the map panel, switched with two buttons. The Moon
+  unrolled flat, near side in the middle, with the past landings and custom points as dots
+  that select their site, the Sun and Earth where they are overhead at the selected hour,
+  and the night half shaded. The south pole sites are one strip along the bottom that
+  leads back to the south pole map. View and select only: points are still picked on the
+  south pole map.
 - Past landings for comparison: Apollo 11, Blue Ghost 1 (CLPS), SLIM, Chandrayaan-3 and
   Chang'e 6 (far side), with coordinates from the NASA NSSDCA table. They are worked out in
   the browser on a smooth Moon with no terrain, listed under their own divider, and never
