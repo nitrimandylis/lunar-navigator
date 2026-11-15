@@ -652,7 +652,7 @@ export function Navigator() {
         >
           {/* The title leads back to the homepage. */}
           <Link href="/" className="hover:underline">
-            Lunar Landing Site Navigator
+            MoonFromEarth
           </Link>
         </h1>
 

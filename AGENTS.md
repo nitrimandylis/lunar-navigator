@@ -1,6 +1,6 @@
 # Team rules (every agent reads this)
 
-Lunar Landing Site Navigator, NASA Space Apps 2026 (Athens). Team: trim, gio, koum.
+MoonFromEarth, our entry for the Lunar Landing Site Navigator challenge, NASA Space Apps 2026 (Athens). Team: trim, gio, koum.
 Trim and gio use Claude Code. Koum uses Codex (ChatGPT) on Windows.
 
 ## The challenge

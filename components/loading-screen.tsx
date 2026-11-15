@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { BuddyFigure } from "@/components/tour-card";
+import { BuddyFigure } from "@/components/buddy";
 import { cn } from "@/lib/utils";
 
 // covers the page while the site data loads, so a slow start shows the

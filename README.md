@@ -1,4 +1,4 @@
-# Lunar Landing Site Navigator
+# MoonFromEarth
 
 Where to land at the Moon's south pole, and when. Compare 18 sites by the hours they get
 sunlight (power) and a line of sight to Earth (radio), for every hour from 2027 to 2040.
@@ -8,7 +8,7 @@ sunlight (power) and a line of sight to Earth (radio), for every hour from 2027 
 - **Challenge:** [Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/), NASA Space Apps Challenge 2026
 - **Team:** Team SBB, Athens local event
 
-![The sites grid for May 2027, sorted by power](docs/evidence/may-2027-sort-power.png)
+![MoonFromEarth in May 2027: the sites table, the sky at the lit ridge near Shackleton and the south pole map](docs/app-may-2027.png)
 
 ## What it does
 
@@ -21,7 +21,9 @@ sunlight (power) and a line of sight to Earth (radio), for every hour from 2027 
   can take. Every site is checked hour by hour and ranked by the days it could land.
 - **Add your own point**, anywhere on the Moon, and compare it with five past landings.
 - **Take the tour.** Five steps through one story: two places 2.1 km apart, one sunlit all
-  of January 2027 and one with no Sun at all.
+  of January 2027 and one with no Sun at all. A small astronaut guide leads it.
+
+![Step 1 of the tour: the guide stands by the tour card, next to the sites table](docs/tour-guide.png)
 
 [`PRODUCT.md`](PRODUCT.md) lists every feature.
 
@@ -69,7 +71,7 @@ found out why. The full comparison is in [`data/KNOWN-ANSWERS.md`](data/KNOWN-AN
 | `public/data/` | The built JSON the website reads: one folder per year, 2027 to 2040. |
 | `public/deck.pdf` | The demo deck. |
 | `story/` | [`sources.md`](story/sources.md): everything we used and credit. [`submission.md`](story/submission.md): the project page text. `notes/`: working notes from the weekend. |
-| `docs/` | Screenshots of the live site, taken signed out, in `evidence/`. |
+| `docs/` | The two screenshots in this README, and screenshots of the live site, taken signed out, in `evidence/`. |
 | `AGENTS.md`, `CLAUDE.md` | The rules our AI coding agents and the review bot read: who owns which folder, and the data contract. |
 | `.github/` | The check and the AI review that run on every pull request. |
 
@@ -97,7 +99,8 @@ The sources are listed in [`story/sources.md`](story/sources.md). The main ones:
 We built this with AI coding tools and say so. Claude Code wrote most of the code and tests
 from our instructions and reviews each pull request. ChatGPT and Codex helped draft the
 submission text. The numbers on the site come from NASA data and plain arithmetic, not from
-an AI model. The logo on slide 1 of the deck is AI-generated and marked as such.
+an AI model. The logo on slide 1 of the deck is AI-generated and marked as such. The tour
+guide is a vector drawing written as code with Claude Code (`components/buddy.tsx`).
 
 ## Licence
 

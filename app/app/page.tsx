@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Navigator } from "@/components/navigator";
 
 export const metadata: Metadata = {
-  title: "Navigator | Lunar Landing Site Navigator",
+  title: "Navigator | MoonFromEarth",
 };
 
 // The tool itself. The homepage at "/" links here.

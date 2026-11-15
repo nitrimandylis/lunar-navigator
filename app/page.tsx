@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 
+import { BuddyFigure } from "@/components/buddy";
 import { HomeMotion } from "@/components/home-motion";
 import { CRATERS } from "@/lib/craters";
 import type { DaySummary, Site } from "@/lib/data";
@@ -131,7 +132,7 @@ export default function Home() {
         earthHours={RIBBON_DAYS.map((day) => day.earth_hours)}
       />
       <header className="hm-header flex items-center gap-6 border-b border-line px-4 py-3 lg:px-8">
-        <p className="font-medium text-bright">Lunar Landing Site Navigator</p>
+        <p className="font-medium text-bright">MoonFromEarth</p>
         {/* Hidden on a phone, where the same button sits just below. */}
         <nav className="ml-auto flex items-center gap-5 text-sm max-sm:hidden">
           <a href="#how" className="hover:text-bright">
@@ -179,6 +180,18 @@ export default function Home() {
                 className="flex h-11 items-center rounded-md border border-line px-5 font-medium text-bright transition-[background-color,transform] duration-150 ease-out hover:bg-neither active:scale-[0.97] motion-reduce:transition-none"
               >
                 Take the tour
+              </Link>
+              {/* The guide from the tour, standing by a line that starts it. */}
+              <Link
+                href="/app?tour=1"
+                className="group flex basis-full items-center gap-3 pt-3 text-sm"
+              >
+                <span aria-hidden="true" className="block w-11 shrink-0">
+                  <BuddyFigure looksUp={false} isGreeting={false} />
+                </span>
+                <span className="underline decoration-muted-foreground underline-offset-4 group-hover:decoration-bright">
+                  New here? Our guide walks you through it in five steps.
+                </span>
               </Link>
             </div>
           </div>
