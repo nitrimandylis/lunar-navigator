@@ -475,8 +475,9 @@ export function Navigator() {
     // Below lg (1024 px) the page is as tall as its panels and scrolls. From lg
     // up it is exactly one screen tall.
     <div className="flex flex-col lg:h-dvh">
-      {/* On a narrow screen the header wraps onto as many lines as it needs. */}
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 lg:flex-nowrap lg:gap-6">
+      {/* The header wraps onto as many lines as it needs. Only from 2xl
+          (1536 px) up is the screen wide enough to hold it all on one line. */}
+      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 2xl:flex-nowrap 2xl:gap-6">
         <h1 className={cn("text-lg font-medium text-bright", TOUR_FADE, isTourOpen && TOUR_DIM)}>
           Lunar Landing Site Navigator
         </h1>
@@ -514,14 +515,14 @@ export function Navigator() {
           <button
             type="button"
             onClick={openPlanner}
-            className="min-h-10 rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
+            className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
           >
             Plan a mission
           </button>
           <button
             type="button"
             onClick={() => showTourStep(0)}
-            className="min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
+            className="min-h-10 whitespace-nowrap rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
           >
             Take the tour
           </button>
