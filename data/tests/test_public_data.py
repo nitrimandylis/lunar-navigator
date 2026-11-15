@@ -196,3 +196,23 @@ def test_only_haworth_has_note():
     assert with_note == ["artemis3-haworth"], with_note
     public = load(PUBLIC / "sites.json")
     assert [s.get("note") for s in public] == [s.get("note") for s in SITES]
+
+
+@pytest.mark.parametrize("site", SITES, ids=SITE_IDS)
+def test_sun_pct_10m_optional_number_in_range(site):
+    if "sun_pct_10m" in site:
+        v = site["sun_pct_10m"]
+        assert isinstance(v, (int, float)) and not isinstance(v, bool), f"{site['id']}: sun_pct_10m must be a number"
+        assert 0 <= v <= 100, f"{site['id']}: sun_pct_10m {v} outside 0..100"
+    public = {s["id"]: s for s in load(PUBLIC / "sites.json")}
+    assert public[site["id"]].get("sun_pct_10m") == site.get("sun_pct_10m")
+
+
+@pytest.mark.parametrize("site", SITES, ids=SITE_IDS)
+def test_sun_pct_10m_not_below_2m_percent(site):
+    if "sun_pct_10m" not in site:
+        pytest.skip("no sun_pct_10m for this site")
+    visible = sum(sum(hourly(y, site["id"])["sun_visible"]) for y in YEARS)
+    total = sum(n_hours(y) for y in YEARS)
+    pct_2m = round(100.0 * visible / total, 1)
+    assert site["sun_pct_10m"] >= pct_2m, f"{site['id']}: 10 m {site['sun_pct_10m']} < 2 m {pct_2m}"
