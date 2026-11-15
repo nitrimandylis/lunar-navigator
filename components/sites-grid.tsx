@@ -47,15 +47,17 @@ type Tooltip = {
   top: number;
 };
 
-// The three columns of every row: name, the day cells, the month totals.
-// leading-tight lets rows shrink to 17.5 px, so 21 rows still fit one screen.
-// Below lg the name column is narrower, to leave more of the screen for days.
+// From lg every row is one line of three columns: name, the day cells, the
+// month totals. leading-tight lets rows shrink to 17.5 px, so 21 rows still
+// fit one screen.
+// Below lg a row is two lines, so the whole month fits a phone without
+// scrolling sideways: the name and the totals, then the days across the full
+// width (DAYS_CELL moves them there with col-span-full and order-1).
 const ROW_COLUMNS =
-  "grid grid-cols-[14rem_minmax(0,1fr)_7.5rem] items-center gap-x-3 leading-tight lg:grid-cols-[22rem_minmax(0,1fr)_7.5rem]";
+  "grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-x-3 gap-y-1 leading-tight lg:grid-cols-[22rem_minmax(0,1fr)_7.5rem] lg:gap-y-0";
 
-// Below lg the grid is 56rem wide whatever the screen, so a day keeps a width
-// a finger can hit, and the grid scrolls sideways inside its panel.
-const GRID_MIN_WIDTH = "min-w-[56rem] lg:min-w-0";
+// Where the days go: the second line below lg, the middle column from lg.
+const DAYS_CELL = "max-lg:order-1 max-lg:col-span-full";
 
 // The two month totals, Sun then Earth, in fixed columns so the numbers line up.
 const TOTAL_COLUMNS = "grid grid-cols-2 gap-x-2 text-right";
@@ -176,20 +178,24 @@ export function SitesGrid({
 
   return (
     <div ref={boxRef} className="relative flex min-h-0 flex-1 flex-col" onMouseLeave={hideTooltip}>
-      {/* Below lg the header and the rows scroll sideways together inside this
-          box. The tooltip stays outside it, so it is never cut off. "relative"
-          keeps the screen-reader-only text of the totals inside the box too:
-          without it that text would stick out and widen the whole page. */}
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-x-auto lg:overflow-x-visible">
+      {/* The tooltip stays outside this box, so it is never cut off. "relative"
+          keeps the screen-reader-only text of the totals inside the box: without
+          it that text would stick out and widen the whole page. */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
         {/* Header: day numbers above the day columns. Hidden from screen
             readers, because every cell's label already names its day. */}
-        <div aria-hidden="true" className={cn(ROW_COLUMNS, GRID_MIN_WIDTH, "mb-1")}>
+        <div aria-hidden="true" className={cn(ROW_COLUMNS, "mb-1")}>
           <span className="text-xs text-muted-foreground">Site</span>
-          <div className="grid gap-px" style={dayColumns}>
+          <div className={cn("grid gap-px", DAYS_CELL)} style={dayColumns}>
             {monthDays.map((dayOfYear, index) => (
               <span
                 key={dayOfYear}
-                className="text-center font-mono text-[11px] tabular-nums text-muted-foreground"
+                className={cn(
+                  "text-center font-mono text-[11px] tabular-nums text-muted-foreground",
+                  // Below lg a day is about 10 px wide, too narrow for every
+                  // number. Show the 1st and every 5th.
+                  index !== 0 && (index + 1) % 5 !== 0 && "max-lg:invisible",
+                )}
               >
                 {index + 1}
               </span>
@@ -206,7 +212,6 @@ export function SitesGrid({
         <ul
           ref={listRef}
           className={cn(
-            GRID_MIN_WIDTH,
             "flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]",
           )}
         >
@@ -247,26 +252,29 @@ export function SitesGrid({
                 data-selected={isSelected}
                 className={cn(
                   ROW_COLUMNS,
-                  // Rows share the height. A row that holds a divider takes its
-                  // own full height instead.
-                  dividerText !== null ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
+                  // From lg rows share the height. A row that holds a divider
+                  // takes its own full height instead, as does every row below
+                  // lg, where the page scrolls rather than the list.
+                  "max-lg:py-1",
+                  dividerText !== null ? "flex-none" : "min-h-4 lg:max-h-[26px] lg:flex-1 lg:basis-0",
                 )}
               >
                 {/* The divider spans all three columns, above the first row of its group. */}
                 {dividerText !== null && (
-                  <div className="col-span-3 mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
+                  <div className="col-span-full mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
                     {dividerText}
                   </div>
                 )}
-                {/* Name, with its tags on the same line. A long name is cut
-                    short so the tags always fit; its title shows it in full. */}
-                <div className="flex min-w-0 items-center gap-2">
+                {/* Name, with its tags on the same line. From lg a long name is
+                    cut short so the tags always fit; its title shows it in
+                    full. Below lg the name wraps instead. */}
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 lg:flex-nowrap">
                   <button
                     type="button"
                     title={site.name}
                     onClick={() => onSelect(site.id, selectedHour)}
                     className={cn(
-                      "block min-w-0 truncate rounded-sm text-left text-sm leading-tight",
+                      "block min-w-0 rounded-sm text-left text-sm leading-tight lg:truncate",
                       // A custom point is named by its numbers, which use the mono font.
                       row.isCustom && "font-mono tabular-nums",
                       isSelected && "font-medium text-bright",
@@ -302,7 +310,7 @@ export function SitesGrid({
 
                 {/* Middle: the days of the month, or one opened day as 24 hours. */}
                 {!showHours && (
-                  <div className="grid h-full max-h-[22px] gap-px" style={dayColumns}>
+                  <div className={cn("grid h-5 max-h-[22px] gap-px lg:h-full", DAYS_CELL)} style={dayColumns}>
                     {monthDays.map((dayOfYear) => {
                       const day = row.days[dayOfYear];
                       let sunHours = 0;
@@ -346,7 +354,9 @@ export function SitesGrid({
                 )}
 
                 {showHours && (
-                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
+                  <div
+                    className={cn("grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2", DAYS_CELL)}
+                  >
                     <span className="font-mono text-xs tabular-nums text-bright">
                       {formatDay(selectedDay)}
                     </span>
@@ -361,7 +371,7 @@ export function SitesGrid({
                     )}
 
                     {hourly !== undefined && (
-                      <div className="grid h-full max-h-[22px] gap-px" style={hourColumns}>
+                      <div className="grid h-5 max-h-[22px] gap-px lg:h-full" style={hourColumns}>
                         {hoursOfDay(selectedDay).map((hourIndex) => {
                           const sunUp = hourly.sun_visible[hourIndex];
                           const earthUp = hourly.earth_visible[hourIndex];

@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
 import type { SiteRow } from "@/lib/app-types";
 import { totalsByMonth } from "@/lib/data";
 import { monthLaneStrengths } from "@/lib/grid";
@@ -15,6 +19,22 @@ export type MonthChipsProps = {
 // The 12 month buttons in the header, for the year of the month on screen. Each chip has two thin lanes under its
 // label: orange for the selected site's sunlight that month, blue for Earth.
 export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthChipsProps) {
+  // Below lg the chips are one row that scrolls sideways. Keep the selected
+  // month in the middle of it. Only the row moves: scrollIntoView would also
+  // scroll the page, which jumps while time is playing.
+  const listRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    if (list === null) {
+      return;
+    }
+    const chip = list.children[visibleMonth % MONTHS_PER_YEAR] as HTMLElement | undefined;
+    if (chip === undefined) {
+      return;
+    }
+    list.scrollLeft = chip.offsetLeft - (list.clientWidth - chip.offsetWidth) / 2;
+  }, [visibleMonth]);
+
   // With no site selected every lane stays empty.
   let monthTotals = null;
   if (selectedRow !== null) {
@@ -29,8 +49,13 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
   }
 
   return (
-    // On a narrow screen the 12 chips wrap onto more lines.
-    <ul className="flex flex-wrap gap-1.5 lg:flex-nowrap">
+    // Below lg the 12 chips sit in one row that scrolls sideways. "relative"
+    // makes each chip's offsetLeft count from the row. The padding keeps the
+    // selected chip's ring inside the row, which would otherwise clip it.
+    <ul
+      ref={listRef}
+      className="relative flex min-w-0 gap-1.5 overflow-x-auto p-1 [scrollbar-width:none] lg:overflow-visible lg:p-0"
+    >
       {months.map((month) => {
         const name = monthName(month);
         const isSelected = month === visibleMonth;
@@ -48,7 +73,7 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
         }
 
         return (
-          <li key={month}>
+          <li key={month} className="shrink-0">
             <button
               type="button"
               aria-pressed={isSelected}

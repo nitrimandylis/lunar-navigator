@@ -69,7 +69,7 @@ Built now:
   selects the site and month it talks about. A test recomputes every number in the tour
   text from the data files. The part of the page a step points at stays lit and the rest
   dims to 30% and cannot be clicked, fading between steps. Right and Left arrows move
-  between steps, Escape closes, and on a phone each step scrolls its target into view.
+  between steps, Escape closes, and on a phone each step opens the tab its target is on.
 
 - Mission planner: a header button opens a panel that answers "where and when can this
   mission land?" for every site at once. Three starting missions (short lander 14 days,
@@ -80,10 +80,15 @@ Built now:
   and its next landing time. Clicking a site or a day shows it on the main page. Past
   landings and custom points are listed apart, not ranked.
 
-- Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
-  Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
-  panel, the header wraps, and the header and play buttons are 40 px tall. The desktop
-  layout is unchanged.
+- Phone and tablet layout: below 1024 px a tab bar at the bottom shows one panel at a
+  time: Sites, Selected site (opens first) or Map (with the custom point form). The header
+  is two lines: the title with Tour and About, then the months in one row that scrolls
+  sideways. Sort and Plan a mission sit at the top of the Sites tab. Each site is two lines,
+  name and totals, then all the days of the month, so nothing scrolls sideways. Picking a
+  site in the grid or on the map opens the Selected site tab, which runs: name and verdict,
+  play and slider (sticky), a taller sky panorama drawn for the phone, the two numbers,
+  then the Sun and Earth charts one per row. Buttons are 40 px tall. The desktop layout is
+  unchanged.
 
 Still open:
 

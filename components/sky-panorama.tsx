@@ -8,6 +8,7 @@ import {
   terrainPoints,
 } from "@/lib/sky";
 import { HOURS_PER_DAY, daysInMonth, firstDayOfMonth } from "@/lib/time";
+import { cn } from "@/lib/utils";
 
 export type SkyPanoramaProps = {
   // The selected site, or null when nothing is selected.
@@ -21,15 +22,18 @@ export type SkyPanoramaProps = {
 };
 
 // Size of the drawing in SVG units. The SVG stretches to the panel width and
-// keeps this shape, so one unit is about one screen pixel.
-const WIDTH = 620;
-const HEIGHT = 116;
+// keeps its shape, so one unit is about one screen pixel. From lg up it is
+// wide and flat. Below lg a narrower, taller drawing is used instead: the wide
+// one squeezed onto a phone would make its labels about 5 px tall.
+const WIDE_WIDTH = 620;
+const WIDE_HEIGHT = 116;
+const PHONE_WIDTH = 360;
+const PHONE_HEIGHT = 150;
+// Margins around the plot, the same in both drawings.
 const LEFT = 44;
 const RIGHT = 8;
 const TOP = 6;
 const BOTTOM = 16;
-const PLOT_WIDTH = WIDTH - LEFT - RIGHT;
-const PLOT_HEIGHT = HEIGHT - TOP - BOTTOM;
 
 // The Sun and Earth are drawn as markers of a fixed size. At this scale their
 // real discs would be 1 or 2 pixels across.
@@ -53,10 +57,10 @@ const COMPASS_LABELS: CompassLabel[] = [
   { azDeg: 360, word: "N", anchor: "end" },
 ];
 
-// Turns an azimuth into an x position inside the plot: north at the left edge,
-// then east, south and west, and north again at the right edge.
-function xFor(azDeg: number): number {
-  return (azDeg / 360) * PLOT_WIDTH;
+// Turns an azimuth into an x position inside a plot plotWidth wide: north at
+// the left edge, then east, south and west, and north again at the right edge.
+function xFor(azDeg: number, plotWidth: number): number {
+  return (azDeg / 360) * plotWidth;
 }
 
 // The Sun or Earth at the selected hour: a filled marker when it is in view,
@@ -66,6 +70,7 @@ function BodyMarker({
   x,
   y,
   radius,
+  plotWidth,
   isVisible,
   fillClass,
   strokeClass,
@@ -74,12 +79,13 @@ function BodyMarker({
   x: number;
   y: number;
   radius: number;
+  plotWidth: number;
   isVisible: boolean;
   fillClass: string;
   strokeClass: string;
 }) {
   // Keep the name inside the plot when the marker is near an edge.
-  const labelX = Math.min(Math.max(x, 14), PLOT_WIDTH - 14);
+  const labelX = Math.min(Math.max(x, 14), plotWidth - 14);
   // The name sits above the marker, or below it when there is no room above.
   let labelY = y - radius - 3;
   if (labelY < TOP + 9) {
@@ -132,22 +138,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
   const range = skyYRange(terrainElevDeg, hourly.sun_elev_deg, hourly.earth_elev_deg);
   const ticks = yTicks(range);
-
-  // Turns an elevation into a y position: range.max at the top.
-  function yFor(elevDeg: number): number {
-    const fraction = (range.max - elevDeg) / (range.max - range.min);
-    return TOP + fraction * PLOT_HEIGHT;
-  }
-
-  const bottomY = TOP + PLOT_HEIGHT;
-
-  // The terrain line, and the same line closed along the bottom: the ground.
-  const terrainLine = skyLinePath(
-    terrainPoints(terrainElevDeg, terrainStepDeg),
-    xFor,
-    yFor,
-  );
-  const ground = terrainLine + " L" + PLOT_WIDTH + "," + bottomY + " L0," + bottomY + " Z";
+  const terrain = terrainPoints(terrainElevDeg, terrainStepDeg);
 
   // The paths of the Sun and Earth during the month on screen.
   const startHour = firstDayOfMonth(visibleMonth) * HOURS_PER_DAY;
@@ -177,19 +168,33 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
     (earthIsVisible ? "in view" : "below the horizon") +
     ".";
 
-  return (
-    <figure>
-      {/* On a narrow screen the directions wrap under the title. */}
-      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 text-sm text-foreground lg:flex-nowrap lg:gap-4">
-        <span>Sky all the way round, height stretched</span>
-        <span className="font-mono text-xs tabular-nums text-muted-foreground">
-          Sun {sunAz.toFixed(0)}° {compassWord(sunAz)} · Earth {earthAz.toFixed(0)}°{" "}
-          {compassWord(earthAz)}
-        </span>
-      </figcaption>
+  // Draws the sky at one size. The page draws it twice, wide and phone-sized,
+  // and CSS shows only the one that fits the screen.
+  function drawSky(width: number, height: number, className: string) {
+    const plotWidth = width - LEFT - RIGHT;
+    const plotHeight = height - TOP - BOTTOM;
+    const bottomY = TOP + plotHeight;
+    // Each drawing needs its own clip path id: two elements with one id clash.
+    const clipId = "sky-plot-" + width;
+
+    function xAt(azDeg: number): number {
+      return xFor(azDeg, plotWidth);
+    }
+
+    // Turns an elevation into a y position: range.max at the top.
+    function yFor(elevDeg: number): number {
+      const fraction = (range.max - elevDeg) / (range.max - range.min);
+      return TOP + fraction * plotHeight;
+    }
+
+    // The terrain line, and the same line closed along the bottom: the ground.
+    const terrainLine = skyLinePath(terrain, xAt, yFor);
+    const ground = terrainLine + " L" + plotWidth + "," + bottomY + " L0," + bottomY + " Z";
+
+    return (
       <svg
-        viewBox={"0 0 " + WIDTH + " " + HEIGHT}
-        className="h-auto w-full"
+        viewBox={"0 0 " + width + " " + height}
+        className={cn("h-auto w-full", className)}
         role="img"
         aria-label={"Terrain horizon around the site with the Sun and Earth. " + description}
       >
@@ -198,7 +203,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
           <g key={tick}>
             <line
               x1={LEFT}
-              x2={WIDTH - RIGHT}
+              x2={width - RIGHT}
               y1={yFor(tick)}
               y2={yFor(tick)}
               className="stroke-line/50"
@@ -216,18 +221,18 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
         <g transform={"translate(" + LEFT + ", 0)"}>
           <defs>
-            <clipPath id="sky-plot">
-              <rect x={0} y={TOP} width={PLOT_WIDTH} height={PLOT_HEIGHT} />
+            <clipPath id={clipId}>
+              <rect x={0} y={TOP} width={plotWidth} height={plotHeight} />
             </clipPath>
           </defs>
 
-          <g clipPath="url(#sky-plot)">
+          <g clipPath={"url(#" + clipId + ")"}>
             {/* The month's paths go under the ground, so the part of a path
                 that is behind the terrain looks dimmer. */}
             {sunPieces.map((piece, index) => (
               <path
                 key={"sun-" + index}
-                d={skyLinePath(piece, xFor, yFor)}
+                d={skyLinePath(piece, xAt, yFor)}
                 fill="none"
                 strokeWidth={1}
                 className="stroke-power/60"
@@ -236,7 +241,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
             {earthPieces.map((piece, index) => (
               <path
                 key={"earth-" + index}
-                d={skyLinePath(piece, xFor, yFor)}
+                d={skyLinePath(piece, xAt, yFor)}
                 fill="none"
                 strokeWidth={1}
                 className="stroke-comms/70"
@@ -252,15 +257,15 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
           {COMPASS_LABELS.map((label) => (
             <g key={label.azDeg}>
               <line
-                x1={xFor(label.azDeg)}
-                x2={xFor(label.azDeg)}
+                x1={xAt(label.azDeg)}
+                x2={xAt(label.azDeg)}
                 y1={bottomY}
                 y2={bottomY + 4}
                 className="stroke-line"
               />
               <text
-                x={xFor(label.azDeg)}
-                y={HEIGHT - 2}
+                x={xAt(label.azDeg)}
+                y={height - 2}
                 textAnchor={label.anchor}
                 className="fill-muted-foreground font-mono text-[11px]"
               >
@@ -271,24 +276,41 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
           <BodyMarker
             name="Earth"
-            x={xFor(earthAz)}
+            x={xAt(earthAz)}
             y={yFor(earthElev)}
             radius={EARTH_MARKER_RADIUS}
+            plotWidth={plotWidth}
             isVisible={earthIsVisible}
             fillClass="fill-comms"
             strokeClass="stroke-comms"
           />
           <BodyMarker
             name="Sun"
-            x={xFor(sunAz)}
+            x={xAt(sunAz)}
             y={yFor(sunElev)}
             radius={SUN_MARKER_RADIUS}
+            plotWidth={plotWidth}
             isVisible={sunIsVisible}
             fillClass="fill-power"
             strokeClass="stroke-power"
           />
         </g>
       </svg>
+    );
+  }
+
+  return (
+    <figure>
+      {/* On a narrow screen the directions wrap under the title. */}
+      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 text-sm text-foreground lg:flex-nowrap lg:gap-4">
+        <span>Sky all the way round, height stretched</span>
+        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+          Sun {sunAz.toFixed(0)}° {compassWord(sunAz)} · Earth {earthAz.toFixed(0)}°{" "}
+          {compassWord(earthAz)}
+        </span>
+      </figcaption>
+      {drawSky(WIDE_WIDTH, WIDE_HEIGHT, "max-lg:hidden")}
+      {drawSky(PHONE_WIDTH, PHONE_HEIGHT, "lg:hidden")}
     </figure>
   );
 }
