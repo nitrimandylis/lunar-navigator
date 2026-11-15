@@ -905,15 +905,12 @@ export function Navigator() {
       </main>
 
       {/* The tab bar, below lg only. During the guided tour it is dimmed and
-          inert like the rest of the page: the tour picks the tab itself. */}
+          inert like the rest of the page: the tour picks the tab itself. The
+          labels dim, not the bar, so the list behind it does not show through. */}
       <nav
         aria-label="Sections"
         inert={isTourOpen}
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-line bg-background lg:hidden",
-          TOUR_FADE,
-          isTourOpen && TOUR_DIM,
-        )}
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-line bg-background lg:hidden"
       >
         {PHONE_TABS.map((item) => {
           const isOpen = item.tab === phoneTab;
@@ -925,6 +922,8 @@ export function Navigator() {
               onClick={() => showTab(item.tab)}
               className={cn(
                 "h-14 text-sm text-muted-foreground",
+                TOUR_FADE,
+                isTourOpen && TOUR_DIM,
                 // The open tab has a bright label and a bright line on top.
                 isOpen && "font-medium text-bright shadow-[inset_0_2px_0_var(--bright)]",
               )}
