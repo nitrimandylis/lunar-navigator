@@ -1,14 +1,16 @@
-// Calendar helpers. The data covers the calendar years 2027 to 2030, one
+// Calendar helpers. The data covers the calendar years 2027 to 2040, one
 // sample per hour, joined into one timeline.
 //
 // - An hour index counts hours from 2027-01-01 00:00 UTC, which is hour 0.
 // - A day index counts days from 2027-01-01, which is day 0.
 // - A month index counts months from January 2027, which is month 0. So 11 is
-//   December 2027, 12 is January 2028 and 47 is December 2030.
+//   December 2027, 12 is January 2028 and 167 is December 2040.
 
 // The years with data, in order. To add a year, add it here: everything else
 // in this file is worked out from this list.
-export const YEARS = [2027, 2028, 2029, 2030];
+export const YEARS = [
+  2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036, 2037, 2038, 2039, 2040,
+];
 
 export const FIRST_YEAR = YEARS[0];
 export const LAST_YEAR = YEARS[YEARS.length - 1];
@@ -39,7 +41,7 @@ export const MONTH_NAMES = [
 const DAYS_IN_PLAIN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 // A leap year has 29 days in February. Every fourth year is one, except a
-// century year that cannot be divided by 400. Of our years only 2028 is.
+// century year that cannot be divided by 400. Of our years 2028, 2032, 2036 and 2040 are.
 export function isLeapYear(year: number): boolean {
   if (year % 400 === 0) {
     return true;
@@ -85,10 +87,10 @@ export function firstDayOfMonth(month: number): number {
   return day;
 }
 
-// Every day of the four years: 365 + 366 + 365 + 365.
+// Every day of all the years, 5114 for 2027 to 2040.
 export const TOTAL_DAYS = firstDayOfMonth(MONTH_COUNT);
 
-// Every hour of the four years. The last hour index is one less than this.
+// Every hour of all the years. The last hour index is one less than this.
 export const TOTAL_HOURS = TOTAL_DAYS * HOURS_PER_DAY;
 
 // The month a day index falls in, and the day inside that month counted from

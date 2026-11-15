@@ -2,8 +2,17 @@ import type { Hourly, SiteRow } from "@/lib/app-types";
 import { clearanceSeries, countdownText } from "@/lib/clearance";
 import { sunPercent } from "@/lib/data";
 import { daysOfMonth, shortSiteName } from "@/lib/grid";
-import { formatHour, monthName, monthOfHour } from "@/lib/time";
+import {
+  firstDayOfMonth,
+  firstMonthOfYear,
+  formatHour,
+  monthName,
+  monthOfHour,
+} from "@/lib/time";
 import { monthVerdict } from "@/lib/verdict";
+
+// The days of 2027 to 2030, the years sun_pct_10m in sites.json covers.
+const DAYS_2027_TO_2030 = firstDayOfMonth(firstMonthOfYear(2031));
 
 export type SelectedSiteProps = {
   // The selected site, or null when nothing is selected.
@@ -82,14 +91,15 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         )}
         {/* Facts that do not change with the hour, from optional fields of
             sites.json, in one paragraph to keep the card short. row.days
-            holds every day of 2027 to 2030, worked out from 2 m up. */}
+            holds every day of 2027 to 2040, worked out from 2 m up. sun_pct_10m
+            only covers 2027 to 2030, so the 2 m figure uses those days too. */}
         {(site.sun_pct_10m !== undefined ||
           site.slope_deg !== undefined ||
           site.psr_km !== undefined) && (
           <p className="text-muted-foreground">
             {site.sun_pct_10m !== undefined && (
               <>
-                Sun 2027 to 2030: {sunPercent(row.days).toFixed(1)}% at 2 m,{" "}
+                Sun 2027 to 2030: {sunPercent(row.days.slice(0, DAYS_2027_TO_2030)).toFixed(1)}% at 2 m,{" "}
                 {site.sun_pct_10m.toFixed(1)}% at 10 m.{" "}
               </>
             )}

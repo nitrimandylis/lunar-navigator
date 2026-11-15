@@ -47,13 +47,13 @@ or fix a fact that went stale. Put the edit in the PR for the change it describe
 The data shapes passed between folders. Change only when both owners agree.
 
 `data/build.py` writes the files below to `public/data/`. The app fetches them from `/data/...`.
-They cover calendar years 2027 to 2030, one sample per hour.
+They cover calendar years 2027 to 2040, one sample per hour.
 
 - 2027 lives at `/data/sites/<id>.json`, `/data/summary/<id>.json`, `/data/ephemeris.json`.
 - Other years live at `/data/<year>/sites/<id>.json`, `/data/<year>/summary/<id>.json`,
   `/data/<year>/ephemeris.json`. There is one `sites.json` for all years.
 - `start_utc` is `<year>-01-01T00:00:00Z`. A year has 8760 hours and 365 days, a leap year
-  (2028) 8784 and 366. Never hardcode them: read `count` and `days.length`.
+  (2028, 2032, 2036, 2040) 8784 and 366. Never hardcode them: read `count` and `days.length`.
 - The examples below show 2027.
 
 Conventions:
