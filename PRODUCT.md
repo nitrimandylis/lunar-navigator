@@ -8,13 +8,18 @@ with terrain horizons, from JPL Horizons ephemerides and LOLA terrain.
 
 ## Where it is headed
 
-Hackathon build, 14-15 Nov 2026. South pole only, calendar year 2027, hourly, UTC.
+Hackathon build, 14-15 Nov 2026. South pole only, calendar years 2027 to 2030, hourly, UTC.
 
 Built now:
 
 - Sites grid: one row per site, two lanes per day (orange power, blue comms), one month at
   a time. Click a day to open its 24 hours; Escape or the close button shuts it.
-- Month chips in the header, tinted by the selected site's monthly hours.
+- Year and month chips in the header: four year buttons (2027 to 2030) and the 12 months of
+  the year on screen, tinted by the selected site's monthly hours. The four years are one
+  timeline of 1461 days, so Play, the slider and the arrow keys run straight from one year
+  into the next. Each year's files are loaded and joined in the browser. In the data files a
+  dark spell is cut at the first and last hour of each year, so the verdict line can
+  understate a spell that crosses New Year.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
@@ -54,7 +59,8 @@ Built now:
 
 - Share link and CSV: under the selected site, "Copy link" copies a link that opens the
   page on the same site and hour (`?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
-  saves the site's 8760 hourly rows (Sun and Earth elevation, azimuth and visibility).
+  saves the site's 35,064 hourly rows, 2027 to 2030 (Sun and Earth elevation, azimuth and
+  visibility).
   Custom points have no link, because they only exist in the browser tab.
 
 - Guided tour: five steps from a header button, telling one story (two places 2.1 km apart
@@ -68,8 +74,8 @@ Built now:
   mission land?" for every site at once. Three starting missions (short lander 14 days,
   crewed stay 7 days, long rover 100 days with at most 50 h of dark, as planned for VIPER),
   each with editable needs: length of stay, share of the stay with the Sun and with Earth
-  in view, longest dark spell. Every site is checked hour by hour for all of 2027 and
-  ranked by the number of days with a landing time that works, with a year strip per site
+  in view, longest dark spell. Every site is checked hour by hour from 2027 to 2030 and
+  ranked by the number of days with a landing time that works, with a four-year strip per site
   and its next landing time. Clicking a site or a day shows it on the main page. Past
   landings and custom points are listed apart, not ranked.
 

@@ -20,6 +20,7 @@ import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import { TourCard } from "@/components/tour-card";
+import { YearChips } from "@/components/year-chips";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -27,25 +28,31 @@ import {
   type SiteRow,
 } from "@/lib/app-types";
 import { customSiteHourly, summarizeDays } from "@/lib/custom-site";
-import type {
-  DaySummary,
-  Ephemeris,
-  Site,
-  SiteHourly,
-  SiteSummary,
+import {
+  dataFolder,
+  joinEphemeris,
+  joinHourly,
+  type DaySummary,
+  type Ephemeris,
+  type Site,
+  type SiteHourly,
+  type SiteSummary,
 } from "@/lib/data";
 import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
 import { parseShareQuery } from "@/lib/share";
 import type { SortKey } from "@/lib/sort";
 import {
-  HOURS_IN_YEAR,
   HOURS_PER_DAY,
-  YEAR,
+  MONTHS_PER_YEAR,
+  TOTAL_HOURS,
+  YEARS,
   firstDayOfMonth,
+  firstMonthOfYear,
   monthOfHour,
   moveHourToMonth,
   stepHour,
+  yearOfMonth,
 } from "@/lib/time";
 import { TOUR_STEPS } from "@/lib/tour";
 import { cn } from "@/lib/utils";
@@ -57,6 +64,17 @@ async function fetchJson(path: string): Promise<unknown> {
     throw new Error("Could not load " + path + " (status " + response.status + ")");
   }
   return response.json();
+}
+
+// Fetches the same file for every year and returns the parts in year order.
+// file is a path inside a year's folder, for example "summary/<id>.json".
+async function fetchEveryYear(file: string): Promise<unknown[]> {
+  return Promise.all(YEARS.map((year) => fetchJson(dataFolder(year) + file)));
+}
+
+// The Sun and Earth sub-points for every hour of every year, as one file.
+async function fetchEphemeris(): Promise<Ephemeris> {
+  return joinEphemeris((await fetchEveryYear("ephemeris.json")) as Ephemeris[]);
 }
 
 // How long one hour of data stays on screen while time is playing. At 80 ms
@@ -169,7 +187,9 @@ export function Navigator() {
     setFailedHourlyIds((previous) => previous.filter((id) => id !== siteId));
 
     try {
-      const hourly = (await fetchJson("/data/sites/" + siteId + ".json")) as SiteHourly;
+      // One file per year, joined into one timeline.
+      const parts = (await fetchEveryYear("sites/" + siteId + ".json")) as SiteHourly[];
+      const hourly = joinHourly(parts);
       setHourlyBySite((previous) => ({ ...previous, [siteId]: hourly }));
     } catch {
       // Forget the request so a later click can try again, and say it failed.
@@ -185,18 +205,25 @@ export function Navigator() {
     async function loadSitesAndSummaries() {
       try {
         const loadedSites = (await fetchJson("/data/sites.json")) as Site[];
-        const summaryFiles = (await Promise.all(
-          loadedSites.map((site) => fetchJson("/data/summary/" + site.id + ".json")),
-        )) as SiteSummary[];
+        // For each site, one summary file per year.
+        const summaryParts = (await Promise.all(
+          loadedSites.map((site) => fetchEveryYear("summary/" + site.id + ".json")),
+        )) as SiteSummary[][];
 
+        // Put each site's years one after the other, so day 0 is 1 January
+        // 2027 and the days run on to the end of the last year.
         const loadedSummaries: Record<string, DaySummary[]> = {};
-        for (const file of summaryFiles) {
-          loadedSummaries[file.id] = file.days;
+        for (const parts of summaryParts) {
+          let days: DaySummary[] = [];
+          for (const part of parts) {
+            days = days.concat(part.days);
+          }
+          loadedSummaries[parts[0].id] = days;
         }
 
         // The reference landings have no data files. Work out their hours
         // from the ephemeris, the same way as a custom point.
-        const ephemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        const ephemeris = await fetchEphemeris();
         const referenceHourly: Record<string, Hourly> = {};
         for (const site of REFERENCE_SITES) {
           const hourly = customSiteHourly(site.lat, site.lon, ephemeris);
@@ -280,14 +307,19 @@ export function Navigator() {
     setSelectedHour(moveHourToMonth(selectedHour, month));
   }
 
+  // Showing another year keeps the month of the year: May 2027 becomes May 2029.
+  function changeYear(year: number) {
+    changeMonth(firstMonthOfYear(year) + (visibleMonth % MONTHS_PER_YEAR));
+  }
+
   // While playing, move one hour forward every PLAY_STEP_MS. Each new hour
-  // starts the next wait, and the last hour of the year stops the play.
+  // starts the next wait, and the last hour of the data stops the play.
   useEffect(() => {
     if (!isPlaying) {
       return;
     }
     const timer = setTimeout(() => {
-      if (selectedHour >= HOURS_IN_YEAR - 1) {
+      if (selectedHour >= TOTAL_HOURS - 1) {
         setIsPlaying(false);
       } else {
         setSelectedHour(selectedHour + 1);
@@ -393,7 +425,7 @@ export function Navigator() {
 
     try {
       if (ephemerisCache.current === null) {
-        ephemerisCache.current = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        ephemerisCache.current = await fetchEphemeris();
       }
       const ephemeris = ephemerisCache.current;
 
@@ -505,15 +537,13 @@ export function Navigator() {
           id="tour-months"
           inert={isTourOpen && tourTarget !== "months"}
           className={cn(
-            "flex items-center gap-3 rounded-lg",
+            "flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg",
             TOUR_FADE,
             tourTarget === "months" && "ring-2 ring-bright ring-offset-4 ring-offset-background",
             isTourOpen && tourTarget !== "months" && TOUR_DIM,
           )}
         >
-          <span className="font-mono text-sm tabular-nums text-muted-foreground">
-            {YEAR}
-          </span>
+          <YearChips visibleYear={yearOfMonth(visibleMonth)} onChangeYear={changeYear} />
           <MonthChips
             visibleMonth={visibleMonth}
             selectedRow={selectedRow}

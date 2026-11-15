@@ -1,6 +1,8 @@
-// Shapes of the JSON files that the Python in data/ writes, plus two small
+// Shapes of the JSON files that the Python in data/ writes, plus small
 // helpers that work on them. Field names match the JSON exactly (snake_case),
 // so parsed JSON can be typed without any conversion.
+
+import { FIRST_YEAR, MONTH_COUNT, firstMonthOfYear } from "./time.ts";
 
 // One entry of sites.json.
 export type Site = {
@@ -75,18 +77,86 @@ export type MonthTotals = {
   bothHours: number;
 };
 
+// Where a year's files live. 2027 sits directly in /data/. Each later year
+// has its own folder: /data/2028/, /data/2029/, /data/2030/.
+export function dataFolder(year: number): string {
+  if (year === FIRST_YEAR) {
+    return "/data/";
+  }
+  return "/data/" + year + "/";
+}
+
+// Joins one site's hourly files, one per year and in year order, into one
+// file that covers all the years. The terrain horizon does not change from
+// year to year, so it comes from the first file.
+export function joinHourly(parts: SiteHourly[]): SiteHourly {
+  const joined: SiteHourly = {
+    id: parts[0].id,
+    start_utc: parts[0].start_utc,
+    step_minutes: parts[0].step_minutes,
+    count: 0,
+    sun_elev_deg: [],
+    sun_az_deg: [],
+    earth_elev_deg: [],
+    earth_az_deg: [],
+    sun_visible: [],
+    earth_visible: [],
+    horizon: parts[0].horizon,
+  };
+  for (const part of parts) {
+    joined.count += part.count;
+    joined.sun_elev_deg = joined.sun_elev_deg.concat(part.sun_elev_deg);
+    joined.sun_az_deg = joined.sun_az_deg.concat(part.sun_az_deg);
+    joined.earth_elev_deg = joined.earth_elev_deg.concat(part.earth_elev_deg);
+    joined.earth_az_deg = joined.earth_az_deg.concat(part.earth_az_deg);
+    joined.sun_visible = joined.sun_visible.concat(part.sun_visible);
+    joined.earth_visible = joined.earth_visible.concat(part.earth_visible);
+  }
+  return joined;
+}
+
+// Joins the ephemeris files, one per year and in year order, into one.
+export function joinEphemeris(parts: Ephemeris[]): Ephemeris {
+  const joined: Ephemeris = {
+    start_utc: parts[0].start_utc,
+    step_minutes: parts[0].step_minutes,
+    count: 0,
+    sub_solar_lon_deg: [],
+    sub_solar_lat_deg: [],
+    sub_earth_lon_deg: [],
+    sub_earth_lat_deg: [],
+    earth_distance_km: [],
+  };
+  for (const part of parts) {
+    joined.count += part.count;
+    joined.sub_solar_lon_deg = joined.sub_solar_lon_deg.concat(part.sub_solar_lon_deg);
+    joined.sub_solar_lat_deg = joined.sub_solar_lat_deg.concat(part.sub_solar_lat_deg);
+    joined.sub_earth_lon_deg = joined.sub_earth_lon_deg.concat(part.sub_earth_lon_deg);
+    joined.sub_earth_lat_deg = joined.sub_earth_lat_deg.concat(part.sub_earth_lat_deg);
+    joined.earth_distance_km = joined.earth_distance_km.concat(part.earth_distance_km);
+  }
+  return joined;
+}
+
 // Adds up the hours of sunlight, of Earth visibility and of both for each month.
-// Returns 12 entries, January first. A month with no days gives zeros.
+// Returns one entry per month index, January 2027 first (see lib/time.ts).
+// A month with no days gives zeros. A day outside the years with data is ignored.
 export function totalsByMonth(days: DaySummary[]): MonthTotals[] {
   const totals: MonthTotals[] = [];
-  for (let month = 0; month < 12; month++) {
+  for (let month = 0; month < MONTH_COUNT; month++) {
     totals.push({ sunHours: 0, earthHours: 0, bothHours: 0 });
   }
 
   for (const day of days) {
-    // In "2027-03-15" the characters at positions 5 and 6 are the month, "03".
+    // In "2027-03-15" the first 4 characters are the year, and the
+    // characters at positions 5 and 6 are the month, "03".
+    const year = Number(day.date.slice(0, 4));
     const monthNumber = Number(day.date.slice(5, 7));
-    const monthTotals = totals[monthNumber - 1];
+    const month = firstMonthOfYear(year) + monthNumber - 1;
+    if (month < 0 || month >= MONTH_COUNT) {
+      continue;
+    }
+    const monthTotals = totals[month];
     monthTotals.sunHours += day.sun_hours;
     monthTotals.earthHours += day.earth_hours;
     monthTotals.bothHours += day.both_hours;

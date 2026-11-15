@@ -1,4 +1,4 @@
-// Landing windows: the hours of the year at which a mission can land at a
+// Landing windows: the hours of the data at which a mission can land at a
 // site and get what it needs for its whole stay.
 //
 // Everything here works on the sun_visible and earth_visible arrays of one
@@ -106,7 +106,7 @@ function runningTotals(values: number[]): number[] {
   return totals;
 }
 
-// One value per hour of the year: 1 if a mission that lands at that hour gets
+// One value per hour of the data: 1 if a mission that lands at that hour gets
 // what it needs for its whole stay, 0 if not.
 //
 // A landing hour works when all of these hold:

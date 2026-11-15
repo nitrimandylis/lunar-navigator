@@ -1,7 +1,7 @@
 import type { Hourly, SiteRow } from "@/lib/app-types";
 import { clearanceSeries, countdownText } from "@/lib/clearance";
 import { daysOfMonth, shortSiteName } from "@/lib/grid";
-import { MONTH_NAMES, formatHour, monthOfHour } from "@/lib/time";
+import { formatHour, monthName, monthOfHour } from "@/lib/time";
 import { monthVerdict } from "@/lib/verdict";
 
 export type SelectedSiteProps = {
@@ -37,7 +37,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
       monthDays.push(row.days[dayOfYear]);
     }
   }
-  const verdict = monthVerdict(monthDays, MONTH_NAMES[month]);
+  const verdict = monthVerdict(monthDays, monthName(month));
 
   // How far the Sun and Earth sit above the terrain horizon this hour, the
   // same number the clearance charts draw. Above 0 means in view.

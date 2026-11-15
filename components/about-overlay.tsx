@@ -115,8 +115,8 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 day hour by hour.
               </li>
               <li>
-                <span className="text-bright">Months.</span> The buttons at the top change
-                the month. A later launch date means a different month, and often a
+                <span className="text-bright">Years and months.</span> The buttons at the
+                top change the year and the month. A later launch date means a different month, and often a
                 different answer.
               </li>
               <li>
@@ -133,7 +133,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
               <li>
                 <span className="text-bright">Plan a mission.</span> Pick a kind of
                 mission and how much Sun and Earth it needs. Every site is then checked
-                hour by hour for the whole year, and ranked by how many days have a
+                hour by hour for all four years, and ranked by how many days have a
                 landing time that works. Click a site or a day to see it on the main page.
               </li>
               <li>
@@ -176,8 +176,8 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
           <Part title="Where the numbers come from">
             <ul className="flex list-disc flex-col gap-1.5 pl-5">
               <li>
-                Sun and Earth positions come from NASA/JPL Horizons, for every hour of
-                2027, as seen from each site.
+                Sun and Earth positions come from NASA/JPL Horizons, for every hour from
+                2027 to 2030, as seen from each site.
               </li>
               <li>
                 The ground comes from the LOLA laser altimeter on NASA&apos;s Lunar
@@ -204,7 +204,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 It is geometry only: when the Sun and Earth are above the ground. It is not
                 a power budget, a temperature model or a radio link budget.
               </li>
-              <li>It covers 2027 only, one sample per hour, in UTC.</li>
+              <li>It covers 2027 to 2030, one sample per hour, in UTC.</li>
               <li>
                 Past landings and custom points use a smooth Moon with no terrain, so they
                 are shown apart and never ranked against the south pole sites.
