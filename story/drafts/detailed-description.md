@@ -162,7 +162,17 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
 1. **D1 - Trim (nitrimandylis):** Can you provide screenshots from the final public build showing (a) the table sorted by Power, Comms and Both for one labelled month, (b) a linked site/time horizon view, and (c) the Short lander example above with its requirements and result? Please provide the public URL, revision, UTC selections and screenshot paths/links, and state whether the displayed results match the draft's tables.
 
-   Answer - Trim, date: Pending.
+   Answer - Trim, 2026-11-15: Public URL: https://www.moonfrom.earth/ (the bare domain redirects to it). Checked on 15 November 2026 with `main` at 799f550. The app code last changed in 10aa615 (PR #87), and the live site shows that commit's 2027 to 2040 year picker. I did not read the deployment id. Claude Code captured the screenshots in my session, in a headless Chromium with no cookies or login. They are 3200 x 2000 px PNG files in `docs/evidence/`.
+
+   (a) May 2027 sorted three ways, opened with `?site=shackleton-ridge&time=2027-05-01T00:00Z`: `may-2027-sort-power.png`, `may-2027-sort-comms.png`, `may-2027-sort-both.png`. Top three rows. Power: Lit ridge near Shackleton (512 Sun h), Candidate near Haworth (488), Best-lit point on Connecting Ridge (465). Comms: Candidate near Haworth, Candidate near Malapert, Candidate near Nobile (744 Earth h each). Both: Candidate near Haworth, Lit ridge near Shackleton, Candidate near Nobile.
+
+   (b) Linked site and time: `?site=shackleton-shadow&time=2027-05-16T07:00Z` opens Shadowed ground near Shackleton at 16 May 2027, 07:00 UTC, with its sky panorama: `shared-link-shackleton-shadow-2027-05-16T07.png`.
+
+   (c) Short lander: `planner-short-lander-2027-05-01.png`, with 1 May 2027, 00:00 UTC selected on the main page. The preset shows 14 days, Sun 80%, Earth 50%, longest dark spell 24 hours. The result line reads: "10 of 18 sites can host this mission from 2027 to 2040. Best: Lit ridge near Shackleton, with a landing time that works on 2527 of 5114 days."
+
+   2040, for D2: `?site=shackleton-ridge&time=2040-05-16T07:00Z`, `year-2040-shackleton-ridge-2040-05-16T07.png`. The verdict reads Sun up 100% of May, Earth 52%.
+
+   Match with the draft's tables: yes for everything the interface displays. The May 2027 row for the Shackleton ridge shows 512 Sun h and 457 Earth h, and its verdict gives a longest dark spell of 6 d 18 h, which is 162 h. The shadowed point shows 0 and 0 at -89.3690, -136.5882. In the planner the Shackleton ridge has its next landing at 1 May 2027, 00:00 UTC, so the draft's stay meets the preset. Connecting Ridge shows its next window on 12 July 2027, so that stay does not. Not displayed anywhere: the 436 simultaneous hours, and the per-stay figures in the 14-day table (296 h, 230 h, 300 h, 21 h, 81 h). Those remain data checks, not screenshots.
 
 2. **D2 - resolved, 15 November 2026:** PR #87 (10aa615) updates lib/time.ts to 2027-2040 and retains a separately labelled 2027-2030 height comparison. The implementation/range question is answered by repository evidence F09. No repeat answer is needed; include a 2040 screenshot in D1's final-build evidence.
 
