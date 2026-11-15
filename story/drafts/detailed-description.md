@@ -1,81 +1,110 @@
-# Detailed project description - working draft
+# Detailed project description - revised working draft
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Updated: 14 November 2026, following Nick's feature-status clarification.
-Only the text between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. All team questions, source-review caveats and rubric notes are below that boundary. [PROJECT NAME] remains a placeholder.
+Revised: 15 November 2026. Evidence snapshot: dbec867, with Nick's latest coverage confirmation. The name follows the current app title.
+Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. Questions, evidence details and rubric notes follow the boundary.
 
 ---
 
 ## DRAFT TEXT - START
 
-### The problem and our intended users
+### The right place also needs the right time
 
-A lunar location needs to be considered together with a time window. Sunlight availability and a view of Earth can differ between nearby points and across the year. A high annual sunlight percentage can also conceal a long continuous period of darkness. Understanding these differences is relevant when exploring opportunities for solar power and direct-to-Earth communication, although visibility alone cannot establish whether either system will work.
+A lunar location cannot be understood from a map position or an annual sunlight percentage alone. A solar-powered mission needs to know when sunlight is available, how long darkness lasts and when Earth is visible for a possible direct radio link. Those conditions can change sharply between nearby points and over time.
 
-We are developing [PROJECT NAME] as a website for exploring these site-and-date conditions at the lunar south pole. Our intended users are educators and the public who want an understandable explanation, and mission planners and other space professionals who want more detailed information for an initial comparison.
+Lunar Landing Site Navigator connects a table of locations and dates, a physical explanation of Sun and Earth visibility, and a mission planner that checks conditions throughout a proposed stay. Its intended users are educators and the public exploring lunar conditions, and space professionals examining preliminary site-and-time options.
 
-### Available location and date selection
+The challenge identifies complicated interfaces as a barrier to evaluating existing information. Our contribution brings three tasks into one connected workflow: compare availability, see why a horizon blocks the Sun or Earth, and check whether a proposed stay meets explicit requirements. An educator can use that connection to explain lunar conditions; a planner can inspect the assumptions behind an initial shortlist.
 
-Users can select a site and change the date. A location can also be chosen by entering exact coordinates or clicking a point on the lunar map. This provides an entry point for exploring a location and its conditions at a chosen time.
+### Compare locations in the same table
 
-The prepared site dataset contains 18 points, each with 8,760 hourly samples covering 2027 and corresponding daily summaries. Location selection and the scientific coverage of a selected point are separate: the documented method uses terrain horizons for these prepared points, while custom-point estimates use a smooth-Moon horizon without local terrain obstruction. Results from those two methods need to be distinguished.
+The table is the comparison tool. Prepared sites are shown against the same month, with separate sunlight and Earth-visibility lanes. Users can open a day to inspect its hours and sort the prepared sites by:
 
-### Planned comparison, interface levels and AI feature
+- **Power:** most hours with some sunlight.
+- **Comms:** most hours with Earth visible.
+- **Both:** most hours when the Sun and Earth are visible together.
 
-Side-by-side site comparison is planned so that users can inspect different locations over the same time window. We also plan a simpler interface for educators and the public, alongside a more detailed interface for professional users. The intended difference is the level of information and explanation, rather than a claim of NASA endorsement or professional certification.
+This makes the ranking interpretable. A site at the top of Power has the most modelled sunlight hours for that month; the label does not establish electrical output or landing safety.
 
-An AI feature is also planned to help identify promising locations and time windows. The criteria for a best option, the search coverage and the verification method are still being defined. The feature is not yet presented as an implemented or validated optimiser, and a suggestion would not by itself establish landing safety.
+Selecting a site and hour updates a horizon panorama showing the Sun and Earth against the skyline, charts showing how far each body clears the terrain, and rise/set countdowns. Playback and a slider show how conditions evolve. These linked views give the changing numbers a physical explanation.
 
-### A prepared-data example: nearby locations, different conditions
+The selected-site card also provides terrain context: slope estimated from a 30 m LOLA grid, distance to the nearest mapped permanently shadowed region larger than 1 square kilometre, and a separate comparison of sunlight at 2 m and 10 m observer heights. The height comparison currently summarizes 2027-2030; it is distinct from the longer hourly dataset. These indicators help users ask more specific questions about a point; they are not combined into a universal suitability score.
 
-Two team-computed points near Shackleton, shackleton-ridge and shackleton-shadow, are about 2.1 km apart. Both use a 2 m observer height above the local ground and the same terrain-aware visibility method. They are points selected by the team's scan, rather than official mission landing sites.
+Users can choose a prepared site, enter coordinates, or click empty ground on the polar map and add that point. Custom locations are evaluated at those coordinates on a smooth Moon without local terrain, and are labelled and grouped separately. Five past landing locations provide context using the same modelled future dates. These smooth-horizon examples are not ranked against the terrain-aware south pole points.
 
-For May 2027, the model's hourly samples run from 1 May at 00:00 through 31 May at 23:00 UTC, covering 744 hours:
+### Check the mission's whole stay
 
-| Modelled quantity | Lit ridge near Shackleton | Shadowed point near Shackleton |
+The mission planner asks which prepared locations have an arrival time meeting the user's stated requirements.
+
+Users set length of stay, minimum fractions of that stay with Sun and Earth visibility, and maximum continuous darkness. Editable presets are starting assumptions, not agency-certified mission requirements.
+
+The planner checks candidate arrival hours, including sunlight at arrival and enough remaining data for the whole stay. It ranks terrain-aware sites by the number of days containing at least one qualifying arrival hour. It also shows the next qualifying time and a timeline of eligible days. A day-level slip margin indicates how far the selected date can move within the same run of eligible days. This describes flexibility within the visibility-based arrival window, not a launch-trajectory calculation.
+
+The search is an explicit numerical calculation. Its results can be traced to the requirements and hourly data; the current ranking does not depend on an AI-generated recommendation.
+
+### A decision the calculation can explain
+
+Consider the editable Short lander preset: a 14-day stay, at least 80% of its hours with Sun visible, at least 50% with Earth visible, no continuous darkness longer than 24 hours, and sunlight at arrival. These are illustrative planning assumptions, not requirements certified by NASA or a spacecraft operator.
+
+For arrival at 00:00 UTC on 1 May 2027, the 336-hour stay ends at 00:00 UTC on 15 May, excluding that endpoint. Running the existing planner calculation on the committed hourly records gives:
+
+| Result for the same 14-day stay | Lit ridge near Shackleton | Best-lit point on Connecting Ridge |
 | --- | --- | --- |
-| Sun visible | 512 h / 744 h (68.8%) | 0 h |
-| Earth visible | 457 h / 744 h (61.4%) | 0 h |
-| Sun and Earth visible at the same hourly sample | 436 h / 744 h (58.6%) | 0 h |
-| Longest continuous Sun gap in this month | 162 h (6.75 days) | All 744 h |
+| Sun visible | 296 h (88.1%) | 230 h (68.5%) |
+| Earth visible | 300 h (89.3%) | 300 h (89.3%) |
+| Longest darkness during the stay | 21 h | 81 h |
+| Sun visible at arrival | Yes | No |
+| Meets these visibility requirements | Yes | No |
 
-Across the full year, the ridge has sunlight at 7,936 of 8,760 hourly samples (90.6%). Its 162-hour dark interval falls in May. The shadowed point has no modelled Sun or Earth visibility at the sampled times throughout 2027.
+Both points provide the same Earth-visibility hours for this stay. The Connecting Ridge point fails the sunlight and darkness thresholds and has no sunlight at arrival. The Shackleton ridge meets all the stated conditions. This is a result for those requirements and dates, not a declaration that one location is best for every mission.
 
-These [prepared-data results](https://github.com/nitrimandylis/lunar-navigator/blob/c99fb3df081aca91e54ac95b57e66b12fdeac194/data/FACTS-FOR-STORY.md#6-one-reproducible-comparison-the-shackleton-litdark-pair) illustrate why both location and time matter: nearby points can have very different conditions, and annual totals do not reveal the timing or length of every interruption. The example currently establishes a comparison in the data; the side-by-side website comparison is still planned.
+The coordinates are latitude -89.43865, longitude -137.49989 for the Shackleton ridge, and latitude -89.4739, longitude -137.3158 for Connecting Ridge, in degrees with east-positive longitude. These are team-computed points. The example was checked using the implemented planner's calculation and stored hourly data.
 
-### How NASA data enables the result
+### Two points about 2 km apart
 
-The calculation combines two kinds of NASA information. [NASA/JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) supplies the hourly directions of the Sun and Earth as seen from the lunar points. Saved responses identify the DE441 ephemeris and use no atmospheric refraction. The team's files treat the reported times as UTC.
+The team-computed Shackleton ridge and shadowed points are about 2.1 km apart. The shadowed point is at latitude -89.36899, longitude -136.5882, in east-positive degrees. For May 2027, both use the same 2 m observer height, terrain method and UTC window: 1 May 00:00 through 31 May 23:00, or 744 hourly samples.
 
-LRO LOLA south pole digital elevation models, obtained through [NASA Moon Trek](https://trek.nasa.gov/moon/), supply the terrain. The documented version 4 products have 5 m and 30 m pixels. The horizon calculation uses detailed terrain within 25 km and more coarsely sampled terrain out to 150 km, allowing for lunar curvature. It builds a skyline in 360 directions at one-degree azimuth steps, viewed from 2 m above the ground.
+| Modelled May 2027 result | Lit ridge near Shackleton | Shadowed point near Shackleton |
+| --- | --- | --- |
+| Sun visible | 512 h (68.8%) | 0 h |
+| Earth visible | 457 h (61.4%) | 0 h |
+| Sun and Earth visible together | 436 h (58.6%) | 0 h |
+| Longest dark interval within the month | 162 h (6.75 days) | All 744 h |
 
-The team compares the Sun and Earth with that skyline. A body is classed as visible at an hourly sample if any part of its apparent disc clears the terrain horizon, using a 25-point disc approximation. Hourly values are summed to produce visibility totals; continuous periods without sunlight are also recorded.
+Across 2027, the ridge has sunlight at 7,936 of 8,760 hourly samples, or 90.6%. That high annual percentage still includes the 162-hour dark interval in May. The example shows why location, total availability and uninterrupted availability are different questions, and why a particular mission window needs inspection.
 
-NASA supplies the positions and terrain inputs. The team's processing produces the visibility estimates used to explore site-and-time conditions.
+These are model outputs, not observations of an operating mission. The points were selected by the team's terrain scan, not designated as precise landing sites by NASA.
 
-### Checks and confidence
+### NASA inputs, team processing, visible results
 
-The data handoff reports internal consistency checks across all 18 prepared points: each hourly array contains 8,760 entries, visibility values are binary, there are no null values, and daily visibility sums agree with the hourly files. In that dataset, a zero represents blocked visibility rather than missing data.
+[NASA/JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) supplies hourly Sun and Earth directions. LRO LOLA south pole digital elevation models, accessed through [NASA Moon Trek](https://trek.nasa.gov/moon/), supply the surrounding terrain.
 
-These checks support internal consistency; they do not independently establish physical accuracy. Further independent scientific comparison and observed usability feedback would strengthen confidence. Professional adoption, measured educational outcomes and improvements in task speed have not been established by the evidence used for this draft.
+The team calculates a skyline in 360 directions, accounting for lunar curvature. It uses 5 m or 30 m terrain products near the site and a coarser representation farther away, out to 150 km. The standard observer is 2 m above local ground. A body counts as visible at a sampled hour when any part of its apparent disc clears the terrain horizon; no atmospheric refraction is applied.
 
-### Intended contribution and current limits
+Those calculations become hourly records and daily summaries. The website turns them into the table, panorama, charts and mission-window search. NASA data drives both the comparison and its explanation; site selection, processing and the connected workflow are the team's contribution.
 
-The intended contribution is a clear workflow connecting a location, a time window, the resulting conditions and their explanation. For education, the Shackleton example can help explain how terrain and timing affect the view of the Sun and Earth. For preliminary mission exploration, presenting sunlight and Earth visibility separately makes those different conditions explicit. The planned interface levels and AI feature are intended to support those uses; their benefit still needs to be demonstrated.
+The prepared dataset contains 18 terrain-aware south pole points with hourly data for 2027-2040. Custom and past-landing points use a separate smooth-Moon calculation. LOLA also supplies the map relief, whose illustrative lighting is not a real-time sunlight map.
 
-The model's scope remains bounded:
+Distances to large permanent shadows use NASA PGDA's LOLA polygon product, with Barker et al. (2023) credited for the data. A shadowed point in a one-year simulation is not automatically classified as permanently shadowed. For example, the separate Haworth region-centre point lies in a mapped large permanent shadow; its result does not describe every possible location in the wider region.
 
-- The prepared site dataset covers 2027 only, at one-hour intervals. Shorter events are not resolved, and each sampled hour counts fully toward a total.
-- Sun visibility does not calculate electrical generation, battery capacity or thermal conditions. Earth visibility does not calculate radio link performance, antenna pointing or the visibility of a particular ground station.
-- The terrain skyline is a finite-resolution approximation. Terrain errors are not propagated, and the model uses a fixed 2 m observer height.
-- Custom-point estimates in the documented method lack the local terrain treatment of the 18 prepared points.
-- Team-computed points are not official NASA landing candidates. Mission-related entries represent individual points, rather than a model of a whole candidate region.
-- Neither the current visibility indicators nor the planned AI suggestions establish a complete assessment of landing safety.
+### Evidence and scientific limits
 
-### Next steps
+The repository includes checks for coverage, visibility values and agreement between hourly and daily totals. The May totals above were recounted from the committed hourly records. The 14-day example additionally uses the same calculation as the implemented planner, without starting the website.
 
-The immediate development goals are to complete comparison, the two interface levels and the proposed AI feature, with explicit search criteria and verification for any recommendations. Before submission, we also need to reproduce the chosen example in the final interface, complete the source and AI-use records, and update this description to match the finished website.
+Separate stored pipeline benchmarks are compared with Glaser and colleagues' [published Connecting Ridge study](https://elib.dlr.de/94242/1/EPSC2014-136-1.pdf). At two published 10 m locations, the project's 2027 sunlit fractions differ from the reported multi-year results by about 0.3-0.4 percentage points. At the two 2 m benchmark locations, differences are larger: about 5.6 and 8.1 points. A further team check taking the maximum within a 20 m neighbourhood still leaves gaps of approximately 5.1 and 5.3 points at 2 m. It therefore does not resolve the discrepancy. Terrain products and time coverage differ; the cause has not been established. These comparisons do not establish a general accuracy percentage or a complete replication.
+
+Sun visibility is not an electrical-power or thermal calculation. Earth visibility is not a radio-link budget or confirmation that a particular ground station can communicate. Hourly sampling and finite terrain resolution limit precision; terrain errors are not propagated. The slope indicator describes terrain at a 30 m scale, not roughness beneath a lander. The shadow-distance product excludes smaller shadows and does not confirm water ice or usable resources. Annual stored summaries truncate darkness at year boundaries; the interface's selected-site verdict and the planner use joined hourly data to retain a spell across New Year. Gaps at the outer coverage boundaries remain truncated.
+
+The tool supports exploratory comparison and visibility-based planning. It does not assess every terrain hazard, spacecraft constraint or trajectory needed to approve a landing.
+
+### Making the evidence usable
+
+The shared interface offers plain-language captions, an About panel and a guided tour, alongside charts and the adjustable planner for deeper investigation. Share links preserve a selected prepared site and time; CSV export makes its hourly data available for inspection.
+
+The demonstrated value is a traceable decision: the same stay requirements can be tested against multiple locations and the result explained through the underlying conditions. For education, the ridge/shadow example and guided tour connect lunar geography with power and communication constraints. For preliminary planning, the table and requirements search identify options for closer engineering investigation. Educational outcomes, task-time improvements and professional adoption have not been measured.
+
+The website uses Next.js, React and TypeScript with Tailwind and UI components; Python prepares the scientific data. Prepared data now cover 2027-2040. Further validation at the standard 2 m height and observation of first-time users would strengthen the next iteration. A further AI feature remains under consideration.
 
 ## END OF DRAFT TEXT
 
@@ -83,76 +112,64 @@ The immediate development goals are to complete comparison, the two interface le
 
 ## TEAM NOTES AND QUESTIONS - DO NOT SUBMIT
 
-**Everything below this heading is preparation material, not part of the project description.**
+**Everything below this heading is preparation material, not part of the description.**
 
-### Status basis
+### Resolved answers and newer evidence
 
-[Nick's update F02](../sources.md#f02) is the basis for the interface account. It confirms site selection and date changes as working, describes coordinate entry and map clicking, removes the 3D Moon, and identifies comparison, audience-specific interfaces and the AI feature as planned. Nick confirmed that AI selection criteria are still being decided. This writing task has not independently tested the website.
+| Topic | Answer used |
+| --- | --- |
+| Coordinates/map | No snapping. Empty-map clicks fill coordinates to two decimals, then Add site creates a custom point; an existing pin selects its prepared site. Up to three custom points. F03-F05. |
+| Custom-point model | Smooth Moon, no local terrain; explicitly labelled, separated and not ranked against terrain-aware points. F03-F05. |
+| Comparison | The shared table, not a separate pick-two feature. Monthly Power = Sun hours; Comms = Earth hours; Both = simultaneous hours. F05/F06. |
+| Coverage | Nick and the latest data handoff confirm 2027-2040; PR #82 supplies the additional years on main. The checked interface year list still ends at 2030, so final-build evidence is assigned to Trim below. F07/F08. |
+| Audience interface | Shared at present, with tour/help and more detailed planner controls. Later audience-mode decisions are not confirmed. F05/F06. |
+| Planner/AI | Implemented numerical requirements search; AI remains under consideration. A qualifying day contains at least one qualifying hour, not necessarily a whole day of valid arrival hours. F05/F06. |
+| Slip margin | Remaining consecutive eligible days after the selected day. It does not promise every hour is valid or model launch-vehicle timing/trajectories. F05. |
+| Visible outputs | Newer verdict text includes longest darkness; Both sorting is implemented. The example's simultaneous-hours value was checked in data, not claimed as a particular printed column. F05 supersedes the older interface snapshot. |
+| Map imagery | A LOLA-derived hillshade now underlies the map. Its artificial lighting is illustrative, not actual solar illumination. A05/F05. |
+| Literature | The EPSC conference paper and journal abstract were read. DLR 94242 is the conference paper; 94240 is the Icarus record. The full journal paper was not read. T04/T05. |
+| New terrain context | Selected-site card includes 30 m-scale slope, distance to mapped PSRs larger than 1 square kilometre, and a distinct 2027-2030 10 m Sun summary. These do not silently inherit the 2040 hourly range. T06/F08. |
+| New validation | The 20 m neighbourhood sensitivity check still leaves about five percentage points at both 2 m benchmarks. Pixel rounding alone is not an established explanation. F08. |
 
-[Gio's handoff F01](../sources.md#f01) is the basis for calculations and results. It is owner-reported implementation evidence, not NASA certification. Its own unverified items still apply. If the implementation has changed since that snapshot, update the relevant claims before approving the draft.
+The website was not run in this writing task. The existing planner calculation was executed directly against stored hourly records; that check is not a browser or usability test.
 
-### Questions about location/date selection - trim and gio
+### Reproduction and source notes
 
-1. Does entering coordinates or clicking the map analyse the exact point or select/snap to a prepared point?
-2. Do custom points still use a smooth-Moon horizon without local terrain? How does the interface explain the difference?
-3. Which metrics are currently visible: Sun hours, Earth hours, simultaneous visibility, solar elevation, darkness gaps or other outputs?
-4. What date/time inputs and intervals does the working interface support within the 2027 data? Do not infer arbitrary ranges from the hourly dataset.
-5. Once comparison is complete, can the website reproduce the exact May Shackleton example? Record a screenshot, app/data revision and verifier. A data-only metric must not be described as visible in the interface.
-
-### Questions about the planned interfaces - Nick and trim
-
-1. Which information and controls will the public/educator view show?
-2. Which additional information will the professional view show?
-3. What actual difference will help each audience complete its task? A role selector alone does not demonstrate a benefit.
-4. Keep professional audience labels neutral. A label such as professional or mission planner does not imply NASA endorsement.
-
-### Questions about the planned AI feature - whole team
-
-Nick has confirmed that the selection criteria are undecided. The draft deliberately does not promise a global best site, an implemented scoring formula or a validated optimisation result.
-
-- What objective will define a preferred option: sunlight, Earth visibility, simultaneous availability, uninterrupted duration, user priorities or something else?
-- What sites, coordinates, dates and time-window lengths can it search? Searching 18 prepared points would not establish a best location everywhere on the Moon.
-- Does an actual numerical search compute the rankings, does an AI model explain them, or is another architecture planned? What provider/model and data inputs will be used?
-- How will terrain-aware and smooth-Moon results be handled so they are not silently ranked as equivalent?
-- How will the selected site/time, supporting numbers, constraints and limitations be checked against the underlying data?
-- What will it do when no option meets the requirements?
-
-These are questions for defining and describing the feature, not claims that those capabilities exist.
-
-### Questions about scientific evidence - gio
-
-1. Confirm the final data revision and May figures: 512 Sun hours, 457 Earth hours and 436 simultaneous hours out of 744, plus the ridge's 162-hour dark interval. Full year: 7,936 Sun hours out of 8,760.
-2. Which consistency or scientific checks have been rerun, by whom, on which revision and with what outcome?
-3. Has the original Glaser et al. paper been checked? F01's author did not reread it; the point and time span differ. Keep the numerical literature comparison out of the submission text until verified.
-4. Is there evidence for the reported terrain rerun within about 70 m? Do not add it as verified without a record.
-5. Confirm UT/UTC treatment, terrain-product assignment, original coordinate sources and rights. Resolve any remaining documentation differences before quoting more precision.
-
-### Questions about benefit and final copy - Nick and the team
-
-- What are the final project/team names?
-- Has anyone outside the development team tried the site? If yes, record the task, participant type, date, observed result and feedback. No such result is assumed here.
-- What is the strongest demonstrated improvement in our workflow? Any faster/easier claim needs actual evidence.
-- Which planned features were completed by submission time? Move only confirmed functions into the available-features section.
-- What are the final public links, permitted member credits and complete AI/asset disclosures?
+- Current snapshot: [dbec867 / F08](../sources.md#f08), superseding [3a065ee / F05](../sources.md#f05). Relevant evidence: PRODUCT.md, lib/sort.ts, lib/windows.ts, lib/time.ts, current data records and their interface components. No application or data-processing code was edited.
+- Executed the existing `landingHours` calculation with the Short lander preset (336 hours, Sun share 0.8, Earth share 0.5, maximum darkness 24 hours) and recounted each 1-15 May 2027 stay. Results are in the draft's 14-day table. This verifies a numerical path, not the final rendered interface or an operational mission requirement.
+- Recounted May 2027 indexes 2880-3623: ridge Sun/Earth/both 512/457/436 and longest within-month dark run 162; shadow 0/0/0 and 744.
+- Checked 18 catalogue entries and 18 series files per year. Inspected Shackleton metadata: 8,760/8,784/8,760/8,760 samples in 2027/2028/2029/2030, step 60 minutes.
+- Recounted four stored benchmark strings, 8,760 entries each. At 2 m, spots 1/2 give 83.92%/86.66%; at 10 m, spots 3/4 give 95.95%/95.97%. [T04](../sources.md#t04) reports 92%/92.3% and 95.6%/95.66%. Do not use the closer 10 m results as an accuracy guarantee for the 2 m interface.
+- T04's abstract discusses 19 years while figure captions say 20 years; the draft uses multi-year. Sunlit-time fraction differs from partial-disc-weighted average illumination.
+- The current data handoff supplies corrected Icarus/EPSC/Mazarico credits, Barker/PGDA credits and coverage through 2040. Sources and data questions addressed by that handoff are resolved; they are not requested again below.
+- These checks verify committed outputs, the existing numerical calculation and source comparisons, not a fresh Horizons query, terrain rebuild or independent QuickMap validation.
 
 ### Review against NASA's rubric
 
-These are editorial notes, not extra form fields or predicted scores. [N01](../sources.md#n01), pp. 5-7, governs the five criteria; no percentage weights or winning odds are assumed.
-
-| Criterion | Evidence available | Remaining gap |
+| Criterion | Evidence and writing choice | Remaining limit |
 | --- | --- | --- |
-| Impact | A defined site/time question and a meaningful prepared-data example | Observed benefit for an intended user; otherwise keep benefit as intended |
-| Creativity | Planned comparison, differentiated interfaces and AI-supported site/time exploration | Show the specific completed improvement; planned features do not prove novelty or effectiveness |
-| Validity | Reported consistency checks, explicit method and limits | Final revision check, appropriate independent comparison, usability evidence and AI recommendation verification |
-| Relevance | Horizons and LOLA directly drive Sun/Earth conditions | Demonstrate that chain in the completed workflow |
-| Presentation | Clear separation of available work, planned features, evidence and scope | Readable final screenshots and consistent final summary, description and deck |
+| Impact | Demonstrates a 14-day decision and separates educational and preliminary-planning uses | Intended benefit is not measured adoption, saved cost or educational improvement |
+| Creativity | Explicitly connects sorting, physical explanation and a transparent whole-stay search | No unsupported first-ever claim or invented superiority to existing tools |
+| Validity | Explicit method, sampling, search criteria and close/discrepant benchmarks | Standard-height uncertainty, final live check and further independent validation |
+| Relevance | Horizons/LOLA drive the outputs and planner | Imagery/branding cannot substitute for analytical data use |
+| Presentation | One question leads through working journey, evidence, method, confidence and value | Final screenshots and a consistent deck still need preparation |
 
-### Source and writing key
+Authority: [N01](../sources.md#n01), pp. 5-7; [N02](../sources.md#n02), pp. 6-9. Writing follows the [submission-page guide](../submission-page-guide.md) and [research strategies](../winning-strategies.md), including their credited professional advice. This is an evidence review, not a guaranteed or predicted score.
 
-- [N01](../sources.md#n01), pp. 5-7: judging criteria.
-- [N02](../sources.md#n02), pp. 6-9: description prompts, data and disclosures.
-- [N06](../sources.md#n06): official challenge objective and audiences. Full suggestions were previously reviewed through the lower-authority [L01](../sources.md#l01).
-- [T01](../sources.md#t01): Horizons documentation as system background.
-- [F01](../sources.md#f01), sections 1-8: data/methods, consistency checks, site provenance, comparison and limits. Section 9 and the final unverified list support the outstanding credit/evidence questions.
-- [F02](../sources.md#f02): Nick's current feature/status report and undecided AI criteria.
-- [Submission-page guide](../submission-page-guide.md) and [research strategies](../winning-strategies.md): clear problem, actual evidence and consistency, including credited P01-P02 communication advice. No previous participant's wording, concept or results are used as ours.
+### Questions - answer below each question only
+
+Please add `Answer - name, date:` below the relevant question. Leave the draft text and question unchanged; Nick will incorporate agreed answers. No source reconstruction or new data build is requested from Gio: the latest data/credit handoff is incorporated.
+
+1. **D1 - Trim (nitrimandylis):** Can you provide screenshots from the final public build showing (a) the table sorted by Power, Comms and Both for one labelled month, (b) a linked site/time horizon view, and (c) the Short lander example above with its requirements and result? Please provide the public URL, revision, UTC selections and screenshot paths/links, and state whether the displayed results match the draft's tables.
+
+   Answer - Trim, date: Pending.
+
+2. **D2 - Trim (nitrimandylis):** Which final build exposes the working 2027-2040 data in the date picker, planner and CSV export? The dbec867 data include 2040, while its lib/time.ts still lists 2027-2030. Please provide the release/revision and one 2040 screenshot or observed workflow result so we can align the final copy with the public build.
+
+   Answer - Trim, date: Pending.
+
+3. **D3 - Nick:** Can two or three people outside the team try a defined task without coaching? Ask one to explain the ridge/shadow result and another to find an arrival option using stated stay requirements. Record participant count, task, completion or failure, confusing labels and useful observations. If this is not done, retain the current unmeasured-outcome wording.
+
+   Answer - Nick, date: Pending.
+
+Final names are assigned to Nick in [high-level-summary.md](high-level-summary.md); credits, disclosure and links have named owners in [submission-fields.md](submission-fields.md). These questions request evidence and confirmations, not new features. The slide-deck file remains empty until Nick resumes deck preparation.

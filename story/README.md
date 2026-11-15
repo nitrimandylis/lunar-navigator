@@ -20,9 +20,16 @@ The final submission should present our team's actual work, verified outputs and
 | [Research and presentation strategies](winning-strategies.md) | Sourced communication lessons and our proposed applications |
 | [Sources and evidence register](sources.md) | Original links, source authority, inspection limits and credits to complete |
 | [Team working index](START-HERE.md) | Draft status, workflow and remaining confirmations |
+| [High-level summary draft](drafts/high-level-summary.md) | Proposed summary, with Nick's remaining questions below it |
+| [Detailed description draft](drafts/detailed-description.md) | Workflow, NASA data, checked examples, limits and named evidence questions |
+| [Remaining submission fields](drafts/submission-fields.md) | Form wording, actual credits, disclosures and public-link questions |
+| [Evidence record](demo-evidence.md) | Completed numerical checks and pending screenshots/usability evidence |
+| [Slide-deck placeholder](drafts/slide-deck.md) | Intentionally empty until deck preparation resumes |
 
 Our chosen demo is an English slide deck of up to seven slides total. We are not preparing a video.
 
-The older pitch and evidence-checklist documents are preparation drafts. Their historical snapshots and rehearsal timings should not be read as the current submitted project or current NASA rules.
+The older pitch is a historical preparation draft. Its starter-app snapshot and rehearsal timings should not be read as the current project or current NASA rules. The evidence record has been updated to distinguish completed numerical checks from pending browser/user checks.
 
-Research basis reviewed on 14 November 2026. See the source register for publication dates, exact locations and unresolved points.
+In each current draft, only the text between DRAFT TEXT - START and END OF DRAFT TEXT is proposed submission wording. Named questions and preparation notes are below that boundary. Teammates should add answers beneath the relevant questions without editing the draft wording; Nick will incorporate agreed responses.
+
+Research basis reviewed on 14 November 2026; working drafts and project evidence updated on 15 November 2026. Prepared data now cover 2027-2040. See the source register for publication dates, exact locations and verification limits.
