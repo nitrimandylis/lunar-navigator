@@ -1,11 +1,11 @@
-# Remaining submission fields - working drafts
+# Remaining submission fields - revised working drafts
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Updated: 14 November 2026, following Nick's feature-status clarification.
-Only the text between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed form content. All instructions, questions and evidence-review notes are below that boundary. Square-bracket values are unfilled draft fields, not questions to copy into the final submission.
+Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation.
+Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed form content. Square brackets identify final identifiers/links still needed. Notes and remaining questions follow the boundary.
 
-The [summary](high-level-summary.md) and [detailed description](detailed-description.md) have separate files. The [slide-deck placeholder](slide-deck.md) remains completely empty.
+The [summary](high-level-summary.md) and [detailed description](detailed-description.md) have their own files. The [slide-deck placeholder](slide-deck.md) remains empty.
 
 ---
 
@@ -13,50 +13,69 @@ The [summary](high-level-summary.md) and [detailed description](detailed-descrip
 
 ### Project identification
 
-Project name: [FINAL PROJECT NAME]
+Project name: Lunar Landing Site Navigator
 
 Team name: [FINAL TEAM NAME]
 
 Selected challenge: Lunar Landing Site Navigator
 
-Member credits: [PERMITTED MEMBER CREDITS]
+Member credits: [APPROVED MEMBER CREDITS]
 
 ### NASA data
 
-Our prepared 2027 dataset combines NASA/JPL Horizons Sun and Earth positions with lunar terrain derived from LRO LOLA elevation models obtained through NASA Moon Trek. Horizons provides hourly directions of the Sun and Earth from the lunar points; saved responses identify the DE441 ephemeris and no atmospheric refraction. The LOLA products provide surrounding topography for the team's terrain-horizon calculation. Comparing the apparent Sun and Earth discs with that horizon produces hourly visibility values and daily summaries for 18 prepared points.
+NASA information is the basis of the project's visibility calculations. NASA/JPL Horizons supplies hourly Sun and Earth directions at lunar locations, and sub-solar/sub-Earth positions and Earth-Moon distances used for smooth-Moon estimates. LRO LOLA elevation data supplies the terrain needed to determine whether surrounding ground blocks the view.
 
-The terrain products reported in the data handoff are LRO_LOLA_DEM_SPole875_5mp_v04.tif (5 m pixels) and LRO_LOLA_DEM_SPole75_30mp_v04.tif (30 m pixels). The horizon uses terrain out to 150 km and a fixed 2 m observer height above local ground. Custom-point estimates in the documented method use a smooth-Moon horizon and need to be distinguished from the terrain-aware prepared points.
+The team uses LRO LOLA DEM v4 south pole products obtained through NASA Moon Trek: LRO_LOLA_DEM_SPole875_5mp_v04.tif (5 m pixels) and LRO_LOLA_DEM_SPole75_30mp_v04.tif (30 m pixels). A skyline is calculated around each prepared point, accounting for lunar curvature and terrain out to 150 km, with a standard observer height of 2 m. Sun and Earth are treated as apparent discs. Hourly visibility becomes availability totals and the numerical mission-window search.
+
+The current prepared dataset contains 18 south pole points with hourly records for 2027-2040. Custom and past-landing points use a smooth-Moon model without local terrain and are kept separate from terrain-aware rankings. The separate 10 m observer-height summary currently covers 2027-2030.
+
+Ground slope is derived from the 30 m LOLA terrain. Distance to large permanently shadowed regions uses NASA PGDA's LPSR_80S_20MPP_ADJ_1km2 polygon product, restricted to regions larger than 1 square kilometre. It is distance to a mapped shadow boundary, not evidence of water ice, resource accessibility or landing safety.
+
+NASA NSSDCA's Table of Anthropogenic Impacts and Spacecraft on the Moon supplies coordinates for five past-landing reference locations. LOLA also supplies the map relief; its illustrative shading is not real-time sunlight.
 
 - NASA/JPL Horizons: https://ssd.jpl.nasa.gov/horizons/
 - Horizons documentation: https://ssd.jpl.nasa.gov/horizons/manual.html
+- Horizons API: https://ssd.jpl.nasa.gov/api/horizons.api
 - NASA Moon Trek, access point for the terrain products: https://trek.nasa.gov/moon/
-- NASA LRO LOLA instrument background: https://science.nasa.gov/mission/lro/lola/
+- LRO LOLA instrument background: https://science.nasa.gov/mission/lro/lola/
+- NASA NSSDCA coordinate table: https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html
+- NASA PGDA, A New View of the Lunar South Pole from LOLA, product 90: https://pgda.gsfc.nasa.gov/products/90 ; data DOI: https://doi.org/10.60903/gsfcpgda-lola-spole
 
 ### Space agency partner data and other references
 
-Additional space agency partner datasets: [COMPLETE FROM VERIFIED TEAM INVENTORY]
+The documented analytical inputs are the NASA resources above. Other recorded resources and tools are:
 
-Other references and resources recorded for the project:
+**Location and literature references**
 
-- LROC / Mark Robinson, IM-2 intended landing-point coordinates: https://lroc.im-ldi.com/images/1401
-- Lunar Resources Registry south pole map, candidate-region centre coordinates and Connecting Ridge search starting area: https://lunarresourcesregistry.com/south-pole-map/
-- IAU/USGS Gazetteer of Planetary Nomenclature, crater names and locator-map outline inputs: https://planetarynames.wr.usgs.gov/
-- Glaser et al. (2014), Icarus 243, 78-90, literature reference recorded for the Connecting Ridge plausibility check: https://elib.dlr.de/94242
+- LROC / Mark Robinson, IM-2 intended landing-point reference: https://lroc.im-ldi.com/images/1401
+- Lunar Resources Registry south pole map, region centres and Connecting Ridge search starting area: https://lunarresourcesregistry.com/south-pole-map/
+- IAU/USGS Gazetteer, crater names and locator outlines; data scans used Gazetteer-derived crater starting coordinates via Wikipedia: https://planetarynames.wr.usgs.gov/
+- Glaser et al. (2014), Connecting Ridge - A landing site at the lunar south pole with extended illumination, EPSC2014-136-1; published point coordinates and sunlit-time benchmarks: https://elib.dlr.de/94242/1/EPSC2014-136-1.pdf
+- Glaser et al. (2014), Illumination conditions at the lunar south pole using high resolution Digital Terrain Models from LOLA, Icarus 243, 78-90; journal abstract: https://elib.dlr.de/94240/ ; DOI: https://doi.org/10.1016/j.icarus.2014.08.013
+- Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography, Icarus 211, 1066-1081; PSR-method reference, not a completed matched validation of our tool: https://doi.org/10.1016/j.icarus.2010.10.030 ; NASA record: https://ntrs.nasa.gov/citations/20120010094
+- Barker et al. (2023), Planetary Science Journal 4, 183; citation requested by the NASA PGDA product page for its LOLA south pole products: https://doi.org/10.3847/PSJ/acf3e1 ; data DOI: https://doi.org/10.60903/gsfcpgda-lola-spole
+
+**Interface assets**
+
 - Excon, Indian Type Foundry via Fontshare, interface text: https://www.fontshare.com/fonts/excon
 - JetBrains Mono, JetBrains via Google Fonts, interface numbers: https://fonts.google.com/specimen/JetBrains+Mono
-- Documented website tools: Next.js, TypeScript, Tailwind CSS, shadcn/ui and npm.
-- Reported data preparation/testing tools: Python, NumPy, Rasterio, Requests and pytest.
-- Other libraries, lunar-map imagery, icons, external code/text and assets: [COMPLETE EXACT SOURCES, ATTRIBUTION AND APPLICABLE RIGHTS]
+- Lucide, interface icons: https://lucide.dev/
+- South pole hillshade: LRO LOLA DEM v4 South Pole (30 m and 5 m), NASA Moon Trek. Rendered by the team's data preparation into basemap.png and basemap-87.5.png with artificial illustrative lighting.
+
+**Software and development tools**
+
+- Website: [Next.js](https://nextjs.org/), [React/React DOM](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/), [shadcn](https://ui.shadcn.com/), [Base UI](https://base-ui.com/), [class-variance-authority](https://www.npmjs.com/package/class-variance-authority), [cn](https://www.npmjs.com/package/cn) and [tw-animate-css](https://www.npmjs.com/package/tw-animate-css); [npm](https://www.npmjs.com/) for packages and [ESLint](https://eslint.org/) for checks.
+- Data preparation/checks: [Python](https://www.python.org/), [NumPy](https://numpy.org/), [Rasterio](https://rasterio.readthedocs.io/), [Requests](https://requests.readthedocs.io/) and [pytest](https://docs.pytest.org/).
+- AI-assisted development/writing: [Claude Code](https://code.claude.com/docs/en/overview) (Anthropic) and [ChatGPT](https://chatgpt.com/)/[Codex](https://openai.com/codex/) (OpenAI), described below.
+- Exact dependency declarations and the project licence are recorded in the repository: https://github.com/nitrimandylis/lunar-navigator
 
 ### Super Intelligence / AI use
 
-Yes. ChatGPT/Codex assisted with reviewing sources, synthesising research and drafting Markdown presentation/submission preparation. Gio's data handoff reports that Claude Code assisted with writing the data scripts and the handoff document.
+Yes. Claude Code assisted with writing/editing the website, data-processing scripts, tests and documentation. The automated PR-review workflow also uses Claude Code after deterministic checks. ChatGPT/Codex assisted with research, source synthesis, presentation/submission drafting and repository coordination.
 
-Other development, testing, design, research or media-generation assistance: [COMPLETE WHOLE-TEAM TOOL AND USE INVENTORY]
+The scientific workflow uses NASA positions and terrain. Current table sorting and mission-window rankings are explicit numerical calculations, not AI-generated recommendations. A further AI feature is under consideration and is not described as implemented.
 
-An AI feature for identifying promising locations and times is planned. Its selection criteria are still being decided; its provider/model, data inputs, implemented behaviour and verification need to be reflected in the final disclosure if the feature is included.
-
-Completed human checking and review: [DESCRIBE ACTUAL CHECKS AND REVIEW ONLY]
+Teammates report no AI-generated images, video or audio. The map hillshade is computed from LOLA data.
 
 ### Public links
 
@@ -76,54 +95,45 @@ NASA project page: [TEAM NASA PROJECT-PAGE URL]
 
 **Everything below this heading is preparation material, not form content.**
 
-### Project identification - questions
+### Answers incorporated
 
-- What are the final project/team names? Lunar Navigator is a working name in existing preparation documents, not a newly confirmed final name.
-- Candidate tagline for discussion only: Explore lunar conditions by site and date.
-- Who will enter the approved form answers?
-- Has an organiser clarified permitted written credits for under-18 members? See [the unresolved distinction](../nasa-rules-and-rubric.md#under-18-names-unresolved-distinction). Do not invent an approved credit format.
+- [F03](../sources.md#f03) supplies trim's app-side answers, assets and assistance. [F04](../sources.md#f04) supplies gio's provenance, tools and assistance. Both are dated snapshots.
+- [F05](../sources.md#f05) records the earlier table, Both sorting, planner, four-year coverage, map relief, validation display and dependency inventory. [F08](../sources.md#f08) updates it to the newer data and terrain indicators.
+- [F06](../sources.md#f06) is an earlier scope snapshot; [F07](../sources.md#f07) supersedes its planned-2040 statement with working coverage and the corrected data-credit handoff. AI remains under consideration, the interface shared, and comparison in the table.
+- A01-A05 in [sources.md](../sources.md#a01) retain actual asset credits. Fonts load through CDN stylesheets.
+- T04/T05 correct the Glaser citation: 94242 is the EPSC paper; 94240 is the Icarus record. The conference paper and journal abstract were read, not the full journal article.
 
-### NASA data - questions and source limits
+### Questions - answer below each question only
 
-- **Gio:** confirm final data revision, exact product-access/download references, rights and build provenance.
-- **Gio/trim:** do custom-coordinate/map-click points still lack local terrain horizons, or do they map to prepared points? The draft follows [F01](../sources.md#f01) until corrected.
-- Confirm that the final website exposes the described data. [F02](../sources.md#f02) supports site/date selection, but does not certify every metric or scientific output.
-- Do not list QuickMap as an implemented feed or completed validation tool on the current evidence.
-- The NASA LOLA instrument page is background; it is not the product-download reference or a separate analytical input.
+Please add `Answer - name, date:` below the relevant question. Leave the draft text and question unchanged; Nick will incorporate agreed answers. The latest NASA-data and literature credits are incorporated; no repeat source handoff is needed.
 
-Basis: F01 sections 1-4, 8-9; existing [T01-T03](../sources.md#t01); [N02](../sources.md#n02), p. 8; [N05](../sources.md#n05), qualifying challenge resources.
+1. **S1 - Nick:** What is the NASA team project-page URL, and what written member-credit format has the organiser approved for under-18 members? Final project/team names are asked once as H1 in the summary. The deck URL can wait until deck preparation.
 
-### Other references - questions and source limits
+   Answer - Nick, date: Pending.
 
-- **Whole team:** were any additional space-agency partner datasets actually used? None is established in the reviewed evidence; complete the field accurately.
-- **Gio:** recheck the original IM-2 and third-party region-centre coordinate references. A region centre is not a precise official landing point or a model of the entire region.
-- **Gio/trim:** reconcile Gazetteer access paths for the separate uses. [A03](../sources.md#a03) reports direct Gazetteer use for locator outlines; F01 reports scan starting points through Wikipedia.
-- **Gio:** check the original Glaser paper before quoting literature values as verified. F01's author did not reread it. The draft gives the reference without claiming replication or a verified accuracy percentage.
-- **Whole team:** complete the map imagery, icon, library and other resource inventory with exact links and applicable rights. No 3D Moon asset is assumed; the 3D feature is removed from scope.
-- Existing font credits come from trim's recorded [A01](../sources.md#a01) and [A02](../sources.md#a02); confirm the final asset inventory and licences.
-- Tool/library URLs and attribution need completion from the final inventory; merely naming the stack does not finish the credits.
-- Use original public URLs. Research about other participants remains credited communication background and is not our project data or implemented work.
+2. **S2 - Trim (nitrimandylis):** What stable public website URL should judges open? Has it been checked while signed out, including shared links and CSV export? Please give the checked revision/date. Full-range implementation is recorded in F09; final screenshots are requested once as D1 in the detailed description.
 
-Basis: F01 sections 5, 7 and 9 and its unverified list; A01-A03; [N02](../sources.md#n02), p. 9.
+   Answer - Trim, date: Pending.
 
-### AI use - questions and final checks
+3. **S3 - Trim (nitrimandylis):** Are the app's final font, icon, package and other external-asset credits complete, and have applicable permissions/licence conditions been checked? Please name any resources added since the handoff. The source register now includes the supplied NASA-data and paper credits; this question concerns remaining final attribution confirmation.
 
-- **Trim/gio/whole team:** what exact tools and model names were used, for which tasks, and what human checking was actually completed?
-- **Team:** who established the original solution concept, and how did assistance contribute? Do not invent an originality declaration or claim all outputs were independently verified.
-- **Team:** what does the planned AI feature actually search or calculate, with which inputs, criteria and provider/model? Its presence in the final project must be reflected in the final tool inventory and disclosure.
-- Complete any applicable visible acknowledgements and metadata for generated code/data. Inventory any generated images, video or audio and follow [N02 p. 8](../sources.md#n02).
-- The guide states that this particular form response is not shown to judges, while generated-content indicators within the project are visible. The form answer does not replace those indicators.
-- No generated imagery or audio is created by this Markdown drafting work.
+   Answer - Trim, date: Pending.
 
-### Public links - questions and final checks
+4. **S4 - Trim (app/review workflow) and Gio (data work):** For your respective work, is the AI-use account above accurate, what human checking actually took place, and where are the required descriptive acknowledgements/metadata? Add any later assistance; do not invent model versions or imply that a review happened when it did not. A runtime AI provider belongs here only if that feature is delivered.
 
-- What are the team's website and NASA project-page URLs?
-- The chosen demo is an English deck of at most seven slides total. No video is being prepared.
-- The empty slide-deck Markdown file is a placeholder, not a finished demo.
-- Test the final deck/project links while signed out. They must not require permission, a password or registration.
-- Confirm the repository revision and the intended final entry point. A draft PR is not the project demo.
-- Inspect the actual live form for required fields, available options and limits; this writing task has not audited it.
-- Replace all placeholders and obtain team agreement before copying answers.
-- Submit the approved final project through NASA's form and verify the submission confirmation. Markdown drafts and a GitHub PR do not submit the NASA entry.
+   Answer - Trim, date: Pending.
 
-Basis: [N02](../sources.md#n02), pp. 6-9 and 12; [submission-page guide](../submission-page-guide.md). Current feature status follows [F02](../sources.md#f02); calculations follow [F01](../sources.md#f01). NASA rules remain the authority for submission requirements.
+   Answer - Gio, date: Pending.
+
+### Credit completion and release checks
+
+- Exact tool/resource URLs and the supplied data-credit blocks are included above and in [sources.md](../sources.md). The links identify credited resources; they do not claim that a fresh licence audit was performed. Check the final inventory for later additions.
+- No separate partner-agency dataset is established by the reviewed inventory. Add the exact resource and role if one was used.
+- Prepared data and the app year list cover 2027-2040 (PR #87/F09). Keep the separate 2027-2030 10 m summary labelled with its actual period. Final screenshots/public-access checks remain D1/S2, not a request for more data from Gio.
+- The interface is currently shared. AI is undecided. Table comparison and numerical mission planning are delivered capabilities in the reviewed snapshot.
+- Test final links while signed out, record a final revision and capture real screenshots. Replace all identifiers/link placeholders and obtain team agreement.
+- Apply [N02](../sources.md#n02), p. 8, for applicable AI indicators/metadata. The hidden form response does not replace visible project acknowledgements.
+- Make legal/original-work declarations only when accurate. Complete NASA's actual submission action and check confirmation.
+- The chosen demo is an English deck of at most seven slides; no video is being prepared. The empty Markdown file is a placeholder.
+
+Field/rule basis: [N02](../sources.md#n02), pp. 6-9 and 12; [N05](../sources.md#n05); [N01](../sources.md#n01), pp. 5-7; [submission-page guide](../submission-page-guide.md). The live form's required fields, options and limits govern the final hand-in.

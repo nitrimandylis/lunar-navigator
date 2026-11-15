@@ -1,6 +1,6 @@
 # Sources and evidence register
 
-Reviewed: 14 November 2026. Maintainer: Nick / koum.
+Research basis: 14 November 2026. Implementation/source revisions: 15 November 2026. Maintainer: Nick / koum.
 This is the shared register for presentation research and project credits. It is not proof that a resource is implemented in the app. Source IDs are used throughout the guides.
 
 ## Purpose and attribution
@@ -32,7 +32,7 @@ Official NASA scientific documentation is rank 1 for describing its own data/sys
 
 ## How to maintain an entry
 
-Record ID, title/publisher/date, original URL, exact section/page/timestamp, inspection method, what it supports, limits and actual project usage. Date unknown means not independently established; do not invent it. All research entries below were reviewed or their stated access limit recorded on 14 November 2026.
+Record ID, title/publisher/date, original URL, exact section/page/timestamp, inspection method, what it supports, limits and actual project usage. Date unknown means not independently established; do not invent it. The original research set was reviewed on 14 November 2026; later entries state their own review dates.
 
 ## Current NASA and event sources
 
@@ -116,7 +116,7 @@ Record ID, title/publisher/date, original URL, exact section/page/timestamp, ins
 - Award identities and NASA's descriptions read. Does not verify which particular uploaded PDF was the official demo, independently test products or establish winning-format odds.
 - Other winners discussed as leads include Resonant Exoplanets, Astro Sweepers, Photonics Odyssey, HerCode Space, Zumorroda-X and QUEÑARIS. Their full demo materials were not all accessible; no invented review is used.
 
-## NASA science references: implementation usage still to confirm
+## NASA science references: system background and analytical inputs
 
 ### T01
 
@@ -125,7 +125,7 @@ Record ID, title/publisher/date, original URL, exact section/page/timestamp, ins
 - https://ssd.jpl.nasa.gov/horizons/manual.html
 - Locations: Purpose and Scope; Coordinate Center Selection; non-Earth sites/refraction; Definition of Observer Table Quantities, item 4 (AZ-EL); rise/set and limitations sections.
 - Supports descriptions of ephemerides and checking observing-site/output conventions. No refraction is modeled for non-Earth sites. Its default horizon must not be described as our calculated terrain skyline.
-- Existing sources.md already listed https://ssd.jpl.nasa.gov/horizons/ for lunar Sun/Earth positions. Retained as a candidate/previously recorded source; exact actual queries and output usage need gio's confirmation.
+- Previously listed for lunar Sun/Earth positions. F01/F04/F05 now document the reported implementation and checked outputs; exact final build provenance remains to be confirmed.
 
 ### T02
 
@@ -134,7 +134,7 @@ Record ID, title/publisher/date, original URL, exact section/page/timestamp, ins
 - https://science.nasa.gov/mission/lro/lola/
 - Locations: instrument overview, Instrument Operations and educational resources.
 - Supports explaining lunar surface measurements/topography. Does not identify our terrain product, resolution, observer height or implemented horizon method.
-- Previous background credit preserved; actual use remains unconfirmed.
+- Instrument background credit preserved. The exact terrain products and their reported use are documented in F01/F04/F05; this instrument page is not their download reference.
 
 ### T03
 
@@ -216,7 +216,9 @@ These are rank 4. Award corroboration is distinct from team-authored scientific 
 
 - https://mosesandersonong.medium.com/nasa-space-app-hackathon-b4f408d42286
 - Locations: Discovery & Research, Customer Persona, User Journey, Rapid Prototyping, Our Pitch.
-- Supports user-research and iteration lessons. Global Galactic Impact status is reported in the account; exact winning-cause reflection is the author's interpretation, not judges' testimony. Page's displayed date and retrospective chronology should not be used as a precise event timeline.
+- Rechecked 15 November 2026: the author reports five phone interviews and prototype usability testing. Their account supports user-research/iteration lessons, not a mandatory testing method or a demonstrated cause of winning. Its retrospective chronology is not a reliable record of what happened within the hackathon weekend.
+- Official award confirmation: https://2017.spaceappschallenge.org/challenges/warning-danger-ahead/mayday-mayday-mayday/teams/radaway and https://2017.spaceappschallenge.org/awards/global-finalists . Radaway is the 2017 Galactic Impact winner.
+- Official historical mission report: https://assets.spaceappschallenge.org/media/documents/SpaceApps2017_MissionReport.pdf , Galactic Impact section. It describes time-limited target-group interview/validation work. This qualifies the team's retrospective; it is not a current rule or evidence that all research happened during the weekend. NASA's current guides do not mandate a user study or tester count; our small feedback exercise is optional.
 
 ### W05
 
@@ -351,8 +353,8 @@ This section records **actual usage**, unlike the research register above.
 
 | Material | Status | Required completion |
 | --- | --- | --- |
-| Horizons Sun/Earth positions | Previously listed; implementation not verified in this documentation task | gio confirms exact query, observer, time conventions, output and use |
-| LOLA terrain | Background reviewed; actual processing not confirmed | Exact product/version/resolution, method, licence and output role |
+| Horizons Sun/Earth positions | Implementation reported in F01/F04 and reviewed in F05 | Confirm final build provenance and source conventions |
+| LOLA terrain | Named products/methods reported in F01/F04; checked-output review in F05 | Exact product download references, rights and final release confirmation |
 | Moon imagery/textures/site coordinates | Past landing coordinates and the map relief picture recorded below (A04, A05); other site coordinates are in the data handoff | Permissions re-read before hand-in |
 | Other libraries/tools/icons/fonts/media | Fonts and crater outlines recorded below (A01 to A03); the rest pending whole-team inventory | Exact source and applicable attribution/licensing |
 | Screenshots/results | Pending final evidence | App revision, scenario, date, verifier and original capture |
@@ -433,7 +435,7 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 - This later owner handoff supplies implementation evidence where the older T01-T03 and project-credit rows record usage as pending. It does not turn those earlier background references into independent verification or prove final interface behaviour.
 - Reported analytical sources: NASA/JPL Horizons (https://ssd.jpl.nasa.gov/horizons/ ; API https://ssd.jpl.nasa.gov/api/horizons.api) and LRO LOLA DEM v4 via NASA Moon Trek (https://trek.nasa.gov/moon/). Products: `LRO_LOLA_DEM_SPole875_5mp_v04.tif` and `LRO_LOLA_DEM_SPole75_30mp_v04.tif`. Exact product-access references and usage rights still need final confirmation.
 - Reported coordinate sources: LROC/Mark Robinson, 26 February 2025, IM-2 intended landing point (https://lroc.im-ldi.com/images/1401); Lunar Resources Registry south pole map (https://lunarresourcesregistry.com/south-pole-map/) for region centres/search starting area. These original pages were not independently rechecked in this drafting task. A region centre is not an official precise landing point or a model of an entire region.
-- Reported literature check: Glaser et al. (2014), *Icarus* 243, 78-90 (https://elib.dlr.de/94242). F01's author did not reread the paper. Treat the comparison as a reported plausibility check; its quoted literature values, point/disc convention and mismatched point/time span must be resolved before stronger claims. No replication or accuracy percentage is established.
+- Historical literature note: F01 linked https://elib.dlr.de/94242 as the Icarus paper. That is the EPSC conference paper; T04/T05 give the corrected source distinction and later inspection status. F05 records the newer coordinate-specific benchmarks. No general accuracy percentage or complete replication is established.
 - Do not use the unrecorded "within about 70 m" terrain rerun as verified evidence. Retain the handoff's other gaps: UT/UTC treatment, source-based terrain-product assignment, original coordinate checks, rights and Gazetteer access-path reconciliation.
 - Preparation drafts based on this source are in `story/drafts/`. NASA N01-N02 remain the authority for judging and submission; F01 is the basis for this project's reported calculations and their limits.
 
@@ -446,3 +448,118 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 - An AI feature to help identify locations and times is planned. In follow-up, Nick confirmed that the selection criteria are still being decided. Search coverage, model/provider, numerical method and verification are not established; do not claim a global best site or a validated optimiser.
 - This report does not confirm whether coordinate/map selection analyses the exact point or selects a prepared point, or whether the custom-point terrain treatment has changed since F01. Those are explicit questions for trim/gio.
 - The drafting task did not run the website or test these functions. Use this source to distinguish reported working features from intended work, then update the final submission against the completed project.
+
+## Scientific reference clarification - 15 November 2026
+
+### T04
+
+**Glaser et al. (2014), Connecting Ridge - A landing site at the lunar south pole with extended illumination.** EPSC Abstracts 9, EPSC2014-136-1. **Primary conference paper; authoritative for its own reported simulation.**
+
+- Record: https://elib.dlr.de/94242 ; open paper: https://elib.dlr.de/94242/1/EPSC2014-136-1.pdf
+- Accessible text of both pages read on 15 November 2026, including method, point table and results. Supports published coordinates/heights, disc treatment and sunlit-time benchmark values.
+- This is not the Icarus article. Duration wording differs between abstract and figure captions; the draft says multi-year. A published simulation is not observational ground truth or independent validation of this project.
+
+### T05
+
+**Glaser et al. (2014), Illumination conditions at the lunar south pole using high resolution Digital Terrain Models from LOLA.** Icarus 243, DOI 10.1016/j.icarus.2014.08.013. **Peer-reviewed journal record/abstract; full journal text not inspected.**
+
+- DLR record/abstract: https://elib.dlr.de/94240/ ; DOI: https://doi.org/10.1016/j.icarus.2014.08.013
+- Abstract/bibliographic record read on 15 November 2026. Corrects the historical F01 link that identified 94242 as the journal paper. Do not describe the conference paper and journal abstract as a fully read journal article.
+
+## Later project evidence - 15 November 2026
+
+### F03
+
+**Trim's answers for the story questions.** Team-authored handoff, PR #49. **Internal evidence, not a live-site test.**
+
+- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/docs/trim-answers-for-story.md); local path docs/trim-answers-for-story.md.
+- Answers read, including coordinates, custom-point separation, displayed metrics, original controls, assets and AI assistance. They describe code at 8d9c2e2.
+- Later F05 evidence supersedes the no-imagery, 2027-only and planner-unbuilt statements. Preserve the replies' original dates and verification limits.
+
+### F04
+
+**Gio's answers for the story questions.** Team-authored data handoff, PR #46. **Internal evidence, not an independent rebuild or live-site test.**
+
+- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/data/ANSWERS-FOR-STORY.md); local path data/ANSWERS-FOR-STORY.md.
+- Answers read, including data/interface distinctions, the May example, coordinate provenance, tool/AI use and source limits. Most describe 035f289 and 2027.
+- Rights, final links, some human-review details and the original literature check were left unconfirmed. T04-T05/F05 resolve parts of the literature question and update coverage; do not treat every old Not yet confirmed as resolved.
+
+### F05
+
+**Repository and committed-output review.** Snapshot 3a065eedbcc39549afe5157bb2572e5eae66c303, reviewed 15 November 2026. **Primary implementation/stored-result evidence, not a manual usability test or fresh scientific rebuild.**
+
+- [PRODUCT.md](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/PRODUCT.md): table comparison, linked views, time controls, planner, help, sharing/export and layout.
+- [lib/sort.ts](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/lib/sort.ts): monthly Power = Sun hours, Comms = Earth hours, Both = simultaneous hours; not a universal suitability score.
+- [lib/windows.ts](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/lib/windows.ts) and components/mission-planner.tsx: explicit stay requirements, Sun at arrival, full-window coverage, qualifying-day counts, next time and day-level slip margin. Presets are starting assumptions, not agency-certified requirements. This is numerical search, not an AI model.
+- [lib/time.ts](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/lib/time.ts) and public/data/: 2027-2030. Checked 18 catalogue entries and 18 series-file names per year. Inspected Shackleton metadata: 8,760/8,784/8,760/8,760 hourly samples, step 60 minutes.
+- Recounted May 2027 indexes 2880-3623 from the committed series: ridge Sun/Earth/both 512/457/436 and longest within-month dark run 162; shadow 0/0/0 and 744. This is output verification, not a Horizons/terrain recomputation.
+- [data/KNOWN-ANSWERS.md](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/data/KNOWN-ANSWERS.md), data/known_answers_glaser_spots.json and data/tests/test_known_answer.py: benchmark record. Recounted four stored binary strings and compared with T04. Closer 10 m results do not establish standard 2 m accuracy; larger 2 m discrepancies and differing terrain/time coverage remain.
+- Components/about-overlay.tsx holds the newer benchmark explanation; A05 and components/south-pole-map.tsx document the illustrative LOLA hillshade.
+- App/layout.tsx supplies the current title; package.json supplies the current dependency inventory. Relevant implementation was read without editing/running the app. No new automated application tests or full terrain build were run.
+- This snapshot established the earlier revision baseline. F07/F08 now update coverage, terrain indicators, validation and the worked decision; preserve this record's original verification scope.
+
+### F06
+
+**Nick's earlier scope clarification.** 15 November 2026. **Internal team decision/status report, with coverage superseded by F07/F08.**
+
+- Coverage through 2040 is planned and not yet present; current reviewed coverage is 2027-2030.
+- AI remains under consideration. The interface is currently shared; a later audience-mode decision is not confirmed.
+- Comparison is the table: all sites can be viewed and sorted by Comms, Power or Both. Do not present it as a separate comparison feature.
+- Supersedes the relevant planned-feature descriptions in F02. Check later release changes before updating the final submission.
+
+### F07
+
+**Nick's coverage confirmation and relayed data-credit handoff.** 15 November 2026. **Primary team status/provenance report; not an independent scientific validation.**
+
+- Nick confirmed that data through 2040 now work. The follow-up handoff states 2027-2040 and identifies the corrected citation blocks in data/KNOWN-ANSWERS.md, the psr_km section of data/README.md, and the DEM/hillshade credits in data/FACTS-FOR-STORY.md.
+- Use KNOWN-ANSWERS for the corrected Glaser bibliography: DLR 94242 is EPSC; 94240 is the Icarus record. The older FACTS link must not be repeated as the journal link.
+- The handoff explicitly preserves the close 10 m results and larger 2 m differences. It also reports zero annual Sun at the Haworth region-centre point and no lit point in the team's 15 km box scan. A point/scan result does not establish that every location in NASA's broader candidate region is unusable.
+- This resolves the old planned-2040 status and missing data-credit request. It does not claim that this agent tested the final public interface, audited licences or completed a new terrain build.
+
+### F08
+
+**Updated repository review and executed planner example.** Snapshot dbec86782cb7226b11167e0d635419b4707b8abf, 15 November 2026. **Primary implementation/stored-result evidence; not a browser usability test.**
+
+- [Data coverage](https://github.com/nitrimandylis/lunar-navigator/commit/dbec86782cb7226b11167e0d635419b4707b8abf), PR #82: checked 18 site-series and 18 summary filenames per year for 2027-2040. Inspected Shackleton series metadata for all 14 years: start at 1 January UTC, 60-minute step, 8,760/8,784 samples as appropriate; 122,736 hours in total. Other arrays were not exhaustively revalidated here.
+- [Planner](https://github.com/nitrimandylis/lunar-navigator/blob/dbec86782cb7226b11167e0d635419b4707b8abf/lib/windows.ts): executed existing landingHours and longestDarkSpell with the existing Short lander assumptions (336 h, minimum Sun 0.8, Earth 0.5, maximum darkness 24 h). For 1 May 2027 00:00 UTC to 15 May 00:00 exclusive, ridge Sun/Earth 296/300 h, longest dark 21 h, sunlight at arrival: passes. Connecting Ridge 230/300 h, dark 81 h, no Sun at arrival: fails. The detailed draft includes exact coordinates. Executing a stored-data calculation does not validate its physical inputs independently.
+- [Selected-site card](https://github.com/nitrimandylis/lunar-navigator/blob/dbec86782cb7226b11167e0d635419b4707b8abf/components/selected-site.tsx), data/README.md and public/data/sites.json: terrain-derived slope at 30 m scale, large-PSR distance, and Sun fraction at 10 m. The height summary specifically covers 2027-2030. Do not silently extend that summary's period to 2040 or treat coarse slope as lander-footprint safety.
+- [Known answers](https://github.com/nitrimandylis/lunar-navigator/blob/dbec86782cb7226b11167e0d635419b4707b8abf/data/KNOWN-ANSWERS.md), PR #83: a new 20 m neighbourhood check still leaves 5.3/5.1 percentage-point gaps for spots 1/2 at 2 m. Read the record; its horizon rebuild was not rerun. The cause remains unresolved; close original-point 10 m results do not establish 2 m accuracy.
+- New Year handling was updated in PR #78: selected-site daily verdicts and planner checks use joined hourly data, while the raw annual summaries remain cut at year boundaries.
+- lib/time.ts in this snapshot still lists 2027-2030 despite the additional committed data. F07 supplies working-range confirmation; D2 in the detailed draft requests Trim's final release/interface evidence. No claim of a new signed-out website check is made.
+- No server, application build, full test suite or terrain processing was started. Only story/ Markdown was edited. Current code, stored outputs and the user's handoff have distinct verification scopes.
+
+### F09
+
+**Full-range interface update, PR #87.** Snapshot 10aa615fc8b82d2285edad22841f76bfa2baea26, reviewed 15 November 2026. **Primary implementation evidence; final browser screenshots remain pending.**
+
+- [Commit](https://github.com/nitrimandylis/lunar-navigator/commit/10aa615fc8b82d2285edad22841f76bfa2baea26) and lib/time.ts now list every year from 2027 through 2040. The shared timeline drives the picker, planner and export.
+- components/selected-site.tsx explicitly compares 2 m and 10 m Sun shares over the same 2027-2030 subset. It does not relabel the older 10 m calculation as a 2027-2040 summary.
+- Resolves the earlier range-implementation question D2 and supersedes F08's then-current 2030 interface limit. D1/S2 still request final screenshots, public URL and signed-out checks. No additional data-source answer is needed from Gio.
+- Updated files outside story/ came from the team's merged changes. This writing task only edits story/ Markdown.
+
+### T06
+
+**NASA PGDA, A New View of the Lunar South Pole from LOLA (product 90). Official data source.**
+
+- https://pgda.gsfc.nasa.gov/products/90 ; inspected 15 November 2026, PSR products and citation instructions.
+- Confirms the LPSR_80S_20MPP_ADJ_1km2 product and requested Barker citation. Team use and distance computation are documented in F08/data/README.md.
+
+### T07
+
+**Mazarico et al. (2011), Illumination conditions of the lunar polar regions using LOLA topography.** Icarus 211, 1066-1081. **Primary journal reference; NASA record/abstract inspected, not full paper.**
+
+- DOI https://doi.org/10.1016/j.icarus.2010.10.030 ; NASA NTRS https://ntrs.nasa.gov/citations/20120010094 , inspected 15 November 2026.
+- Method/background credit supplied by the data team. The NASA abstract supports horizon-based illumination and PSR background; it is not an independently completed validation of our selected points. No claim that the full article was read.
+
+## Consolidated data credits for the submission
+
+Prepared from the F07 handoff and F08 records. These credit the team's actual inputs and reference roles; they do not imply NASA endorsement or permission to copy another team's work. Keep the limits in T04-T07 and the final draft.
+
+- **NASA/JPL Horizons:** https://ssd.jpl.nasa.gov/horizons/ ; API https://ssd.jpl.nasa.gov/api/horizons.api . Hourly Sun/Earth directions and custom-point ephemerides. Prepared visibility data now span 2027-2040; the earlier saved-response checks described in F01 are dated 14 November 2026.
+- **Terrain and hillshade:** LRO LOLA DEM v4 South Pole, via NASA Moon Trek, https://trek.nasa.gov/moon/ . LRO_LOLA_DEM_SPole875_5mp_v04.tif (5 m) and LRO_LOLA_DEM_SPole75_30mp_v04.tif (30 m). Used for terrain horizons, elevations and team-rendered basemap.png/basemap-87.5.png. Hillshade lighting is illustrative.
+- **Glaser, P., Scholten, F., De Rosa, D., Figuera, R. M., Oberst, J., Mazarico, E., Neumann, G. A., Robinson, M. S. (2014).** Illumination conditions at the lunar south pole using high resolution Digital Terrain Models from LOLA. Icarus 243, 78-90. https://doi.org/10.1016/j.icarus.2014.08.013 ; abstract https://elib.dlr.de/94240/ . Published simulation reference; full journal text not inspected.
+- **Glaser, P., et al. (2014).** Connecting Ridge - A landing site at the lunar south pole with extended illumination. EPSC Abstracts 9, EPSC2014-136-1. https://elib.dlr.de/94242/ ; open paper https://elib.dlr.de/94242/1/EPSC2014-136-1.pdf . Source of published point coordinates and illumination comparisons.
+- **Mazarico, E., Neumann, G. A., Smith, D. E., Zuber, M. T., Torrence, M. H. (2011).** Illumination conditions of the lunar polar regions using LOLA topography. Icarus 211, 1066-1081. https://doi.org/10.1016/j.icarus.2010.10.030 ; NASA abstract https://ntrs.nasa.gov/citations/20120010094 . PSR-method/background reference.
+- **Large permanent-shadow distances:** NASA PGDA LOLA product LPSR_80S_20MPP_ADJ_1km2, https://pgda.gsfc.nasa.gov/products/90 . Barker, M. K., et al. (2023), Planetary Science Journal 4, 183, https://doi.org/10.3847/PSJ/acf3e1 ; data https://doi.org/10.60903/gsfcpgda-lola-spole . Only mapped PSRs larger than 1 square kilometre are included.
+
+Other actual coordinate, interface, software and AI-assistance credits remain in A01-A05, F03/F04 and [submission-fields.md](drafts/submission-fields.md). Prior participant examples remain attributed research references, with their original source roles and inspection limits preserved.

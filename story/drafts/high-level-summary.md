@@ -1,19 +1,21 @@
-# High-level summary - working draft
+# High-level summary - revised working draft
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Updated: 14 November 2026, following Nick's feature-status clarification.
-Only the text between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. All sources, questions and editorial guidance are in the clearly separated team-notes section below. [PROJECT NAME] remains a placeholder.
+Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation. The name below follows the current app title; final naming remains a team decision.
+Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. Notes and remaining questions are below the boundary.
 
 ---
 
 ## DRAFT TEXT - START
 
-Where on the Moon is sunlight available, and when is Earth visible? [PROJECT NAME] is a prototype website being developed to help educators, the public and mission planners explore those questions across lunar south pole locations and dates. Users can select a site, enter exact coordinates or click the lunar map to choose a location, and change the date.
+A ridge near Shackleton has sunlight at 90.6% of 2027's hourly samples, yet experiences 162 consecutive hours of darkness in May. Choosing a lunar landing site requires understanding when those interruptions occur and whether a mission can tolerate them.
 
-Its 18 prepared points combine NASA/JPL Horizons Sun and Earth positions with terrain horizons derived from LRO LOLA elevation data accessed through NASA Moon Trek. The results show why timing matters: a computed ridge near Shackleton has sunlight at 90.6% of 2027's hourly samples, yet includes a 162-hour period of darkness.
+Lunar Landing Site Navigator turns NASA/JPL Horizons Sun and Earth positions and LRO LOLA terrain into a website connecting site comparison, physical explanation and a search for arrival times that meet a mission's needs. Users compare south pole sites in one table, sorting by sunlight, Earth visibility or hours when both are visible. Selecting a site and time updates the horizon view, charts and rise/set countdowns.
 
-Side-by-side comparison, simpler public/educator and more detailed professional interfaces, and an AI feature intended to help identify promising locations and times are planned. The AI selection criteria remain under discussion. Our aim is to make these conditions easier to interpret while keeping their limits clear: sunlight and geometric Earth visibility alone do not establish usable electrical power, a working radio connection or landing safety.
+The planner checks a proposed stay against minimum sunlight, Earth visibility and maximum continuous darkness. For an illustrative 14-day stay from 1 May 2027, the Shackleton ridge meets the stated requirements while the Connecting Ridge point does not.
+
+Guided explanations help educators and the public understand these differences; adjustable requirements and data export support preliminary mission exploration. Prepared hourly data cover 2027-2040. Results describe visibility and selected terrain indicators; spacecraft power, radio performance and landing safety require further engineering assessment.
 
 ## END OF DRAFT TEXT
 
@@ -21,42 +23,35 @@ Side-by-side comparison, simpler public/educator and more detailed professional 
 
 ## TEAM NOTES AND QUESTIONS - DO NOT SUBMIT
 
-**Everything below this heading is preparation material, not part of the high-level summary.**
+**Everything below this heading is preparation material, not part of the summary.**
 
-### What changed after Nick's update
+### Answers incorporated
 
-- Site selection and date changes are working according to Nick. Coordinate entry and clicking the lunar map are also described as available.
-- Comparison is planned, not yet confirmed working.
-- Separate public/educator and professional interfaces are planned.
-- The AI location/time feature is planned. Nick confirmed that its selection criteria are still being decided.
-- The 3D Moon is removed from scope and is not promised in the draft.
-- No new website test or independent feature check was performed in this writing task. This distinction is recorded in [F02](../sources.md#f02).
+- The shared table is the comparison: Power sorts by monthly Sun hours; Comms by monthly Earth hours; Both by simultaneous hours. It is not a separate pick-two feature or a universal site-quality score.
+- The implemented mission planner performs a numerical requirements search. AI remains under consideration and is excluded from delivered-capability claims.
+- The interface is shared, with explanations/tour and more detailed controls. Separate audience modes are not claimed.
+- Nick confirmed that coverage through 2040 now works; PR #82 adds the data and PR #87 exposes the full range in the app. The older planned-extension statement is superseded. Final screenshots and a signed-out check remain requested in the other drafts.
+- Coordinates are used without snapping; custom points have no local terrain. The detailed description explains that distinction.
+- The 3D Moon remains out of scope.
 
-### Questions corresponding to this summary
+Basis: [trim's answers F03](../sources.md#f03), [gio's answers F04](../sources.md#f04), [earlier review F05](../sources.md#f05), [latest team handoff F07](../sources.md#f07), [current review and planner calculation F08](../sources.md#f08). The example uses the existing 14-day preset's explicit assumptions; see the detailed description for thresholds and results. The website was not run in this writing task.
 
-1. **Nick/team:** What are the final project and team names?
-2. **Trim:** Does coordinate entry/map clicking analyse the exact selected location or select the nearest prepared data point? The summary currently describes selection only; it does not promise equal terrain coverage for every coordinate.
-3. **Nick/trim:** Once completed, which comparison and audience-interface functions should move from planned to working?
-4. **Team:** What will the AI optimise, over which sites and times, and how will its suggestions be checked? Until agreed, keep the cautious planned-feature wording.
-5. **Nick:** Which audience provides the clearest demonstrated use case? Target audiences are not evidence of actual adoption.
+### Source and rubric basis
 
-### Evidence behind the draft
+[N02](../sources.md#n02), p. 6, asks what was developed, how it addresses the challenge and why it matters. This draft answers with the decision, actual workflow, integral NASA inputs and one checked result. The [N01](../sources.md#n01) criteria are supported by intended benefit, a specific connected workflow, bounded scientific claims, direct challenge relevance and a clear narrative. This is an evidence review, not a predicted score.
 
-| Claim | Source and limit |
-| --- | --- |
-| Problem and intended audiences | NASA challenge [N06](../sources.md#n06), plus Nick's intended design |
-| Available location selection and date changes | Nick's current report, [F02](../sources.md#f02); not independently tested here |
-| Comparison, two interface levels and AI are planned | F02; do not silently change these to completed features |
-| 18 prepared points, 2027, Horizons and LOLA | Data handoff [F01](../sources.md#f01), sections 1-5; confirm final data revision |
-| 90.6% sunlight and 162-hour gap | F01 section 6: 7,936 of 8,760 samples, fixed 2 m observer height; longest dark interval occurs in May |
-| Limits of sunlight and Earth visibility | F01 section 8 |
+[N03](../sources.md#n03) suggests 50-200 words; that is not a verified form limit. The detailed methods and checks belong in [detailed-description.md](detailed-description.md). No winner's wording or results are reused.
 
-The example concerns a team-computed point, not an official NASA landing recommendation. F01 documents terrain-aware calculations for the 18 prepared points and smooth-Moon estimates for custom points. The final interface must keep that distinction clear if it still applies.
+### Questions - answer below each question only
 
-### Writing and rubric review
+Please add `Answer - name, date:` below the relevant question. Leave the draft text and question unchanged; Nick will incorporate agreed answers. Cross-references avoid asking the same question in several files.
 
-NASA asks what was developed, how it addresses the challenge and why it matters: [N02](../sources.md#n02), p. 6. The draft combines a concrete user question, actual selection functions, NASA inputs and one result. It separates the intended contribution from completed work.
+1. **H1 - Nick:** What are the final project and team names? Should the project keep the current app title?
 
-Review against [N01](../sources.md#n01), pp. 5-7: Impact is an intended benefit, Creativity is the workflow to demonstrate, Validity rests on traceable methods and limits, Relevance on the actual NASA inputs, and Presentation on a clear explanation. No score, percentage weighting or winning probability is predicted.
+   Answer - Nick, date: Pending.
 
-The suggested 50-200 words in [N03](../sources.md#n03), 2:23-2:43, is not a verified field limit. Check the actual form. When the website is complete, replace planned-feature wording only after confirmation and keep the final summary consistent with the [detailed description](detailed-description.md).
+2. **H2 - Nick, optional readability check:** After one non-team reader reads only this summary, can they explain the problem, what users do, and why the result matters? Please record their actual feedback without claiming a formal study. This is our preparation suggestion, not a NASA submission requirement.
+
+   Answer - Nick, date: Pending.
+
+Final screenshots, release evidence and user-task observations are assigned in [detailed-description.md](detailed-description.md). Credits, disclosures and public links are assigned in [submission-fields.md](submission-fields.md). AI remains undecided and the interface shared; neither needs a new decision for this draft.

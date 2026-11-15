@@ -1,5 +1,7 @@
 # Presentation draft
 
+> **HISTORICAL OUTLINE - not the current submission draft.** This early rehearsal predates the implemented project. Its starter-screen snapshot and three-minute timing are historical. Current wording is in [drafts/](drafts/detailed-description.md); our chosen demo is a deck of at most seven slides, with [the deck placeholder](drafts/slide-deck.md) intentionally empty.
+
 Status: outline and speaker notes for the planned product. On 14 November 2026, the inspected app still showed the Next.js starter screen. Replace every bracketed field with verified results before presenting. A three-minute rehearsal target is a working choice, not a confirmed event rule.
 
 ## One-sentence explanation
