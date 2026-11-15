@@ -28,8 +28,8 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
 
   const site = row.site;
 
-  // The month on screen in a sentence: how much Sun and Earth, and which of
-  // the two is the limit.
+  // The month on screen in a sentence, led by the site name: how much Sun and
+  // Earth, and which of the two is the limit.
   const month = monthOfHour(selectedHour);
   const monthDays = [];
   for (const dayOfYear of daysOfMonth(month)) {
@@ -37,7 +37,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
       monthDays.push(row.days[dayOfYear]);
     }
   }
-  const verdict = monthVerdict(monthDays, monthName(month));
+  const verdict = monthVerdict(shortSiteName(site.name), monthDays, monthName(month));
 
   // How far the Sun and Earth sit above the terrain horizon this hour, the
   // same number the clearance charts draw. Above 0 means in view.
@@ -49,31 +49,28 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
   }
 
   return (
-    // The site, then the Sun and the Earth, each with its height above the
-    // terrain, raw elevation and countdown.
+    // The verdict first, then where and when, then the Sun and the Earth,
+    // each with its height above the terrain, raw elevation and countdown.
     <div className="flex flex-col gap-3 text-sm">
-      <div>
-        {/* A custom point is named by its numbers, which use the mono font. */}
-        <p className={row.isCustom ? "font-mono tabular-nums text-bright" : "text-bright"}>
-          {shortSiteName(site.name)}
+      {verdict !== "" && (
+        <p className="text-xl leading-snug text-bright">{verdict}</p>
+      )}
+
+      <div className="text-xs">
+        {/* The verdict names the site, so a site with no days still needs its name here. */}
+        {verdict === "" && <p className="text-sm text-bright">{shortSiteName(site.name)}</p>}
+        <p className="font-mono tabular-nums text-muted-foreground">
           {site.mission !== undefined && (
-            <span className="ml-2 rounded-sm bg-bright px-1.5 align-middle text-[11px] font-medium text-background">
+            <span className="mr-2 rounded-sm bg-bright px-1.5 font-sans text-[11px] font-medium text-background">
               {site.mission}
             </span>
           )}
-        </p>
-        <p className="font-mono tabular-nums text-muted-foreground">
-          {site.lat.toFixed(4)}°, {site.lon.toFixed(4)}°
-        </p>
-        <p className="font-mono tabular-nums text-muted-foreground">
-          {formatHour(selectedHour)}
+          {site.lat.toFixed(4)}°, {site.lon.toFixed(4)}° · {formatHour(selectedHour)}
         </p>
         {(row.isReference || row.isCustom) && (
-          <p className="text-xs text-muted-foreground">Smooth Moon, no terrain.</p>
+          <p className="text-muted-foreground">Smooth Moon, no terrain.</p>
         )}
       </div>
-
-      {verdict !== "" && <p className="leading-snug text-bright">{verdict}</p>}
 
       {hourly === null && !hourlyFailed && (
         <p className="text-muted-foreground">Loading hourly data.</p>
