@@ -13,7 +13,7 @@ The governing sources are the current NASA [Judging & Awards Guide](https://www.
 - **Our application:** a team interpretation; see the other guides for this.
 - **Pending:** a fact or ambiguity still requiring confirmation.
 
-Current written NASA requirements and terms take priority over the video, historical guides, winner examples and general advice. A source being official does not make every sentence a requirement. Technical documentation is authoritative about its own system, not competition scoring.
+Current written NASA requirements and terms take priority over the video, historical guides and general advice. A source being official does not make every sentence a requirement. Technical documentation is authoritative about its own system, not competition scoring.
 
 ## Judging rubric: the primary evaluation reference
 
@@ -50,7 +50,7 @@ The Validity section acknowledges that solutions may still need refinement. The 
 
 ### Under-18 names: unresolved distinction
 
-The slide instructions request member names [N02 p. 11]. The current legal page additionally restricts recognizable names, voices and likenesses of under-18s [N07, Submissions]. The guide and video explicitly discuss visual/audio restrictions but do not settle the written-name question. Nick is under 18. Obtain an organizer-approved way to credit under-18 members before publishing identifying credits. Do not assume initials, parental permission or an adult winner's example settles this.
+The slide instructions request member names [N02 p. 11]. The current legal page additionally restricts recognizable names, voices and likenesses of under-18s [N07, Submissions]. The guide and video explicitly discuss visual/audio restrictions but do not settle the written-name question. Obtain an organizer-approved way to credit under-18 members before publishing identifying credits. Do not assume initials, parental permission or an adult winner's example settles this.
 
 ### AI / SI use
 
@@ -122,4 +122,4 @@ Before-event work: the GO Team allows topic research, resource review and team f
 3. Actual final public URLs, source/asset licences and complete team SI use.
 4. Official submission success and latest published version, checked near hand-in.
 
-See [submission-page-guide.md](submission-page-guide.md) for the field-by-field process and [deck-reference.md](deck-reference.md) for presentation application.
+See [submission-page-guide.md](submission-page-guide.md) for the field-by-field process.

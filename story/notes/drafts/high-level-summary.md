@@ -40,7 +40,7 @@ Basis: [trim's answers F03](../sources.md#f03), [gio's answers F04](../sources.m
 
 [N02](../sources.md#n02), p. 6, asks what was developed, how it addresses the challenge and why it matters. This draft answers with the decision, actual workflow, integral NASA inputs and one checked result. The [N01](../sources.md#n01) criteria are supported by intended benefit, a specific connected workflow, bounded scientific claims, direct challenge relevance and a clear narrative. This is an evidence review, not a predicted score.
 
-[N03](../sources.md#n03) suggests 50-200 words; that is not a verified form limit. The detailed methods and checks belong in [detailed-description.md](detailed-description.md). No winner's wording or results are reused.
+[N03](../sources.md#n03) suggests 50-200 words; that is not a verified form limit. The detailed methods and checks belong in [detailed-description.md](detailed-description.md).
 
 ### Questions - answer below each question only
 

@@ -154,7 +154,7 @@ The website was not run in this writing task. The existing planner calculation w
 | Relevance | Horizons/LOLA drive the outputs and planner | Imagery/branding cannot substitute for analytical data use |
 | Presentation | One question leads through working journey, evidence, method, confidence and value | Final screenshots and a consistent deck still need preparation |
 
-Authority: [N01](../sources.md#n01), pp. 5-7; [N02](../sources.md#n02), pp. 6-9. Writing follows the [submission-page guide](../submission-page-guide.md) and [research strategies](../winning-strategies.md), including their credited professional advice. This is an evidence review, not a guaranteed or predicted score.
+Authority: [N01](../sources.md#n01), pp. 5-7; [N02](../sources.md#n02), pp. 6-9. Writing follows the [submission-page guide](../submission-page-guide.md). This is an evidence review, not a guaranteed or predicted score.
 
 ### Questions - answer below each question only
 
@@ -180,6 +180,6 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
    Answer - Nick, date: Pending.
 
-Final names are assigned to Nick in [high-level-summary.md](high-level-summary.md); credits, disclosure and links have named owners in [submission-fields.md](submission-fields.md). These questions request evidence and confirmations, not new features. The slide-deck file remains empty until Nick resumes deck preparation.
+Final names are assigned to Nick in [high-level-summary.md](high-level-summary.md); credits, disclosure and links have named owners in [submission-fields.md](submission-fields.md). These questions request evidence and confirmations, not new features.
 
-User-feedback basis: N01 p. 6 assesses usability; N02 does not require a user-testing study. W04 is a verified winner's first-hand account of interviews and prototype testing, with timing limits. Our two-or-three-person suggestion is an application, not evidence that a particular testing method wins awards.
+User-feedback basis: N01 p. 6 assesses usability; N02 does not require a user-testing study. Our two-or-three-person suggestion is an application, not a NASA requirement.
