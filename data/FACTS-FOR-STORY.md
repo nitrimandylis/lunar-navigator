@@ -206,6 +206,7 @@ See the "Not verified" list: the 70 m figure could not be re-run here (the terra
 - **Lunar Resources Registry south pole map** (https://lunarresourcesregistry.com/south-pole-map/). Third-party map. Used for the centre points of the three Artemis III candidate regions (Haworth, Malapert Massif, Nobile Rim 1) and of the Connecting Ridge. Not a NASA source; a region centre is not a landing spot.
 - **Glaser et al. 2014**, Icarus 243, 78-90 (https://elib.dlr.de/94242). Used only as the published value for the Connecting Ridge plausibility check (92.27 percent sunlit at 2 m over 19 years). We did not copy data from it.
 - **IAU Gazetteer of Planetary Nomenclature** (https://planetarynames.wr.usgs.gov, USGS Astrogeology). Used for crater centres: as starting points for `rim_search.py` (the README says via Wikipedia) and, per `story/sources.md` A03, for the crater outlines on the locator map. Not used for site coordinates of mission sites or for any Sun or Earth calculation.
+- **LRO LOLA DEM v4 S Pole (30 m and 5 m), NASA Moon Trek**, used for the map hillshade (`public/data/basemap.png`, `basemap-87.5.png`, made by `data/basemap.py`).
 - **Python tools:** numpy, rasterio and requests (listed in `data/requirements.txt`), and pytest for the tests. Licences not re-checked by this agent.
 - AI use: the data scripts and this file were written with Claude Code (Anthropic). Whole team to state exact tools and uses in the AI disclosure.
 
