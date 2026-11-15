@@ -9,6 +9,7 @@ import { AboutOverlay } from "@/components/about-overlay";
 import { ClearanceCharts } from "@/components/clearance-charts";
 import { CustomSiteForm } from "@/components/custom-site-form";
 import { Legend } from "@/components/legend";
+import { MissionPlanner } from "@/components/mission-planner";
 import { MonthChips } from "@/components/month-chips";
 import { SelectedSite } from "@/components/selected-site";
 import { SitesGrid } from "@/components/sites-grid";
@@ -146,6 +147,8 @@ export function Navigator() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   // The About panel is open.
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  // The mission planner is open.
+  const [isPlannerOpen, setIsPlannerOpen] = useState(false);
   // The step of the guided tour on screen, or null when the tour is closed.
   const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
 
@@ -349,6 +352,18 @@ export function Navigator() {
     // it always sees the tour step on screen.
   });
 
+  // The planner compares every site hour by hour, so opening it asks for the
+  // hourly data of all of them. Time stops playing while it is open, and the
+  // guided tour closes.
+  function openPlanner() {
+    setTourStepIndex(null);
+    setIsPlaying(false);
+    setIsPlannerOpen(true);
+    for (const site of sites) {
+      requestHourly(site.id);
+    }
+  }
+
   // Works out a custom point's hourly data and per-day totals in the browser,
   // then adds it as a site. The form checks the numbers before calling this.
   async function addCustomSite(lat: number, lon: number) {
@@ -498,8 +513,15 @@ export function Navigator() {
           {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
           <button
             type="button"
-            onClick={() => showTourStep(0)}
+            onClick={openPlanner}
             className="min-h-10 rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
+          >
+            Plan a mission
+          </button>
+          <button
+            type="button"
+            onClick={() => showTourStep(0)}
+            className="min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
           >
             Take the tour
           </button>
@@ -653,6 +675,16 @@ export function Navigator() {
       </main>
 
       {isAboutOpen && <AboutOverlay onClose={() => setIsAboutOpen(false)} />}
+
+      {isPlannerOpen && (
+        <MissionPlanner
+          rows={rows}
+          hourlyBySite={hourlyBySite}
+          selectedHour={selectedHour}
+          onSelect={selectSiteAndHour}
+          onClose={() => setIsPlannerOpen(false)}
+        />
+      )}
 
       {tourStepIndex !== null && (
         <TourCard
