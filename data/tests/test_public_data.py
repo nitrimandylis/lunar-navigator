@@ -13,8 +13,28 @@ ROOT = Path(__file__).resolve().parents[2]
 SITES_SRC = ROOT / "data" / "sites.json"
 PUBLIC = ROOT / "public" / "data"
 
-COUNT = 8760
-START_UTC = "2027-01-01T00:00:00Z"
+# 2027 lives directly in public/data/; later years in public/data/<year>/ (same layout inside).
+YEARS = [2027, 2028, 2029, 2030]
+
+
+def year_dir(year):
+    return PUBLIC if year == 2027 else PUBLIC / str(year)
+
+
+def rel(path):
+    return path.relative_to(ROOT).as_posix()
+
+
+def n_days(year):
+    return (date(year + 1, 1, 1) - date(year, 1, 1)).days
+
+
+def n_hours(year):
+    return 24 * n_days(year)
+
+
+CASES = [(y, sid) for y in YEARS for sid in [s["id"] for s in json.loads(SITES_SRC.read_text(encoding="utf-8"))]]
+CASE_IDS = [f"{y}-{sid}" for y, sid in CASES]
 HOURLY_ARRAYS = [
     "sun_elev_deg",
     "sun_az_deg",
@@ -48,12 +68,12 @@ def cached(path: Path):
     return _cache[path]
 
 
-def hourly(site_id):
-    return cached(PUBLIC / "sites" / f"{site_id}.json")
+def hourly(year, site_id):
+    return cached(year_dir(year) / "sites" / f"{site_id}.json")
 
 
-def summary(site_id):
-    return cached(PUBLIC / "summary" / f"{site_id}.json")
+def summary(year, site_id):
+    return cached(year_dir(year) / "summary" / f"{site_id}.json")
 
 
 def test_public_sites_json_matches_source():
@@ -62,23 +82,30 @@ def test_public_sites_json_matches_source():
 
 
 @pytest.mark.parametrize("folder", ["sites", "summary"])
-def test_one_file_per_site_and_no_stale_files(folder):
-    d = PUBLIC / folder
-    assert d.is_dir(), f"missing folder: public/data/{folder}"
+@pytest.mark.parametrize("year", YEARS)
+def test_one_file_per_site_and_no_stale_files(year, folder):
+    d = year_dir(year) / folder
+    assert d.is_dir(), f"missing folder: {rel(d)}"
     have = {p.stem for p in d.glob("*.json")}
     want = set(SITE_IDS)
-    assert not want - have, f"public/data/{folder}/ is missing files for: {sorted(want - have)}"
-    assert not have - want, f"public/data/{folder}/ has stale files not in data/sites.json: {sorted(have - want)}"
+    assert not want - have, f"{rel(d)}/ is missing files for: {sorted(want - have)}"
+    assert not have - want, f"{rel(d)}/ has stale files not in data/sites.json: {sorted(have - want)}"
 
 
-@pytest.mark.parametrize("site_id", SITE_IDS)
-def test_hourly_file_shape(site_id):
-    name = f"public/data/sites/{site_id}.json"
-    d = hourly(site_id)
+@pytest.mark.parametrize("year", YEARS[1:])
+def test_extra_year_folder_has_only_expected_entries(year):
+    names = {p.name for p in year_dir(year).iterdir()}
+    assert names == {"sites", "summary", "ephemeris.json"}, f"public/data/{year}/ has {sorted(names)}"
+
+
+@pytest.mark.parametrize("year,site_id", CASES, ids=CASE_IDS)
+def test_hourly_file_shape(year, site_id):
+    name = rel(year_dir(year) / "sites" / f"{site_id}.json")
+    d = hourly(year, site_id)
     assert d["id"] == site_id, f"{name}: id is {d['id']!r}"
-    assert d["count"] == COUNT, f"{name}: count is {d['count']}"
+    assert d["count"] == n_hours(year), f"{name}: count is {d['count']}, expected {n_hours(year)}"
     assert d["step_minutes"] == 60, f"{name}: step_minutes is {d['step_minutes']}"
-    assert d["start_utc"] == START_UTC, f"{name}: start_utc is {d['start_utc']!r}"
+    assert d["start_utc"] == f"{year}-01-01T00:00:00Z", f"{name}: start_utc is {d['start_utc']!r}"
     for key in HOURLY_ARRAYS:
         assert len(d[key]) == d["count"], f"{name}: {key} has {len(d[key])} values, count is {d['count']}"
     for key in ("sun_visible", "earth_visible"):
@@ -89,14 +116,14 @@ def test_hourly_file_shape(site_id):
     assert len(d["horizon"]["elev_deg"]) == 360, f"{name}: horizon.elev_deg does not have 360 values"
 
 
-@pytest.mark.parametrize("site_id", SITE_IDS)
-def test_summary_file_shape(site_id):
-    name = f"public/data/summary/{site_id}.json"
-    s = summary(site_id)
+@pytest.mark.parametrize("year,site_id", CASES, ids=CASE_IDS)
+def test_summary_file_shape(year, site_id):
+    name = rel(year_dir(year) / "summary" / f"{site_id}.json")
+    s = summary(year, site_id)
     assert s["id"] == site_id, f"{name}: id is {s['id']!r}"
     days = s["days"]
-    assert len(days) == 365, f"{name}: {len(days)} days, expected 365"
-    first = date(2027, 1, 1)
+    assert len(days) == n_days(year), f"{name}: {len(days)} days, expected {n_days(year)}"
+    first = date(year, 1, 1)
     for i, day in enumerate(days):
         want = (first + timedelta(days=i)).isoformat()
         assert day["date"] == want, f"{name}: day {i} is {day['date']}, expected {want}"
@@ -105,45 +132,50 @@ def test_summary_file_shape(site_id):
         assert 0 <= day["both_hours"] <= min(day["sun_hours"], day["earth_hours"]), f"{name}: {want} both_hours {day['both_hours']}"
         assert isinstance(day["max_sun_elev_deg"], (int, float)), f"{name}: {want} max_sun_elev_deg not a number"
         assert day["longest_sun_gap_hours"] >= 0, f"{name}: {want} longest_sun_gap_hours negative"
-    assert days[-1]["date"] == "2027-12-31", f"{name}: last day is {days[-1]['date']}"
+    assert days[-1]["date"] == f"{year}-12-31", f"{name}: last day is {days[-1]['date']}"
 
 
-@pytest.mark.parametrize("site_id", SITE_IDS)
-def test_summary_both_hours_match_hourly_visibility(site_id):
-    h = hourly(site_id)
+@pytest.mark.parametrize("year,site_id", CASES, ids=CASE_IDS)
+def test_summary_both_hours_match_hourly_visibility(year, site_id):
+    h = hourly(year, site_id)
     both = [s & e for s, e in zip(h["sun_visible"], h["earth_visible"])]
-    for i, day in enumerate(summary(site_id)["days"]):
+    for i, day in enumerate(summary(year, site_id)["days"]):
         assert day["both_hours"] == sum(both[i * 24:(i + 1) * 24]), (
-            f"public/data/summary/{site_id}.json {day['date']}: both_hours {day['both_hours']} is wrong"
+            f"{year} {site_id} {day['date']}: both_hours {day['both_hours']} is wrong"
         )
 
 
 @pytest.mark.parametrize("body", ["sun", "earth"])
-@pytest.mark.parametrize("site_id", SITE_IDS)
-def test_summary_hours_match_hourly_visibility(site_id, body):
-    h = hourly(site_id)[f"{body}_visible"]
-    days = summary(site_id)["days"]
+@pytest.mark.parametrize("year,site_id", CASES, ids=CASE_IDS)
+def test_summary_hours_match_hourly_visibility(year, site_id, body):
+    h = hourly(year, site_id)[f"{body}_visible"]
+    days = summary(year, site_id)["days"]
     # (step is 60 minutes, so 24 samples per UTC day)
     for i, day in enumerate(days):
         visible = sum(h[i * 24:(i + 1) * 24])
         assert day[f"{body}_hours"] == visible, (
-            f"public/data/summary/{site_id}.json {day['date']}: {body}_hours "
-            f"{day[f'{body}_hours']} != {visible} visible hours in public/data/sites/{site_id}.json"
+            f"{year} {site_id} {day['date']}: {body}_hours {day[f'{body}_hours']} != {visible} visible hours in the hourly file"
         )
     total = sum(d[f"{body}_hours"] for d in days)
-    assert total == sum(h), (
-        f"public/data/summary/{site_id}.json: yearly {body}_hours {total} != {sum(h)} in public/data/sites/{site_id}.json"
-    )
+    assert total == sum(h), f"{year} {site_id}: yearly {body}_hours {total} != {sum(h)} in the hourly file"
 
 
-def test_ephemeris_file():
-    e = load(PUBLIC / "ephemeris.json")
-    name = "public/data/ephemeris.json"
-    assert e["count"] == COUNT, f"{name}: count is {e['count']}"
+@pytest.mark.parametrize("year", YEARS)
+def test_ephemeris_file(year):
+    path = year_dir(year) / "ephemeris.json"
+    e = load(path)
+    name = rel(path)
+    assert e["count"] == n_hours(year), f"{name}: count is {e['count']}, expected {n_hours(year)}"
     for key in EPHEMERIS_ARRAYS:
-        assert len(e[key]) == COUNT, f"{name}: {key} has {len(e[key])} values"
+        assert len(e[key]) == e["count"], f"{name}: {key} has {len(e[key])} values"
     bad = [v for v in e["earth_distance_km"] if not 350000 <= v <= 410000]
     assert not bad, f"{name}: earth_distance_km has {len(bad)} values outside 350000..410000"
+
+
+@pytest.mark.parametrize("year", YEARS)
+def test_ephemeris_matches_site_start(year):
+    e = load(year_dir(year) / "ephemeris.json")
+    assert e["start_utc"] == f"{year}-01-01T00:00:00Z"
 
 
 @pytest.mark.parametrize("site", SITES, ids=SITE_IDS)

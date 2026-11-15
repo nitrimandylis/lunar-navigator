@@ -79,6 +79,35 @@ defaults, so only change them to experiment. `--only` leaves `ephemeris.json` an
 Re-run `build.py` whenever `sites.json` or the horizon code changes, and commit the new files
 in `public/data/`. After adding or changing one site, `build.py --only <site id>` is enough.
 
+## Later years (2028, 2029, 2030)
+
+2027 stays exactly where it was (`public/data/sites/`, `summary/`, `ephemeris.json`), and
+`public/data/sites.json` is still the one site list. Each later year has its own folder with the
+same three things inside, and no `sites.json` of its own:
+
+```
+public/data/2028/sites/<id>.json      hourly series, same shape as 2027 (8784 samples, 2028 is a leap year)
+public/data/2028/summary/<id>.json    per-day totals (366 days)
+public/data/2028/ephemeris.json       sub-solar / sub-Earth points
+public/data/2029/...                  8760 samples, 365 days
+public/data/2030/...                  8760 samples, 365 days
+```
+
+`start_utc` is `<year>-01-01T00:00:00Z`; `count` is 24 x days in that year. Built with, per year
+(the folder name must match the year):
+
+```bash
+data/.venv/Scripts/python data/build.py --out public/data/2028 --start 2028-01-01 --days 366
+data/.venv/Scripts/python data/build.py --out public/data/2029 --start 2029-01-01 --days 365
+data/.venv/Scripts/python data/build.py --out public/data/2030 --start 2030-01-01 --days 365
+```
+
+`build.py` also drops a copy of `sites.json` into `--out`; delete it from the year folder (it is
+not part of the layout, and `test_public_data.py` fails if it is there). Horizons limits rows per
+request; `horizons.MAX_STEPS_PER_REQUEST` already splits the fetch. The app does not load these
+years yet. `test_public_data.py` checks every year (start date, day count, last date, hourly
+counts, `both_hours` against the hourly visibility).
+
 ## Basemap image
 
 `basemap.py` renders the real south pole terrain as a grey hillshade picture for the app map.
@@ -200,7 +229,7 @@ elevation, source, and `mission` for a real mission site, left out otherwise), t
   degrees; its size changes by under 2 percent over a year), Earth 6,378.137 km at the real
   Earth-Moon distance for each hour (0.9 to 1.0 degrees). Both are the values JPL Horizons uses.
 - `longest_sun_gap_hours` is the whole dark spell that touches the day, so it can be more than 24.
-  A spell that touches the first or last hour of 2027 is cut there.
+  A spell that touches the first or last hour of a year's file is cut there.
 - The Moon has no atmosphere, so there is no refraction.
 - Terrain is the LOLA data through September 2011. The viewer is a fixed 2 m above the ground (a stand-in for a lander's panel or antenna height); the
   lander itself, and any height other than the one set by `--observer-height`, is not modelled.
