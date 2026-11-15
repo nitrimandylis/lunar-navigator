@@ -191,10 +191,10 @@ export function SitesGrid({
               <span
                 key={dayOfYear}
                 className={cn(
-                  "text-center font-mono text-[11px] tabular-nums text-muted-foreground",
-                  // Below "wide" a day is about 10 px wide, too narrow for
-                  // every number. Show the 1st and every 5th.
-                  index !== 0 && (index + 1) % 5 !== 0 && "max-wide:invisible",
+                  "text-center font-mono text-xs tabular-nums text-muted-foreground",
+                  // Below 2xl a day is under 16 px wide, too narrow for every
+                  // number at a readable size. Show the 1st and every 5th.
+                  index !== 0 && (index + 1) % 5 !== 0 && "max-2xl:invisible",
                 )}
               >
                 {index + 1}
@@ -286,13 +286,13 @@ export function SitesGrid({
                       {shortSiteName(site.name)}
                     </button>
                     {(pairText !== null || row.isCustom || site.mission !== undefined) && (
-                      <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
+                      <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
                         {site.mission !== undefined && (
                           <span className="rounded-sm bg-bright px-1.5 font-medium text-background">
                             {site.mission}
                           </span>
                         )}
-                        {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
+                        {pairText !== null && <span className="tabular-nums">{pairText}</span>}
                         {row.isCustom && (
                           <>
                             <span className="rounded-sm border border-line px-1 leading-none py-px">no terrain</span>

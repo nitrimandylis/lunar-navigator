@@ -68,7 +68,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         {verdict === "" && <p className="text-sm text-bright">{shortSiteName(site.name)}</p>}
         <p className="font-mono tabular-nums text-muted-foreground">
           {site.mission !== undefined && (
-            <span className="mr-2 rounded-sm bg-bright px-1.5 font-sans text-[11px] font-medium text-background">
+            <span className="mr-2 rounded-sm bg-bright px-1.5 font-sans text-xs font-medium text-background">
               {site.mission}
             </span>
           )}
@@ -123,10 +123,10 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
             <p className="font-mono text-2xl leading-tight tabular-nums text-power">
               {sunClearance.toFixed(2)}°
             </p>
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            <p className="text-xs tabular-nums text-muted-foreground">
               Sun elev. {hourly.sun_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono text-[13px] tabular-nums text-foreground">
+            <p className="text-sm tabular-nums text-foreground">
               {countdownText(hourly.sun_visible, selectedHour, "Sunset", "Sunrise")}
             </p>
           </div>
@@ -135,10 +135,10 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
             <p className="font-mono text-2xl leading-tight tabular-nums text-comms">
               {earthClearance.toFixed(2)}°
             </p>
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            <p className="text-xs tabular-nums text-muted-foreground">
               Earth elev. {hourly.earth_elev_deg[selectedHour].toFixed(2)}°
             </p>
-            <p className="font-mono text-[13px] tabular-nums text-foreground">
+            <p className="text-sm tabular-nums text-foreground">
               {countdownText(hourly.earth_visible, selectedHour, "Earthset", "Earthrise")}
             </p>
           </div>

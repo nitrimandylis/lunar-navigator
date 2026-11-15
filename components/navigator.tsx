@@ -108,6 +108,7 @@ function Panel({
   isDimmed,
   className,
   headerRight,
+  isHero,
   children,
 }: {
   title: string;
@@ -119,6 +120,9 @@ function Panel({
   className?: string;
   // Controls on the right of the title line, from lg up. Optional.
   headerRight?: React.ReactNode;
+  // True for the main panel of the page. From lg up it is the only panel with
+  // a border, and its title is bigger, so the eye lands on it first.
+  isHero?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -126,7 +130,9 @@ function Panel({
       aria-label={title}
       inert={isDimmed}
       className={cn(
-        "rounded-lg border border-line bg-panel px-4 py-3",
+        "rounded-lg border border-line bg-panel px-4 py-3 lg:px-5",
+        // The border stays 1 px wide and turns see-through, so nothing moves.
+        isHero !== true && "lg:border-transparent",
         TOUR_FADE,
         isHighlighted && "ring-2 ring-bright",
         isDimmed && TOUR_DIM,
@@ -136,7 +142,9 @@ function Panel({
       {/* On a narrow screen a long caption wraps under the title. From lg up
           it stays on the title's line and is cut short. */}
       <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 lg:flex-nowrap lg:gap-3">
-        <h2 className="shrink-0 text-sm font-medium text-bright">{title}</h2>
+        <h2 className={cn("shrink-0 text-sm font-medium text-bright", isHero === true && "lg:text-base")}>
+          {title}
+        </h2>
         <p className="min-w-0 text-xs text-muted-foreground lg:truncate" title={caption}>
           {caption}
         </p>
@@ -616,12 +624,12 @@ export function Navigator() {
           (1344 px) up the screen holds it all on one line.
           Below lg it is two lines: the title with Tour and About, then the
           months in one row that scrolls sideways. */}
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 wide:flex-nowrap wide:gap-6">
+      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 lg:px-8 wide:flex-nowrap wide:gap-4">
         {/* Below lg the title takes the room the buttons leave, and wraps
             onto a second line rather than push them down. */}
         <h1
           className={cn(
-            "text-base font-medium text-bright max-lg:min-w-0 max-lg:flex-1 lg:text-lg",
+            "text-base font-medium text-bright max-lg:min-w-0 max-lg:flex-1 lg:text-lg wide:whitespace-nowrap",
             TOUR_FADE,
             isTourOpen && TOUR_DIM,
           )}
@@ -649,7 +657,7 @@ export function Navigator() {
         <div
           inert={isTourOpen}
           className={cn(
-            "ml-auto flex shrink-0 items-center gap-2 lg:gap-4",
+            "ml-auto flex shrink-0 items-center gap-2 lg:gap-3",
             TOUR_FADE,
             isTourOpen && TOUR_DIM,
           )}
@@ -689,6 +697,7 @@ export function Navigator() {
             isHighlighted={tourTarget === "sites"}
             isDimmed={isTourOpen && tourTarget !== "sites"}
             headerRight={sortControl}
+            isHero
             // Stacked, a tooltip near the right edge is cut off at the panel's
             // side, so it never makes the page scroll sideways.
             className={cn(
