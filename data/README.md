@@ -168,6 +168,24 @@ tests/                          pytest checks, including test_public_data.py and
 - `build.py` uses the 5 m terrain where the whole 25 km search area fits inside it (very near
   the pole) and the 30 m terrain everywhere else.
 
+## `sun_pct_10m` (optional site field)
+
+`sun_pct_10m` in `sites.json` (both copies) is the percent of all hours of 2027 to 2030 (35,064
+hours) with any part of the Sun's disc above the horizon seen from a 10 m observer height,
+rounded to 1 decimal. The 2 m figures are in the hourly files (`sun_visible`); later years are not
+included. It is computed by `data/sun_pct_10m.py`, which reuses `build.py`'s rule exactly (same
+DEM choice and ranges, 1 degree horizon, nearest-azimuth lookup, Sun as a disc, no refraction)
+with only the observer height changed, and the Sun az/el from the committed hourly files:
+
+```bash
+data/.venv/Scripts/python data/sun_pct_10m.py --validate   # 2 m check against committed sun_visible
+data/.venv/Scripts/python data/sun_pct_10m.py --write      # compute at 10 m and update both sites.json
+```
+
+`--validate` reproduces the committed 2027 `sun_visible` exactly for most sites; a site can differ
+by an hour or two where the Sun sits on the horizon edge, because the committed az/el are rounded.
+It does not change `terrain.DEFAULT_OBSERVER_HEIGHT_M`, which stays at 2 m.
+
 ## Where the sites come from
 
 `sites.json` has three kinds of site. It is not a NASA list of landing sites.
