@@ -185,10 +185,41 @@ export function customSiteHourly(
   return hourly;
 }
 
+// For every hour, the length in hours of the unbroken dark spell it belongs
+// to, or 0 when the Sun is in view. A spell is cut at the first and the last
+// hour of the data. This matches dark_run_lengths in data/build.py.
+export function darkSpellLengths(sunVisible: number[]): number[] {
+  const lengths: number[] = [];
+  for (let i = 0; i < sunVisible.length; i++) {
+    lengths.push(0);
+  }
+
+  let hour = 0;
+  while (hour < sunVisible.length) {
+    if (sunVisible[hour] === 1) {
+      hour += 1;
+      continue;
+    }
+    // Walk to the end of this dark spell, then give every hour in it the
+    // spell's length.
+    let end = hour;
+    while (end < sunVisible.length && sunVisible[end] === 0) {
+      end += 1;
+    }
+    for (let i = hour; i < end; i++) {
+      lengths[i] = end - hour;
+    }
+    hour = end;
+  }
+  return lengths;
+}
+
 // Per-day totals from hourly arrays, the same numbers data/build.py puts in
 // summary/<id>.json. It assumes one sample per hour, so a day is 24 samples.
 // startUtc is the time of sample 0, for example "2027-01-01T00:00:00Z".
 // Samples left over after the last whole day are ignored.
+// longest_sun_gap_hours is the whole dark spell that touches the day, not just
+// the part inside it, so it can be more than 24.
 export function summarizeDays(
   startUtc: string,
   sunElevDeg: number[],
@@ -198,6 +229,7 @@ export function summarizeDays(
   const startMs = Date.parse(startUtc);
   const dayCount = Math.floor(sunElevDeg.length / HOURS_PER_DAY);
   const days: DaySummary[] = [];
+  const spellLengths = darkSpellLengths(sunVisible);
 
   for (let day = 0; day < dayCount; day++) {
     const firstHour = day * HOURS_PER_DAY;
@@ -205,7 +237,6 @@ export function summarizeDays(
     let earthHours = 0;
     let bothHours = 0;
     let maxSunElevation = -Infinity;
-    let currentGap = 0;
     let longestGap = 0;
 
     for (let i = firstHour; i < firstHour + HOURS_PER_DAY; i++) {
@@ -214,14 +245,7 @@ export function summarizeDays(
       // Both flags are 1 or 0, so their product is 1 only when both are up.
       bothHours += sunVisible[i] * earthVisible[i];
       maxSunElevation = Math.max(maxSunElevation, sunElevDeg[i]);
-
-      // A gap is a run of hours in a row without the Sun.
-      if (sunVisible[i] === 1) {
-        currentGap = 0;
-      } else {
-        currentGap += 1;
-      }
-      longestGap = Math.max(longestGap, currentGap);
+      longestGap = Math.max(longestGap, spellLengths[i]);
     }
 
     // "2027-01-01T00:00:00.000Z" cut down to "2027-01-01".

@@ -1,7 +1,8 @@
 import type { Hourly, SiteRow } from "@/lib/app-types";
 import { clearanceSeries, countdownText } from "@/lib/clearance";
-import { shortSiteName } from "@/lib/grid";
-import { formatHour } from "@/lib/time";
+import { daysOfMonth, shortSiteName } from "@/lib/grid";
+import { MONTH_NAMES, formatHour, monthOfHour } from "@/lib/time";
+import { monthVerdict } from "@/lib/verdict";
 
 export type SelectedSiteProps = {
   // The selected site, or null when nothing is selected.
@@ -26,6 +27,17 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
   }
 
   const site = row.site;
+
+  // The month on screen in a sentence: how much Sun and Earth, and which of
+  // the two is the limit.
+  const month = monthOfHour(selectedHour);
+  const monthDays = [];
+  for (const dayOfYear of daysOfMonth(month)) {
+    if (row.days[dayOfYear] !== undefined) {
+      monthDays.push(row.days[dayOfYear]);
+    }
+  }
+  const verdict = monthVerdict(monthDays, MONTH_NAMES[month]);
 
   // How far the Sun and Earth sit above the terrain horizon this hour, the
   // same number the clearance charts draw. Above 0 means in view.
@@ -60,6 +72,8 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
           <p className="text-xs text-muted-foreground">Smooth Moon, no terrain.</p>
         )}
       </div>
+
+      {verdict !== "" && <p className="leading-snug text-bright">{verdict}</p>}
 
       {hourly === null && !hourlyFailed && (
         <p className="text-muted-foreground">Loading hourly data.</p>

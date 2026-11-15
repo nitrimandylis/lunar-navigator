@@ -55,6 +55,11 @@ Built now:
   dims to 30% and cannot be clicked, fading between steps. Right and Left arrows move
   between steps, Escape closes, and on a phone each step scrolls its target into view.
 
+- Verdict line: the Selected site panel says the month in words, for example "In May the
+  Sun is up 47% of the time and Earth is in view 100%. Power is the limit here, not the
+  radio link. Longest dark spell: 13 d 17 h." Past landings and custom points now carry the
+  whole dark spell that touches a day, as the data files do.
+
 - Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
   Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
   panel, the header wraps, and the header and play buttons are 40 px tall. The desktop
