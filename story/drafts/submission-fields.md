@@ -2,7 +2,7 @@
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Revised: 15 November 2026. Evidence snapshot: dbec867, with Nick's latest coverage confirmation.
+Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation.
 Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed form content. Square brackets identify final identifiers/links still needed. Notes and remaining questions follow the boundary.
 
 The [summary](high-level-summary.md) and [detailed description](detailed-description.md) have their own files. The [slide-deck placeholder](slide-deck.md) remains empty.
@@ -111,7 +111,7 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
    Answer - Nick, date: Pending.
 
-2. **S2 - Trim (nitrimandylis):** What stable public website URL should judges open? Has it been checked while signed out, including shared links and CSV export? Please give the checked revision/date. Full-range UI evidence is asked once as D2 in the detailed description.
+2. **S2 - Trim (nitrimandylis):** What stable public website URL should judges open? Has it been checked while signed out, including shared links and CSV export? Please give the checked revision/date. Full-range implementation is recorded in F09; final screenshots are requested once as D1 in the detailed description.
 
    Answer - Trim, date: Pending.
 
@@ -129,7 +129,7 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
 - Exact tool/resource URLs and the supplied data-credit blocks are included above and in [sources.md](../sources.md). The links identify credited resources; they do not claim that a fresh licence audit was performed. Check the final inventory for later additions.
 - No separate partner-agency dataset is established by the reviewed inventory. Add the exact resource and role if one was used.
-- Prepared data cover 2027-2040. Keep the separate 2027-2030 10 m summary labelled with its actual period. Trim's final interface/export evidence remains D2, not a request for more data from Gio.
+- Prepared data and the app year list cover 2027-2040 (PR #87/F09). Keep the separate 2027-2030 10 m summary labelled with its actual period. Final screenshots/public-access checks remain D1/S2, not a request for more data from Gio.
 - The interface is currently shared. AI is undecided. Table comparison and numerical mission planning are delivered capabilities in the reviewed snapshot.
 - Test final links while signed out, record a final revision and capture real screenshots. Replace all identifiers/link placeholders and obtain team agreement.
 - Apply [N02](../sources.md#n02), p. 8, for applicable AI indicators/metadata. The hidden form response does not replace visible project acknowledgements.

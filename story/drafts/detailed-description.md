@@ -2,7 +2,7 @@
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Revised: 15 November 2026. Evidence snapshot: dbec867, with Nick's latest coverage confirmation. The name follows the current app title.
+Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation. The name follows the current app title.
 Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. Questions, evidence details and rubric notes follow the boundary.
 
 ---
@@ -121,7 +121,7 @@ The website uses Next.js, React and TypeScript with Tailwind and UI components; 
 | Coordinates/map | No snapping. Empty-map clicks fill coordinates to two decimals, then Add site creates a custom point; an existing pin selects its prepared site. Up to three custom points. F03-F05. |
 | Custom-point model | Smooth Moon, no local terrain; explicitly labelled, separated and not ranked against terrain-aware points. F03-F05. |
 | Comparison | The shared table, not a separate pick-two feature. Monthly Power = Sun hours; Comms = Earth hours; Both = simultaneous hours. F05/F06. |
-| Coverage | Nick and the latest data handoff confirm 2027-2040; PR #82 supplies the additional years on main. The checked interface year list still ends at 2030, so final-build evidence is assigned to Trim below. F07/F08. |
+| Coverage | Nick and the data handoff confirm 2027-2040. PR #82 supplies the data; PR #87 updates the app's year list and joined timeline. The implementation question is resolved; final screenshots and public access are still pending evidence. F07-F09. |
 | Audience interface | Shared at present, with tour/help and more detailed planner controls. Later audience-mode decisions are not confirmed. F05/F06. |
 | Planner/AI | Implemented numerical requirements search; AI remains under consideration. A qualifying day contains at least one qualifying hour, not necessarily a whole day of valid arrival hours. F05/F06. |
 | Slip margin | Remaining consecutive eligible days after the selected day. It does not promise every hour is valid or model launch-vehicle timing/trajectories. F05. |
@@ -135,7 +135,7 @@ The website was not run in this writing task. The existing planner calculation w
 
 ### Reproduction and source notes
 
-- Current snapshot: [dbec867 / F08](../sources.md#f08), superseding [3a065ee / F05](../sources.md#f05). Relevant evidence: PRODUCT.md, lib/sort.ts, lib/windows.ts, lib/time.ts, current data records and their interface components. No application or data-processing code was edited.
+- Current snapshot: [10aa615 / F09](../sources.md#f09), updating [dbec867 / F08](../sources.md#f08) and [3a065ee / F05](../sources.md#f05). Relevant evidence: PRODUCT.md, lib/sort.ts, lib/windows.ts, lib/time.ts, current data records and their interface components. No application or data-processing code was edited.
 - Executed the existing `landingHours` calculation with the Short lander preset (336 hours, Sun share 0.8, Earth share 0.5, maximum darkness 24 hours) and recounted each 1-15 May 2027 stay. Results are in the draft's 14-day table. This verifies a numerical path, not the final rendered interface or an operational mission requirement.
 - Recounted May 2027 indexes 2880-3623: ridge Sun/Earth/both 512/457/436 and longest within-month dark run 162; shadow 0/0/0 and 744.
 - Checked 18 catalogue entries and 18 series files per year. Inspected Shackleton metadata: 8,760/8,784/8,760/8,760 samples in 2027/2028/2029/2030, step 60 minutes.
@@ -164,12 +164,12 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
    Answer - Trim, date: Pending.
 
-2. **D2 - Trim (nitrimandylis):** Which final build exposes the working 2027-2040 data in the date picker, planner and CSV export? The dbec867 data include 2040, while its lib/time.ts still lists 2027-2030. Please provide the release/revision and one 2040 screenshot or observed workflow result so we can align the final copy with the public build.
+2. **D2 - resolved, 15 November 2026:** PR #87 (10aa615) updates lib/time.ts to 2027-2040 and retains a separately labelled 2027-2030 height comparison. The implementation/range question is answered by repository evidence F09. No repeat answer is needed; include a 2040 screenshot in D1's final-build evidence.
 
-   Answer - Trim, date: Pending.
-
-3. **D3 - Nick:** Can two or three people outside the team try a defined task without coaching? Ask one to explain the ridge/shadow result and another to find an arrival option using stated stay requirements. Record participant count, task, completion or failure, confusing labels and useful observations. If this is not done, retain the current unmeasured-outcome wording.
+3. **D3 - Nick, optional usability evidence:** Can two or three people outside the team try a defined task without coaching? Ask one to explain the ridge/shadow result and another to find an arrival option using stated stay requirements. Record participant count, task, completion or failure, confusing labels and useful observations. This is our suggested small check, not a NASA-required study or tester count. If it is not done, retain the current unmeasured-outcome wording; it does not block submission.
 
    Answer - Nick, date: Pending.
 
 Final names are assigned to Nick in [high-level-summary.md](high-level-summary.md); credits, disclosure and links have named owners in [submission-fields.md](submission-fields.md). These questions request evidence and confirmations, not new features. The slide-deck file remains empty until Nick resumes deck preparation.
+
+User-feedback basis: N01 p. 6 assesses usability; N02 does not require a user-testing study. W04 is a verified winner's first-hand account of interviews and prototype testing, with timing limits. Our two-or-three-person suggestion is an application, not evidence that a particular testing method wins awards.

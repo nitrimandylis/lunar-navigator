@@ -31,7 +31,7 @@ Use an English slide demo of **up to seven slides total**, including title and c
 
 The [summary](drafts/high-level-summary.md), [detailed description](drafts/detailed-description.md) and [remaining form fields](drafts/submission-fields.md) are working drafts. Only their clearly bounded DRAFT TEXT sections are proposed submission copy. The [slide-deck placeholder](drafts/slide-deck.md) is intentionally empty.
 
-Add answers immediately below the named questions in the relevant draft, using `Answer - name, date:`. Leave draft text and questions unchanged; Nick will incorporate agreed answers. [demo-evidence.md](demo-evidence.md) indexes each question and owner: Nick for names/reader observations, Trim for final interface/screenshots/links, and Trim/Gio for their respective assistance acknowledgements. The supplied data-credit handoff is already incorporated.
+Add answers immediately below the named questions in the relevant draft, using `Answer - name, date:`. Leave draft text and questions unchanged; Nick will incorporate agreed answers. [demo-evidence.md](demo-evidence.md) indexes each question and owner: Nick for names/reader observations, Trim for final screenshots/links, and Trim/Gio for their respective assistance acknowledgements. The supplied data-credit handoff is incorporated and D2 is resolved by PR #87.
 
 Current evidence includes 2027-2040 prepared data, the table as the comparison, an executed 14-day planner example and the new terrain indicators. Final public-build screenshots and usability observations remain separate pending evidence. See F07/F08 in [sources.md](sources.md#f07).
 
@@ -47,7 +47,7 @@ The pitch's description of the starter app reflects earlier inspection. Use the 
 ## What Nick can do now
 
 1. Review the three current drafts and answer Nick's questions below their draft sections.
-2. Ask Trim to supply the outstanding final-build evidence in D1-D2; do not repeat the completed data-source handoff.
+2. Ask Trim to supply the outstanding final-build evidence in D1; D2 is resolved. Do not repeat the completed data-source handoff.
 3. Record actual reader/user-task observations if available, and revise wording only around what they establish.
 4. Gather real screenshots when the team is ready; no server is started by this task. Resume the deck when Nick chooses.
 5. Check final claims, credits, permitted member credits, public access and submission confirmation.

@@ -1,12 +1,12 @@
 # Demo evidence and submission checks
 
-Reviewed: 15 November 2026. Evidence snapshot: dbec867. This is a preparation record, not the final NASA submission.
+Reviewed: 15 November 2026. Evidence snapshot: 10aa615. This is a preparation record, not the final NASA submission.
 
 ## Current evidence and its limits
 
 The old starter-screen snapshot has been superseded. The repository now contains the comparison table, linked horizon/charts, numerical mission planner, tour, sharing/export and terrain context. Prepared hourly data cover 2027-2040. See [F07/F08](sources.md#f07) for exactly what was checked and [the detailed draft](drafts/detailed-description.md) for the proposed account.
 
-Stored-data calculations are complete for the examples below. A final browser check, screenshots and first-time user observations have not been recorded here. The checked interface year list still ends at 2030; Trim's D2 question requests the final public-build evidence for the full data range. No server was started for this documentation work.
+Stored-data calculations are complete for the examples below. PR #87 now exposes 2027-2040 in the app, resolving the earlier D2 implementation question. A final browser check, screenshots and first-time user observations have not been recorded here; D1/S2 request that evidence. No server was started for this documentation work.
 
 ## Evidence already available
 
@@ -25,13 +25,13 @@ Answer each question in its corresponding draft, directly beneath it. Add `Answe
 | Owner | Question IDs and location | Requested evidence |
 | --- | --- | --- |
 | Nick | H1-H2 in [summary](drafts/high-level-summary.md) | Final names and a reader's understanding of the summary |
-| Trim / nitrimandylis | D1-D2 in [detailed description](drafts/detailed-description.md) | Final-build screenshots, example agreement and full-range interface evidence |
-| Nick | D3 in [detailed description](drafts/detailed-description.md) | Actual non-team task observations, if performed |
+| Trim / nitrimandylis | D1 in [detailed description](drafts/detailed-description.md); D2 resolved | Final-build screenshots, example agreement and a 2040 selection |
+| Nick | D3 in [detailed description](drafts/detailed-description.md), optional | Actual non-team task observations, if performed; not a NASA-required study |
 | Nick | S1 in [submission fields](drafts/submission-fields.md) | NASA project-page URL and organiser-confirmed written member credits |
 | Trim / nitrimandylis | S2-S3 in [submission fields](drafts/submission-fields.md) | Signed-out public access and final app asset/permission/credit confirmation |
 | Trim and Gio / supergioo0 | S4 in [submission fields](drafts/submission-fields.md) | Accurate assistance account, human checking and required acknowledgements for their respective work |
 
-The latest data-source handoff is incorporated. No duplicate request for bibliography, a new terrain build or another explanation of the same benchmark values is outstanding.
+The latest data-source handoff is incorporated. No duplicate request for bibliography, a new terrain build or another explanation of the same benchmark values is outstanding. H2/D3 are optional preparation suggestions, not eligibility conditions or a promise of higher scores.
 
 ## Final manual evidence check
 
@@ -49,7 +49,7 @@ These checks are requested, not marked as completed:
 
 | Revision / public URL | Task and UTC selection | Observed result | Screenshot or record | Checked by / date |
 | --- | --- | --- | --- | --- |
-| Pending Trim D1-D2/S2 | Final interface and full-range release | Not recorded here | Pending | Pending |
+| Pending Trim D1/S2 | Final interface and full-range release | Not recorded here | Pending | Pending |
 | Pending Nick D3 | Non-team reader/user task | Not recorded here | Pending | Pending |
 
 ## Submission checks

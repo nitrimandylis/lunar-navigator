@@ -216,7 +216,9 @@ These are rank 4. Award corroboration is distinct from team-authored scientific 
 
 - https://mosesandersonong.medium.com/nasa-space-app-hackathon-b4f408d42286
 - Locations: Discovery & Research, Customer Persona, User Journey, Rapid Prototyping, Our Pitch.
-- Supports user-research and iteration lessons. Global Galactic Impact status is reported in the account; exact winning-cause reflection is the author's interpretation, not judges' testimony. Page's displayed date and retrospective chronology should not be used as a precise event timeline.
+- Rechecked 15 November 2026: the author reports five phone interviews and prototype usability testing. Their account supports user-research/iteration lessons, not a mandatory testing method or a demonstrated cause of winning. Its retrospective chronology is not a reliable record of what happened within the hackathon weekend.
+- Official award confirmation: https://2017.spaceappschallenge.org/challenges/warning-danger-ahead/mayday-mayday-mayday/teams/radaway and https://2017.spaceappschallenge.org/awards/global-finalists . Radaway is the 2017 Galactic Impact winner.
+- Official historical mission report: https://assets.spaceappschallenge.org/media/documents/SpaceApps2017_MissionReport.pdf , Galactic Impact section. It describes time-limited target-group interview/validation work. This qualifies the team's retrospective; it is not a current rule or evidence that all research happened during the weekend. NASA's current guides do not mandate a user study or tester count; our small feedback exercise is optional.
 
 ### W05
 
@@ -525,6 +527,15 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 - New Year handling was updated in PR #78: selected-site daily verdicts and planner checks use joined hourly data, while the raw annual summaries remain cut at year boundaries.
 - lib/time.ts in this snapshot still lists 2027-2030 despite the additional committed data. F07 supplies working-range confirmation; D2 in the detailed draft requests Trim's final release/interface evidence. No claim of a new signed-out website check is made.
 - No server, application build, full test suite or terrain processing was started. Only story/ Markdown was edited. Current code, stored outputs and the user's handoff have distinct verification scopes.
+
+### F09
+
+**Full-range interface update, PR #87.** Snapshot 10aa615fc8b82d2285edad22841f76bfa2baea26, reviewed 15 November 2026. **Primary implementation evidence; final browser screenshots remain pending.**
+
+- [Commit](https://github.com/nitrimandylis/lunar-navigator/commit/10aa615fc8b82d2285edad22841f76bfa2baea26) and lib/time.ts now list every year from 2027 through 2040. The shared timeline drives the picker, planner and export.
+- components/selected-site.tsx explicitly compares 2 m and 10 m Sun shares over the same 2027-2030 subset. It does not relabel the older 10 m calculation as a 2027-2040 summary.
+- Resolves the earlier range-implementation question D2 and supersedes F08's then-current 2030 interface limit. D1/S2 still request final screenshots, public URL and signed-out checks. No additional data-source answer is needed from Gio.
+- Updated files outside story/ came from the team's merged changes. This writing task only edits story/ Markdown.
 
 ### T06
 

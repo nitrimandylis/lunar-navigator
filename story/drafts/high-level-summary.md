@@ -2,7 +2,7 @@
 
 > **DRAFT - preparation only. Not approved for submission.**
 
-Revised: 15 November 2026. Evidence snapshot: dbec867, with Nick's latest coverage confirmation. The name below follows the current app title; final naming remains a team decision.
+Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation. The name below follows the current app title; final naming remains a team decision.
 Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed submission wording. Notes and remaining questions are below the boundary.
 
 ---
@@ -30,7 +30,7 @@ Guided explanations help educators and the public understand these differences; 
 - The shared table is the comparison: Power sorts by monthly Sun hours; Comms by monthly Earth hours; Both by simultaneous hours. It is not a separate pick-two feature or a universal site-quality score.
 - The implemented mission planner performs a numerical requirements search. AI remains under consideration and is excluded from delivered-capability claims.
 - The interface is shared, with explanations/tour and more detailed controls. Separate audience modes are not claimed.
-- Nick confirmed that coverage through 2040 now works; the prepared 2031-2040 data are also on main in PR #82. The older planned-extension statement is superseded. Trim's final public-build evidence is requested below.
+- Nick confirmed that coverage through 2040 now works; PR #82 adds the data and PR #87 exposes the full range in the app. The older planned-extension statement is superseded. Final screenshots and a signed-out check remain requested in the other drafts.
 - Coordinates are used without snapping; custom points have no local terrain. The detailed description explains that distinction.
 - The 3D Moon remains out of scope.
 
@@ -50,7 +50,7 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
    Answer - Nick, date: Pending.
 
-2. **H2 - Nick:** After one non-team reader reads only this summary, can they explain the problem, what users do, and why the result matters? Please record their actual feedback without claiming a formal study.
+2. **H2 - Nick, optional readability check:** After one non-team reader reads only this summary, can they explain the problem, what users do, and why the result matters? Please record their actual feedback without claiming a formal study. This is our preparation suggestion, not a NASA submission requirement.
 
    Answer - Nick, date: Pending.
 
