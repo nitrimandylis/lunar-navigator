@@ -8,8 +8,10 @@ import {
   hoursUntilChange,
   joinEphemeris,
   joinHourly,
+  sunPercent,
   totalsByMonth,
   type Ephemeris,
+  type SiteSummary,
   type SiteHourly,
 } from "./data.ts";
 import { TOTAL_HOURS, YEARS } from "./time.ts";
@@ -270,4 +272,19 @@ test("hoursUntilChange matches a real 48 hours of data", () => {
   assert.equal(hoursUntilChange(sunVisible, 29), 1);
   // From hour 30 on it stays down until the excerpt ends.
   assert.equal(hoursUntilChange(sunVisible, 30), null);
+});
+
+test("sunPercent is the share of all hours with the Sun in view", () => {
+  assert.equal(sunPercent([]), 0);
+  // 12 + 24 = 36 of 48 hours.
+  assert.equal(sunPercent([day("2027-01-01", 12, 0), day("2027-01-02", 24, 0)]), 75);
+});
+
+test("the lit ridge near Shackleton has the Sun for 90.6% of 2027", () => {
+  // data/FACTS-FOR-STORY.md: 7,936 of the 8,760 hours of 2027, which is 90.6%.
+  const summary: SiteSummary = JSON.parse(
+    readFileSync("public/data/summary/shackleton-ridge.json", "utf8"),
+  );
+  assert.equal(summary.days.length, 365);
+  assert.equal(sunPercent(summary.days).toFixed(1), "90.6");
 });

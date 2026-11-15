@@ -675,7 +675,7 @@ export function Navigator() {
         <div className={cn("flex flex-col gap-3 lg:min-h-0", phoneTab === "map" && "max-lg:hidden")}>
           <Panel
             title="Sites"
-            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
+            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view. Stronger colour means more hours. Times are UTC."
             isHighlighted={tourTarget === "sites"}
             isDimmed={isTourOpen && tourTarget !== "sites"}
             // Stacked, a tooltip near the right edge is cut off at the panel's

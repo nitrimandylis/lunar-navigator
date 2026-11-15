@@ -29,6 +29,11 @@ const SOURCE_LINKS = [
     note: "the IM-2 coordinates",
   },
   {
+    href: "https://pgda.gsfc.nasa.gov/products/90",
+    label: "NASA PGDA, LOLA map of permanent shadow (Barker et al. 2023)",
+    note: "the permanently shadowed regions we measure distance to",
+  },
+  {
     href: "https://doi.org/10.1016/j.icarus.2014.08.013",
     label: "Glaser et al. 2014, Icarus 243",
     note: "the published sunlight figure we compare with",
@@ -202,6 +207,22 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
               <li>
                 The Sun and Earth are discs, not points. A body counts as in view when any
                 part of its disc is above the ground.
+              </li>
+              <li>
+                Sun at 10 m. The same sums with the solar panel 10 m up instead of 2 m.
+                Near the pole a few metres of height can clear a ridge, so the selected
+                site shows both.
+              </li>
+              <li>
+                Slope. The tilt of the ground at the site, from the 30 m LOLA terrain. It
+                is the average over a 30 m square, so boulders and small craters under a
+                lander do not show.
+              </li>
+              <li>
+                Permanent shadow. The distance to the edge of the nearest region that
+                never sees the Sun, where water ice may survive. Only regions of 1 square
+                kilometre or more are counted, from NASA&apos;s LOLA map of them. Smaller
+                shadows can be much closer.
               </li>
             </ul>
 

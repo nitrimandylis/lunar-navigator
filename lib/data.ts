@@ -2,7 +2,7 @@
 // helpers that work on them. Field names match the JSON exactly (snake_case),
 // so parsed JSON can be typed without any conversion.
 
-import { FIRST_YEAR, MONTH_COUNT, firstMonthOfYear } from "./time.ts";
+import { FIRST_YEAR, HOURS_PER_DAY, MONTH_COUNT, firstMonthOfYear } from "./time.ts";
 
 // One entry of sites.json.
 export type Site = {
@@ -19,6 +19,14 @@ export type Site = {
   // Optional caveat shown under the site, for example why a mission region
   // centre gets no Sun. Most sites leave it out.
   note?: string;
+  // Optional: percent of all the hours of 2027 to 2030 with the Sun in view
+  // from 10 m above the ground, instead of the 2 m every other number uses.
+  sun_pct_10m?: number;
+  // Optional: slope of the ground at the site in degrees, from the 30 m LOLA
+  // terrain. It is the slope of a 30 m cell, not of the ground under a lander.
+  slope_deg?: number;
+  // Optional: distance in km to the nearest permanently shadowed region.
+  psr_km?: number;
 };
 
 // sites/<id>.json: one value per hour for one site.
@@ -166,6 +174,19 @@ export function totalsByMonth(days: DaySummary[]): MonthTotals[] {
   }
 
   return totals;
+}
+
+// The share of the hours in these days with the Sun in view, in percent.
+// Every day counts as 24 hours. Returns 0 for no days.
+export function sunPercent(days: DaySummary[]): number {
+  if (days.length === 0) {
+    return 0;
+  }
+  let sunHours = 0;
+  for (const day of days) {
+    sunHours += day.sun_hours;
+  }
+  return (sunHours / (days.length * HOURS_PER_DAY)) * 100;
 }
 
 // How many hours after fromIndex the value first differs from
