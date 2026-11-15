@@ -6,11 +6,12 @@
 // - A month index counts months from January 2027, which is month 0. So 11 is
 //   December 2027, 12 is January 2028 and 47 is December 2030.
 
-export const FIRST_YEAR = 2027;
-export const LAST_YEAR = 2030;
-
-// The years with data, in order.
+// The years with data, in order. To add a year, add it here: everything else
+// in this file is worked out from this list.
 export const YEARS = [2027, 2028, 2029, 2030];
+
+export const FIRST_YEAR = YEARS[0];
+export const LAST_YEAR = YEARS[YEARS.length - 1];
 
 export const MONTHS_PER_YEAR = 12;
 
