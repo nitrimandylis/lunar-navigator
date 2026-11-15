@@ -60,28 +60,45 @@ async function fetchJson(path: string): Promise<unknown> {
 // a lunar day (about 708 hours) takes a little under a minute.
 const PLAY_STEP_MS = 80;
 
+// The guided tour dims every part of the page it is not pointing at. Each part
+// carries TOUR_FADE all the time, so it fades between lit and dimmed instead of
+// jumping, and TOUR_DIM while it is dimmed. A dimmed part is also inert: it
+// cannot be clicked or reached with the Tab key.
+const TOUR_FADE = "transition-[opacity,box-shadow] duration-300 motion-reduce:transition-none";
+const TOUR_DIM = "opacity-30";
+
 // A titled box. Every panel on the page uses it. The caption is one plain
 // sentence, next to the title, that says what the panel shows.
 function Panel({
+  id,
   title,
   caption,
   isHighlighted,
+  isDimmed,
   className,
   children,
 }: {
+  // Set on the panels the guided tour can point at, so it can scroll to them.
+  id?: string;
   title: string;
   caption: string;
   // True while the guided tour points at this panel.
   isHighlighted: boolean;
+  // True while the guided tour points somewhere else.
+  isDimmed: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <section
+      id={id}
       aria-label={title}
+      inert={isDimmed}
       className={cn(
         "rounded-lg border border-line bg-panel px-4 py-3",
+        TOUR_FADE,
         isHighlighted && "ring-2 ring-bright",
+        isDimmed && TOUR_DIM,
         className,
       )}
     >
@@ -257,10 +274,40 @@ export function Navigator() {
     return () => clearTimeout(timer);
   }, [isPlaying, selectedHour]);
 
+  // Shows one step of the guided tour and puts the page in the state its text
+  // talks about: the site, the first hour of the month, and playing or not.
+  function showTourStep(index: number) {
+    const step = TOUR_STEPS[index];
+    setTourStepIndex(index);
+    setSortKey("power");
+    selectSite(step.siteId);
+    setSelectedHour(firstDayOfMonth(step.month) * HOURS_PER_DAY);
+    setIsPlaying(step.isPlaying);
+
+    // On a narrow screen the page scrolls, so the step's target may be off
+    // screen. From lg up the page is one screen tall and this moves nothing.
+    const target = document.getElementById("tour-" + step.target);
+    if (target !== null) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    }
+  }
+
+  function closeTour() {
+    setTourStepIndex(null);
+    setIsPlaying(false);
+  }
+
   // The left and right arrow keys step one hour, unless the user is typing in
-  // a field (the slider handles its own arrow keys).
+  // a field (the slider handles its own arrow keys). While the guided tour is
+  // open they move between its steps instead, and Escape closes it.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      if (tourStepIndex !== null && event.key === "Escape") {
+        closeTour();
+        return;
+      }
+
       const target = event.target as HTMLElement;
       const isTyping =
         target.tagName === "INPUT" ||
@@ -271,6 +318,18 @@ export function Navigator() {
       }
       // Leave browser shortcuts alone: Cmd or Alt with an arrow goes back a page.
       if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      if (tourStepIndex !== null) {
+        if (event.key === "ArrowRight" && tourStepIndex < TOUR_STEPS.length - 1) {
+          event.preventDefault();
+          showTourStep(tourStepIndex + 1);
+        }
+        if (event.key === "ArrowLeft" && tourStepIndex > 0) {
+          event.preventDefault();
+          showTourStep(tourStepIndex - 1);
+        }
         return;
       }
 
@@ -286,23 +345,9 @@ export function Navigator() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // Shows one step of the guided tour and puts the page in the state its text
-  // talks about: the site, the first hour of the month, and playing or not.
-  function showTourStep(index: number) {
-    const step = TOUR_STEPS[index];
-    setTourStepIndex(index);
-    setSortKey("power");
-    selectSite(step.siteId);
-    setSelectedHour(firstDayOfMonth(step.month) * HOURS_PER_DAY);
-    setIsPlaying(step.isPlaying);
-  }
-
-  function closeTour() {
-    setTourStepIndex(null);
-    setIsPlaying(false);
-  }
+    // No dependency list: the handler is set up again after every redraw, so
+    // it always sees the tour step on screen.
+  });
 
   // Works out a custom point's hourly data and per-day totals in the browser,
   // then adds it as a site. The form checks the numbers before calling this.
@@ -409,6 +454,7 @@ export function Navigator() {
   if (tourStepIndex !== null) {
     tourTarget = TOUR_STEPS[tourStepIndex].target;
   }
+  const isTourOpen = tourStepIndex !== null;
 
   return (
     // Below lg (1024 px) the page is as tall as its panels and scrolls. From lg
@@ -416,14 +462,18 @@ export function Navigator() {
     <div className="flex flex-col lg:h-dvh">
       {/* On a narrow screen the header wraps onto as many lines as it needs. */}
       <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 lg:flex-nowrap lg:gap-6">
-        <h1 className="text-lg font-medium text-bright">
+        <h1 className={cn("text-lg font-medium text-bright", TOUR_FADE, isTourOpen && TOUR_DIM)}>
           Lunar Landing Site Navigator
         </h1>
 
         <div
+          id="tour-months"
+          inert={isTourOpen && tourTarget !== "months"}
           className={cn(
             "flex items-center gap-3 rounded-lg",
+            TOUR_FADE,
             tourTarget === "months" && "ring-2 ring-bright ring-offset-4 ring-offset-background",
+            isTourOpen && tourTarget !== "months" && TOUR_DIM,
           )}
         >
           <span className="font-mono text-sm tabular-nums text-muted-foreground">
@@ -436,7 +486,14 @@ export function Navigator() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:ml-auto lg:flex-nowrap lg:gap-4">
+        <div
+          inert={isTourOpen}
+          className={cn(
+            "flex flex-wrap items-center gap-x-4 gap-y-2 lg:ml-auto lg:flex-nowrap lg:gap-4",
+            TOUR_FADE,
+            isTourOpen && TOUR_DIM,
+          )}
+        >
           <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
           {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
           <button
@@ -464,9 +521,11 @@ export function Navigator() {
       <main className="flex flex-col gap-3 p-3 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
         <div className="flex flex-col gap-3 lg:min-h-0">
           <Panel
+            id="tour-sites"
             title="Sites"
             caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
             isHighlighted={tourTarget === "sites"}
+            isDimmed={isTourOpen && tourTarget !== "sites"}
             // Stacked, a tooltip near the right edge is cut off at the panel's
             // side, so it never makes the page scroll sideways.
             className="flex flex-col overflow-x-clip lg:min-h-0 lg:flex-1 lg:overflow-x-visible"
@@ -500,9 +559,11 @@ export function Navigator() {
           {/* The selected site's numbers sit next to its charts: both are
               about the same site and hour. */}
           <Panel
+            id="tour-selected"
             title="Selected site"
             caption="One place at one hour: where the Sun and Earth are, and how long they stay."
             isHighlighted={tourTarget === "selected"}
+            isDimmed={isTourOpen && tourTarget !== "selected"}
           >
             {/* Numbers on the left, the sky and the charts on the right. On a
                 narrow screen the numbers sit above the sky and the charts. */}
@@ -549,6 +610,7 @@ export function Navigator() {
             title="South pole"
             caption="Seen from above. Earth is towards the top."
             isHighlighted={false}
+            isDimmed={isTourOpen}
             className="flex flex-col lg:min-h-0 lg:flex-1"
           >
             {/* The small map is a locator: pins select, anything else opens
@@ -574,7 +636,12 @@ export function Navigator() {
             </div>
           </Panel>
 
-          <Panel title="Custom point" caption="Try any place on the Moon." isHighlighted={false}>
+          <Panel
+            title="Custom point"
+            caption="Try any place on the Moon."
+            isHighlighted={false}
+            isDimmed={isTourOpen}
+          >
             <CustomSiteForm
               pickedPoint={pickedPoint}
               customCount={customSites.length}

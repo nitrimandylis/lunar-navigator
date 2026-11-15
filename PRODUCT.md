@@ -51,7 +51,9 @@ Built now:
 - Guided tour: five steps from a header button, telling one story (two places 2.1 km apart
   with opposite lighting, then the date change, then Apollo 11 for contrast). Each step
   selects the site and month it talks about. A test recomputes every number in the tour
-  text from the data files.
+  text from the data files. The part of the page a step points at stays lit and the rest
+  dims to 30% and cannot be clicked, fading between steps. Right and Left arrows move
+  between steps, Escape closes, and on a phone each step scrolls its target into view.
 
 - Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
   Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
