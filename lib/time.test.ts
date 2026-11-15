@@ -1,22 +1,97 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { readFileSync } from "node:fs";
+
 import {
-  DAYS_IN_MONTH,
-  HOURS_IN_YEAR,
+  MONTH_COUNT,
+  TOTAL_DAYS,
+  TOTAL_HOURS,
+  YEARS,
+  daysInMonth,
   firstDayOfMonth,
+  firstMonthOfYear,
   formatHour,
+  isLeapYear,
+  monthName,
   monthOfHour,
   moveHourToMonth,
   stepHour,
+  yearOfMonth,
 } from "./time.ts";
+
+// The hours of 2027, which is not a leap year.
+const HOURS_IN_2027 = 8760;
 
 test("the months of 2027 add up to 365 days", () => {
   let total = 0;
-  for (const days of DAYS_IN_MONTH) {
-    total += days;
+  for (let month = 0; month < 12; month++) {
+    total += daysInMonth(month);
   }
   assert.equal(total, 365);
+});
+
+test("only 2028 is a leap year, so only its February has 29 days", () => {
+  assert.equal(isLeapYear(2027), false);
+  assert.equal(isLeapYear(2028), true);
+  assert.equal(isLeapYear(2029), false);
+  assert.equal(isLeapYear(2030), false);
+  // The century rule: 2000 was a leap year, 2100 will not be.
+  assert.equal(isLeapYear(2000), true);
+  assert.equal(isLeapYear(2100), false);
+
+  assert.equal(daysInMonth(1), 28);
+  assert.equal(daysInMonth(13), 29);
+  assert.equal(daysInMonth(25), 28);
+});
+
+test("a month index counts months from January 2027", () => {
+  assert.equal(yearOfMonth(0), 2027);
+  assert.equal(yearOfMonth(11), 2027);
+  assert.equal(yearOfMonth(12), 2028);
+  assert.equal(yearOfMonth(MONTH_COUNT - 1), 2030);
+  assert.equal(firstMonthOfYear(2027), 0);
+  assert.equal(firstMonthOfYear(2029), 24);
+  assert.equal(monthName(0), "Jan");
+  assert.equal(monthName(13), "Feb");
+});
+
+test("the four years add up to 1461 days", () => {
+  // 365 + 366 + 365 + 365.
+  assert.equal(TOTAL_DAYS, 1461);
+  assert.equal(TOTAL_HOURS, 1461 * 24);
+});
+
+// Known answer: the ephemeris files from JPL Horizons hold one sample per
+// hour of each year. Together they must be exactly the hours of the calendar.
+test("the calendar has as many hours as the data files", () => {
+  let hoursInFiles = 0;
+  for (const year of YEARS) {
+    const folder = year === 2027 ? "public/data/" : "public/data/" + year + "/";
+    const ephemeris = JSON.parse(readFileSync(folder + "ephemeris.json", "utf8"));
+    assert.equal(ephemeris.start_utc, year + "-01-01T00:00:00Z");
+    hoursInFiles += ephemeris.count;
+  }
+  assert.equal(hoursInFiles, TOTAL_HOURS);
+});
+
+test("the calendar carries on past 2027", () => {
+  // 2028 starts on day 365. Its 29 February is day 365 + 31 + 28.
+  assert.equal(firstDayOfMonth(12), 365);
+  assert.equal(formatHour(365 * 24), "1 Jan 2028, 00:00 UTC");
+  assert.equal(formatHour((365 + 31 + 28) * 24 + 7), "29 Feb 2028, 07:00 UTC");
+  assert.equal(formatHour(TOTAL_HOURS - 1), "31 Dec 2030, 23:00 UTC");
+  assert.equal(monthOfHour(365 * 24), 12);
+  assert.equal(monthOfHour(TOTAL_HOURS - 1), MONTH_COUNT - 1);
+  // 31 Jan 2028 05:00 moved to February 2028 gives the 29th, a leap day.
+  const january31of2028 = (365 + 30) * 24 + 5;
+  assert.equal(
+    formatHour(moveHourToMonth(january31of2028, 13)),
+    "29 Feb 2028, 05:00 UTC",
+  );
+  // May 2027 moved to May 2029 keeps the day and the hour.
+  const may16of2027 = (firstDayOfMonth(4) + 15) * 24 + 7;
+  assert.equal(formatHour(moveHourToMonth(may16of2027, 28)), "16 May 2029, 07:00 UTC");
 });
 
 test("firstDayOfMonth counts the days before a month", () => {
@@ -62,19 +137,19 @@ test("monthOfHour finds the month on the real 2027 calendar", () => {
   assert.equal(monthOfHour(59 * 24), 2);
   assert.equal(monthOfHour(58 * 24 + 23), 1);
   // The last hour of the year is in December.
-  assert.equal(monthOfHour(HOURS_IN_YEAR - 1), 11);
+  assert.equal(monthOfHour(HOURS_IN_2027 - 1), 11);
 });
 
 test("monthOfHour agrees with moveHourToMonth for every month", () => {
-  for (let month = 0; month < 12; month++) {
+  for (let month = 0; month < MONTH_COUNT; month++) {
     assert.equal(monthOfHour(moveHourToMonth(5, month)), month);
   }
 });
 
-test("stepHour moves by hours and stops at both ends of the year", () => {
+test("stepHour moves by hours and stops at both ends of the data", () => {
   assert.equal(stepHour(100, 1), 101);
   assert.equal(stepHour(100, -24), 76);
   assert.equal(stepHour(0, -1), 0);
-  assert.equal(stepHour(HOURS_IN_YEAR - 1, 1), HOURS_IN_YEAR - 1);
-  assert.equal(stepHour(HOURS_IN_YEAR - 3, 24), HOURS_IN_YEAR - 1);
+  assert.equal(stepHour(TOTAL_HOURS - 1, 1), TOTAL_HOURS - 1);
+  assert.equal(stepHour(TOTAL_HOURS - 3, 24), TOTAL_HOURS - 1);
 });

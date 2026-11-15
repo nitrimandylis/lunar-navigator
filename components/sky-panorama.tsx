@@ -7,7 +7,7 @@ import {
   skyYRange,
   terrainPoints,
 } from "@/lib/sky";
-import { DAYS_IN_MONTH, HOURS_PER_DAY, firstDayOfMonth } from "@/lib/time";
+import { HOURS_PER_DAY, daysInMonth, firstDayOfMonth } from "@/lib/time";
 
 export type SkyPanoramaProps = {
   // The selected site, or null when nothing is selected.
@@ -151,7 +151,7 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
   // The paths of the Sun and Earth during the month on screen.
   const startHour = firstDayOfMonth(visibleMonth) * HOURS_PER_DAY;
-  const endHour = startHour + DAYS_IN_MONTH[visibleMonth] * HOURS_PER_DAY;
+  const endHour = startHour + daysInMonth(visibleMonth) * HOURS_PER_DAY;
   const sunPieces = bodyTrack(hourly.sun_az_deg, hourly.sun_elev_deg, startHour, endHour);
   const earthPieces = bodyTrack(hourly.earth_az_deg, hourly.earth_elev_deg, startHour, endHour);
 

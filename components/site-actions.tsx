@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { Hourly } from "@/lib/app-types";
 import type { Site } from "@/lib/data";
 import { hourlyCsv, shareQuery } from "@/lib/share";
-import { YEAR } from "@/lib/time";
+import { FIRST_YEAR, LAST_YEAR } from "@/lib/time";
 
 export type SiteActionsProps = {
   // The selected site, or null when nothing is selected.
@@ -22,7 +22,7 @@ const BUTTON_CLASS =
   "min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm text-bright disabled:opacity-50 lg:min-h-0";
 
 // Two buttons under the selected site: copy a link to this site and hour, and
-// download the site's hourly numbers for the year as a CSV file.
+// download the site's hourly numbers for every year as a CSV file.
 export function SiteActions({ site, isCustom, hourly, selectedHour }: SiteActionsProps) {
   // What the copy button says: it changes for a moment after a click.
   const [copyLabel, setCopyLabel] = useState("Copy link");
@@ -56,7 +56,7 @@ export function SiteActions({ site, isCustom, hourly, selectedHour }: SiteAction
     const url = URL.createObjectURL(file);
     const link = document.createElement("a");
     link.href = url;
-    link.download = selectedSite.id + "-" + YEAR + ".csv";
+    link.download = selectedSite.id + "-" + FIRST_YEAR + "-" + LAST_YEAR + ".csv";
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -73,7 +73,13 @@ export function SiteActions({ site, isCustom, hourly, selectedHour }: SiteAction
         type="button"
         onClick={downloadCsv}
         disabled={hourly === null}
-        title={"Every hour of " + YEAR + ": Sun and Earth elevation, azimuth and visibility"}
+        title={
+          "Every hour from " +
+          FIRST_YEAR +
+          " to " +
+          LAST_YEAR +
+          ": Sun and Earth elevation, azimuth and visibility"
+        }
         className={BUTTON_CLASS}
       >
         Download CSV
