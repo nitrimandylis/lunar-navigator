@@ -530,6 +530,11 @@ export default function Home() {
             </a>{" "}
             is a PDF. The code is open under the AGPL-3.0 licence.
           </p>
+          <p className="text-muted-foreground">
+            We built this with AI coding tools: Claude Code wrote most of the code and tests
+            from our instructions. The numbers come from NASA data and plain arithmetic, not
+            from an AI model.
+          </p>
         </div>
       </footer>
     </div>
