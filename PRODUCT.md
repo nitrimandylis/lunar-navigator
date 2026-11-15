@@ -32,7 +32,9 @@ Built now:
   Earthset or Earthrise.
 - South pole map out to -82, with ten crater outlines, site pins (mission targets ringed)
   and two near pairs (near Shackleton, 2.1 km apart, and near Sverdrup, 2.5 km apart, each a
-  lit and a shadowed site). Click empty ground to pick a custom point.
+  lit and a shadowed site). Click empty ground to pick a custom point. Under it sits a
+  shaded relief picture made from the LOLA terrain (lit by a made-up light, not the real
+  Sun), with a sharper one inside -87.5 once zoomed in.
 - Past landings for comparison: Apollo 11, Blue Ghost 1 (CLPS), SLIM, Chandrayaan-3 and
   Chang'e 6 (far side), with coordinates from the NASA NSSDCA table. They are worked out in
   the browser on a smooth Moon with no terrain, listed under their own divider, and never
@@ -54,4 +56,3 @@ Built now:
 Still open:
 
 - Terrain for custom points. Judged not possible before the deadline.
-- A LOLA hillshade under the map, if gio has time.
