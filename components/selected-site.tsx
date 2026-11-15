@@ -50,8 +50,9 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
 
   return (
     // The site, then the Sun and the Earth, each with its height above the
-    // terrain, raw elevation and countdown.
-    <div className="flex flex-col gap-3 text-sm">
+    // terrain, raw elevation and countdown. Below lg this box dissolves
+    // ("contents") so the page can put the sky between the name and the numbers.
+    <div className="flex flex-col gap-3 text-sm max-lg:contents">
       <div>
         {/* A custom point is named by its numbers, which use the mono font. */}
         <p className={row.isCustom ? "font-mono tabular-nums text-bright" : "text-bright"}>
@@ -87,7 +88,7 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
       {hourly !== null && (
         // Sun and Earth side by side: height above the terrain, raw
         // elevation, and the countdown to the next change.
-        <div className="grid grid-cols-2 gap-x-4">
+        <div className="grid grid-cols-2 gap-x-4 max-lg:order-2">
           <p className="col-span-2 text-muted-foreground">
             {row.isReference || row.isCustom ? "Above the horizon" : "Above terrain"}
           </p>
