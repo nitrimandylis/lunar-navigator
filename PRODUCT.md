@@ -30,6 +30,10 @@ Built now:
 - Selected-site numbers beside the charts: Sun and Earth height above the terrain (raw
   elevation underneath), and countdowns to sunset or sunrise and to
   Earthset or Earthrise.
+- Verdict line: the Selected site panel says the month in words, for example "In May the
+  Sun is up 47% of the time and Earth is in view 100%. Power is the limit here, not the
+  radio link. Longest dark spell: 13 d 17 h." Past landings and custom points now carry the
+  whole dark spell that touches a day, as the data files do.
 - South pole map out to -82, with ten crater outlines, site pins (mission targets ringed)
   and two near pairs (near Shackleton, 2.1 km apart, and near Sverdrup, 2.5 km apart, each a
   lit and a shadowed site). Click empty ground to pick a custom point. Under it sits a

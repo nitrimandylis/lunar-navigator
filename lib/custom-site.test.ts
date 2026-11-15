@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { azimuthDeg, customSiteHourly, elevationDeg, summarizeDays } from "./custom-site.ts";
+import {
+  azimuthDeg,
+  customSiteHourly,
+  darkSpellLengths,
+  elevationDeg,
+  summarizeDays,
+} from "./custom-site.ts";
 
 const AU_KM = 149_597_870.7;
 
@@ -89,6 +95,12 @@ test("a disc counts as visible while its centre is just below the horizon", () =
   assert.deepEqual(hourly.earth_visible, [1, 0]);
 });
 
+test("darkSpellLengths gives every dark hour the length of its spell", () => {
+  assert.deepEqual(darkSpellLengths([1, 0, 0, 1, 0, 1]), [0, 2, 2, 0, 1, 0]);
+  // A spell is cut at both ends of the data.
+  assert.deepEqual(darkSpellLengths([0, 0, 1, 0]), [2, 2, 0, 1]);
+});
+
 test("day summaries add up hours, the highest Sun and the longest gap", () => {
   const sunElev: number[] = [];
   const sunVisible: number[] = [];
@@ -121,7 +133,9 @@ test("day summaries add up hours, the highest Sun and the longest gap", () => {
       earth_hours: 24,
       both_hours: 6,
       max_sun_elev_deg: 2,
-      longest_sun_gap_hours: 18,
+      // The dark spell runs from hour 6 of day 1 to hour 3 of day 2: 22 hours.
+      // Both days get the whole spell, as in data/build.py.
+      longest_sun_gap_hours: 22,
     },
     {
       date: "2027-02-01",
@@ -129,7 +143,7 @@ test("day summaries add up hours, the highest Sun and the longest gap", () => {
       earth_hours: 0,
       both_hours: 0,
       max_sun_elev_deg: 1.25,
-      longest_sun_gap_hours: 4,
+      longest_sun_gap_hours: 22,
     },
   ]);
 });
