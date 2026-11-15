@@ -5,6 +5,7 @@ import { projectSouthPole } from "./geometry.ts";
 import {
   clampLabelX,
   clampView,
+  craterLabelSpot,
   kmToMapPx,
   projectForMap,
   unprojectSouthPole,
@@ -114,4 +115,13 @@ test("clampView keeps the view centre inside the limit", () => {
   assert.deepEqual(moved, { x: 150, y: -170, size: 20 });
   const inside = { x: -10, y: -10, size: 20 };
   assert.deepEqual(clampView(inside, 160), inside);
+});
+
+test("craterLabelSpot puts the name outside the outline on the chosen side", () => {
+  const centre = { x: 10, y: 20 };
+  // A crater 5 wide each way, a gap of 3 and text 11 tall.
+  assert.deepEqual(craterLabelSpot(centre, 5, "above", 3, 11), { x: 10, y: 12, anchor: "middle" });
+  assert.deepEqual(craterLabelSpot(centre, 5, "below", 3, 11), { x: 10, y: 36, anchor: "middle" });
+  assert.deepEqual(craterLabelSpot(centre, 5, "left", 3, 11), { x: 2, y: 23, anchor: "end" });
+  assert.deepEqual(craterLabelSpot(centre, 5, "right", 3, 11), { x: 18, y: 23, anchor: "start" });
 });

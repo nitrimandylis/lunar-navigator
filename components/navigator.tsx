@@ -3,6 +3,7 @@
 // The whole page: it loads the data, holds what is selected, and hands each
 // panel what it needs. The panels live in their own files next to this one.
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { AboutOverlay } from "@/components/about-overlay";
@@ -320,6 +321,20 @@ export function Navigator() {
             requestHourly(site.id);
           }
         }
+
+        // "?tour=1" starts the guided tour on load. The homepage links here.
+        // The planner covers the page, so a link with both opens the planner.
+        // On load the sort is already by power, time is not playing and the
+        // page is at the top, so this does not need the rest of showTourStep.
+        // The first step points at the Sites panel.
+        if (shared.startsTour && shared.planPresetId === null) {
+          const firstStep = TOUR_STEPS[0];
+          setTourStepIndex(0);
+          setSelectedSiteId(firstStep.siteId);
+          requestHourly(firstStep.siteId);
+          setSelectedHour(firstDayOfMonth(firstStep.month) * HOURS_PER_DAY);
+          setPhoneTab("sites");
+        }
       } catch {
         if (!wasCancelled) {
           setLoadError("Could not load the site data. Reload the page to try again.");
@@ -634,7 +649,10 @@ export function Navigator() {
             isTourOpen && TOUR_DIM,
           )}
         >
-          Lunar Landing Site Navigator
+          {/* The title leads back to the homepage. */}
+          <Link href="/" className="hover:underline">
+            Lunar Landing Site Navigator
+          </Link>
         </h1>
 
         <div
