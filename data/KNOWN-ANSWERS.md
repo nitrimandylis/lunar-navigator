@@ -18,6 +18,58 @@ two 2 m spots are the worst matches: those percentages are maxima over a 20 m gr
 sensitive at 2 m, and their coordinates are rounded to 0.0001 degrees (about 3 m). Our result at a
 given point can differ from theirs by several points just from where the pixel centre falls.
 
+## Maximum over a 20 m neighbourhood (does not close the 2 m gap)
+
+Glaser et al. report maxima on a 20 m grid, so their number may belong to a better pixel than the
+one at their coordinates. We recomputed our 2027 Sun % (same rule: any part of the disc above the
+horizon, hourly, 5 m LOLA v4 DEM, 2 m observer for spots 1-2 and 10 m for spots 3-4) at every 5 m
+DEM pixel centre near each published point, each with its own full horizon (25 km at 5 m plus the
+30 m DEM out to 150 km, as in `build.py`). Script: `data/known_answers_neighbourhood.py`; raw
+results: `data/known_answers_neighbourhood.json`. The Sun direction is taken from Horizons at the
+published point and reused for the neighbours (it moves by under 0.001 degrees over 40 m). The
+point row reproduces the committed 83.92 / 86.66 / 95.95 / 95.97 exactly.
+
+Neighbourhood: all pixel centres within 10 m of the published point (a 20 m diameter disc, 12-13
+pixels), the main row. The 20 m x 20 m square (centres within 10 m in both axes, 16 pixels) and
+two 40 m variants (disc r 20 m, 52 pixels; square, 64 pixels) are for sensitivity.
+
+| Spot (height) | Published | Ours at point | Ours, max in 20 m disc | Mean in 20 m disc | Gap before | Gap after |
+|---|---|---|---|---|---|---|
+| 1 (2 m) | 92.0 | 83.92 | 86.67 (7.0 m E, 6.9 m N of the point) | 83.78 | 8.1 | 5.3 |
+| 2 (2 m) | 92.3 | 86.66 | 87.23 (8.7 m E, 3.8 m N) | 85.44 | 5.6 | 5.1 |
+| 3 (10 m) | 95.6 | 95.95 | 96.05 (2.3 m E, 7.7 m S) | 95.87 | -0.4 | -0.5 |
+| 4 (10 m) | 95.66 | 95.97 | 96.04 (8.0 m E, 2.0 m S) | 95.90 | -0.3 | -0.4 |
+
+Gap is published minus ours (negative: ours is higher). Sensitivity of the maximum:
+
+| Spot | 20 m square (16 px) | 40 m disc (52 px) | 40 m square (64 px) |
+|---|---|---|---|
+| 1 | 86.67 | 87.32 | 87.47 |
+| 2 | 87.23 | 90.45 | 90.45 |
+| 3 | 96.05 | 96.05 | 96.05 |
+| 4 | 96.05 | 96.14 | 96.14 |
+
+**Does it close the gap? No.** Taking the best pixel in 20 m moves spot 1 up 2.8 points and spot 2
+up 0.6, leaving 5.3 and 5.1 points short. Spots 3 and 4 were already within 0.4 points and move by
+about 0.1. Only the 40 m variants get spot 2 close (90.45, 1.9 short), and that is a neighbourhood
+twice as wide as the one Glaser describe; at spot 1 even 40 m leaves 4.5 points. The 40 m spot 2
+maximum should not be read as support: the same 40 m area also contains pixels as low as 16.5 %
+(a pit or crater floor), so the 2 m result varies by tens of points over short distances here.
+
+Likely other causes, not tested here:
+
+- DEM resolution: Glaser used a 20 m DTM, ours is 5 m. A coarser grid smooths small ridges and
+  hollows within a few tens of metres of a 2 m observer, which could raise their lit share
+  relative to ours. We cannot check the size or direction of that effect without their DTM.
+- Time span: 19 years against our 2027. Spots 3 and 4 agree to within 0.4 points with the same
+  one-year/19-year difference, so this alone is unlikely to explain 5 points, but it is not ruled out.
+- Coordinate rounding (0.0001 degrees, about 3 m) is covered by this neighbourhood test, so it does
+  not explain the gap.
+- Definition: published values are "lit" percentages (any sunlight); the "average illumination"
+  numbers are lower (88.1 and 87.9) and happen to be close to ours (83.9 and 86.7 at the point, 86.7
+  and 87.2 at the best pixel). We believe the 92 / 92.3 figures are the "lit" definition and have
+  not confirmed it beyond the EPSC abstract wording.
+
 ## Method differences
 
 - Time: Glaser simulate 19 years (1 hour steps; they say it exceeds the 18.6-year cycle); we simulate 2027 only.
@@ -30,7 +82,7 @@ given point can differ from theirs by several points just from where the pixel c
 
 It shows our horizon and Sun-position code lands within a point of an independent, published
 simulation at 10 m height at two points. It does not prove the 2 m numbers: they disagree by 5 to 8
-points at Glaser's two 2 m spots, and one year is not 19 years. Malapert is untested.
+points at Glaser's two 2 m spots (still 5 points after taking the best pixel within 20 m, see above), and one year is not 19 years. Malapert is untested.
 
 ## Notes on sources
 
