@@ -31,7 +31,9 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
           type="button"
           aria-label="Close the tour"
           onClick={onClose}
-          className="ml-auto rounded-sm px-1 text-base leading-none text-muted-foreground hover:text-bright"
+          // On a narrow screen the padding makes the cross easier to hit with a
+          // thumb. The negative margins take the same space back, so nothing moves.
+          className="-my-2 -mr-2 ml-auto rounded-sm p-2 text-base leading-none text-muted-foreground hover:text-bright lg:my-0 lg:mr-0 lg:px-1 lg:py-0"
         >
           ×
         </button>
@@ -44,7 +46,8 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
           type="button"
           onClick={onBack}
           disabled={isFirst}
-          className="rounded-md bg-neither px-3 py-1 text-bright disabled:opacity-40"
+          // min-h-10 makes the buttons 40 px tall on a narrow screen, big enough for a thumb.
+          className="min-h-10 rounded-md bg-neither px-3 py-1 text-bright disabled:opacity-40 lg:min-h-0"
         >
           Back
         </button>
@@ -52,7 +55,7 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
           <button
             type="button"
             onClick={onNext}
-            className="rounded-md bg-bright px-3 py-1 font-medium text-background"
+            className="min-h-10 rounded-md bg-bright px-3 py-1 font-medium text-background lg:min-h-0"
           >
             Next
           </button>
@@ -61,7 +64,7 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md bg-bright px-3 py-1 font-medium text-background"
+            className="min-h-10 rounded-md bg-bright px-3 py-1 font-medium text-background lg:min-h-0"
           >
             Finish
           </button>

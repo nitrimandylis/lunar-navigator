@@ -49,7 +49,13 @@ type Tooltip = {
 
 // The three columns of every row: name, the day cells, the month totals.
 // leading-tight lets rows shrink to 17.5 px, so 21 rows still fit one screen.
-const ROW_COLUMNS = "grid grid-cols-[22rem_minmax(0,1fr)_7.5rem] items-center gap-x-3 leading-tight";
+// Below lg the name column is narrower, to leave more of the screen for days.
+const ROW_COLUMNS =
+  "grid grid-cols-[14rem_minmax(0,1fr)_7.5rem] items-center gap-x-3 leading-tight lg:grid-cols-[22rem_minmax(0,1fr)_7.5rem]";
+
+// Below lg the grid is 56rem wide whatever the screen, so a day keeps a width
+// a finger can hit, and the grid scrolls sideways inside its panel.
+const GRID_MIN_WIDTH = "min-w-[56rem] lg:min-w-0";
 
 // The two month totals, Sun then Earth, in fixed columns so the numbers line up.
 const TOTAL_COLUMNS = "grid grid-cols-2 gap-x-2 text-right";
@@ -93,8 +99,19 @@ export function SitesGrid({
       return;
     }
     const selectedRow = list.querySelector('[data-selected="true"]');
-    if (selectedRow !== null) {
-      selectedRow.scrollIntoView({ block: "nearest" });
+    if (selectedRow === null) {
+      return;
+    }
+    // Move the list only, and only as far as it takes. scrollIntoView would
+    // move the page as well: on a phone, where the page scrolls, tapping a pin
+    // on the map would jump the page back up to this panel.
+    const listRect = list.getBoundingClientRect();
+    const rowRect = selectedRow.getBoundingClientRect();
+    if (rowRect.top < listRect.top) {
+      list.scrollTop -= listRect.top - rowRect.top;
+    }
+    if (rowRect.bottom > listRect.bottom) {
+      list.scrollTop += rowRect.bottom - listRect.bottom;
     }
   }, [selectedSiteId]);
 
@@ -159,240 +176,249 @@ export function SitesGrid({
 
   return (
     <div ref={boxRef} className="relative flex min-h-0 flex-1 flex-col" onMouseLeave={hideTooltip}>
-      {/* Header: day numbers above the day columns. Hidden from screen
-          readers, because every cell's label already names its day. */}
-      <div aria-hidden="true" className={cn(ROW_COLUMNS, "mb-1")}>
-        <span className="text-xs text-muted-foreground">Site</span>
-        <div className="grid gap-px" style={dayColumns}>
-          {monthDays.map((dayOfYear, index) => (
-            <span
-              key={dayOfYear}
-              className="text-center font-mono text-[11px] tabular-nums text-muted-foreground"
-            >
-              {index + 1}
-            </span>
-          ))}
+      {/* Below lg the header and the rows scroll sideways together inside this
+          box. The tooltip stays outside it, so it is never cut off. "relative"
+          keeps the screen-reader-only text of the totals inside the box too:
+          without it that text would stick out and widen the whole page. */}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-x-auto lg:overflow-x-visible">
+        {/* Header: day numbers above the day columns. Hidden from screen
+            readers, because every cell's label already names its day. */}
+        <div aria-hidden="true" className={cn(ROW_COLUMNS, GRID_MIN_WIDTH, "mb-1")}>
+          <span className="text-xs text-muted-foreground">Site</span>
+          <div className="grid gap-px" style={dayColumns}>
+            {monthDays.map((dayOfYear, index) => (
+              <span
+                key={dayOfYear}
+                className="text-center font-mono text-[11px] tabular-nums text-muted-foreground"
+              >
+                {index + 1}
+              </span>
+            ))}
+          </div>
+          <span className={cn(TOTAL_COLUMNS, "text-xs")}>
+            <span className="text-power">Sun h</span>
+            <span className="text-comms">Earth h</span>
+          </span>
         </div>
-        <span className={cn(TOTAL_COLUMNS, "text-xs")}>
-          <span className="text-power">Sun h</span>
-          <span className="text-comms">Earth h</span>
-        </span>
-      </div>
 
-      {/* On a short screen the rows scroll inside the panel. The thin scrollbar
-          is always drawn, so it is clear there are more rows below. */}
-      <ul
-        ref={listRef}
-        className="flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]"
-      >
-        {rows.map((row, rowIndex) => {
-          const site = row.site;
-          const isSelected = site.id === selectedSiteId;
+        {/* On a short screen the rows scroll inside the panel. The thin scrollbar
+            is always drawn, so it is clear there are more rows below. */}
+        <ul
+          ref={listRef}
+          className={cn(
+            GRID_MIN_WIDTH,
+            "flex min-h-0 flex-1 flex-col gap-[2px] overflow-y-auto [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]",
+          )}
+        >
+          {rows.map((row, rowIndex) => {
+            const site = row.site;
+            const isSelected = site.id === selectedSiteId;
 
-          // The near pair tag only shows if the partner is in the grid too.
-          let pairText: string | null = null;
-          const partnerId = pairPartnerId(site.id, NEAR_PAIRS);
-          for (const otherRow of rows) {
-            if (otherRow.site.id === partnerId) {
-              pairText = pairLabel(site, otherRow.site);
+            // The near pair tag only shows if the partner is in the grid too.
+            let pairText: string | null = null;
+            const partnerId = pairPartnerId(site.id, NEAR_PAIRS);
+            for (const otherRow of rows) {
+              if (otherRow.site.id === partnerId) {
+                pairText = pairLabel(site, otherRow.site);
+              }
             }
-          }
-          const isPairPartner = pairText !== null && site.id === selectedPartnerId;
-          const monthTotals = totalsByMonth(row.days)[visibleMonth];
+            const isPairPartner = pairText !== null && site.id === selectedPartnerId;
+            const monthTotals = totalsByMonth(row.days)[visibleMonth];
 
-          // The selected row shows 24 hourly cells while a day is open.
-          const showHours = isDayOpen && isSelected;
-          const hourly = hourlyBySite[site.id];
-          const hourlyFailed = failedHourlyIds.includes(site.id);
+            // The selected row shows 24 hourly cells while a day is open.
+            const showHours = isDayOpen && isSelected;
+            const hourly = hourlyBySite[site.id];
+            const hourlyFailed = failedHourlyIds.includes(site.id);
 
-          // Reference rows sit below every curated row, and custom rows below
-          // those. The first row of each group carries the group's divider.
-          let dividerText: string | null = null;
-          const previousRow = rowIndex > 0 ? rows[rowIndex - 1] : null;
-          if (row.isReference && (previousRow === null || !previousRow.isReference)) {
-            dividerText = "Past landings elsewhere on the Moon: smooth horizon, no terrain";
-          }
-          if (row.isCustom && (previousRow === null || !previousRow.isCustom)) {
-            dividerText = "Custom points: no terrain";
-          }
+            // Reference rows sit below every curated row, and custom rows below
+            // those. The first row of each group carries the group's divider.
+            let dividerText: string | null = null;
+            const previousRow = rowIndex > 0 ? rows[rowIndex - 1] : null;
+            if (row.isReference && (previousRow === null || !previousRow.isReference)) {
+              dividerText = "Past landings elsewhere on the Moon: smooth horizon, no terrain";
+            }
+            if (row.isCustom && (previousRow === null || !previousRow.isCustom)) {
+              dividerText = "Custom points: no terrain";
+            }
 
-          return (
-            <li
-              key={site.id}
-              data-selected={isSelected}
-              className={cn(
-                ROW_COLUMNS,
-                // Rows share the height. A row that holds a divider takes its
-                // own full height instead.
-                dividerText !== null ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
-              )}
-            >
-              {/* The divider spans all three columns, above the first row of its group. */}
-              {dividerText !== null && (
-                <div className="col-span-3 mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
-                  {dividerText}
-                </div>
-              )}
-              {/* Name, with its tags on the same line. A long name is cut
-                  short so the tags always fit; its title shows it in full. */}
-              <div className="flex min-w-0 items-center gap-2">
-                <button
-                  type="button"
-                  title={site.name}
-                  onClick={() => onSelect(site.id, selectedHour)}
-                  className={cn(
-                    "block min-w-0 truncate rounded-sm text-left text-sm leading-tight",
-                    // A custom point is named by its numbers, which use the mono font.
-                    row.isCustom && "font-mono tabular-nums",
-                    isSelected && "font-medium text-bright",
-                    isPairPartner && "outline-1 outline-offset-2 outline-bright outline-dashed",
-                  )}
-                >
-                  {shortSiteName(site.name)}
-                </button>
-                {(pairText !== null || row.isCustom || site.mission !== undefined) && (
-                  <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
-                    {site.mission !== undefined && (
-                      <span className="rounded-sm bg-bright px-1.5 font-medium text-background">
-                        {site.mission}
-                      </span>
-                    )}
-                    {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
-                    {row.isCustom && (
-                      <>
-                        <span className="rounded-sm border border-line px-1 leading-none py-px">no terrain</span>
-                        <button
-                          type="button"
-                          aria-label={"Remove " + site.name}
-                          onClick={() => onRemoveCustom(site.id)}
-                          className="rounded-sm px-1 text-sm leading-none hover:text-bright"
-                        >
-                          ×
-                        </button>
-                      </>
-                    )}
+            return (
+              <li
+                key={site.id}
+                data-selected={isSelected}
+                className={cn(
+                  ROW_COLUMNS,
+                  // Rows share the height. A row that holds a divider takes its
+                  // own full height instead.
+                  dividerText !== null ? "flex-none" : "min-h-4 max-h-[26px] flex-1 basis-0",
+                )}
+              >
+                {/* The divider spans all three columns, above the first row of its group. */}
+                {dividerText !== null && (
+                  <div className="col-span-3 mb-0.5 border-t border-line pt-1 text-xs text-muted-foreground">
+                    {dividerText}
                   </div>
                 )}
-              </div>
-
-              {/* Middle: the days of the month, or one opened day as 24 hours. */}
-              {!showHours && (
-                <div className="grid h-full max-h-[22px] gap-px" style={dayColumns}>
-                  {monthDays.map((dayOfYear) => {
-                    const day = row.days[dayOfYear];
-                    let sunHours = 0;
-                    let earthHours = 0;
-                    if (day !== undefined) {
-                      sunHours = day.sun_hours;
-                      earthHours = day.earth_hours;
-                    }
-                    const hasRing = isSelected && dayOfYear === selectedDay;
-                    const tooltipDetail =
-                      formatHours(sunHours) +
-                      " h sunlight · " +
-                      formatHours(earthHours) +
-                      " h Earth in view";
-                    return (
-                      <button
-                        key={dayOfYear}
-                        type="button"
-                        aria-label={dayCellLabel(site.name, dayOfYear, sunHours, earthHours)}
-                        onClick={() => openDayCell(site.id, dayOfYear)}
-                        onMouseEnter={(event) =>
-                          showTooltip(event.currentTarget, formatDay(dayOfYear), tooltipDetail)
-                        }
-                        onFocus={(event) =>
-                          showTooltip(event.currentTarget, formatDay(dayOfYear), tooltipDetail)
-                        }
-                        onBlur={hideTooltip}
-                        className={cn(
-                          "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
-                          hasRing && "relative z-10 ring-2 ring-bright",
-                        )}
-                      >
-                        <Lanes
-                          power={laneOpacity(sunHours, HOURS_PER_DAY)}
-                          comms={laneOpacity(earthHours, HOURS_PER_DAY)}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {showHours && (
-                <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
-                  <span className="font-mono text-xs tabular-nums text-bright">
-                    {formatDay(selectedDay)}
-                  </span>
-
-                  {hourly === undefined && !hourlyFailed && (
-                    <span className="text-xs text-muted-foreground">Loading hours.</span>
-                  )}
-                  {hourly === undefined && hourlyFailed && (
-                    <span className="text-xs text-bright">
-                      Could not load the hours. Click the site name to retry.
-                    </span>
-                  )}
-
-                  {hourly !== undefined && (
-                    <div className="grid h-full max-h-[22px] gap-px" style={hourColumns}>
-                      {hoursOfDay(selectedDay).map((hourIndex) => {
-                        const sunUp = hourly.sun_visible[hourIndex];
-                        const earthUp = hourly.earth_visible[hourIndex];
-                        const stateText = hourStateText(sunUp, earthUp);
-                        const hasRing = isSelected && hourIndex === selectedHour;
-                        return (
-                          <button
-                            key={hourIndex}
-                            type="button"
-                            aria-label={site.name + ", " + formatHour(hourIndex) + ": " + stateText}
-                            onClick={() => onSelect(site.id, hourIndex)}
-                            onMouseEnter={(event) =>
-                              showTooltip(event.currentTarget, formatHour(hourIndex), stateText)
-                            }
-                            onFocus={(event) =>
-                              showTooltip(event.currentTarget, formatHour(hourIndex), stateText)
-                            }
-                            onBlur={hideTooltip}
-                            className={cn(
-                              "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
-                              hasRing && "relative z-10 ring-2 ring-bright",
-                            )}
-                          >
-                            <Lanes power={sunUp} comms={earthUp} />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
+                {/* Name, with its tags on the same line. A long name is cut
+                    short so the tags always fit; its title shows it in full. */}
+                <div className="flex min-w-0 items-center gap-2">
                   <button
                     type="button"
-                    aria-label={"Close " + formatDay(selectedDay)}
-                    onClick={closeDay}
-                    className="rounded-sm px-1.5 text-sm leading-none text-muted-foreground hover:text-bright"
+                    title={site.name}
+                    onClick={() => onSelect(site.id, selectedHour)}
+                    className={cn(
+                      "block min-w-0 truncate rounded-sm text-left text-sm leading-tight",
+                      // A custom point is named by its numbers, which use the mono font.
+                      row.isCustom && "font-mono tabular-nums",
+                      isSelected && "font-medium text-bright",
+                      isPairPartner && "outline-1 outline-offset-2 outline-bright outline-dashed",
+                    )}
                   >
-                    ×
+                    {shortSiteName(site.name)}
                   </button>
+                  {(pairText !== null || row.isCustom || site.mission !== undefined) && (
+                    <div className="flex shrink-0 items-center gap-2 text-[11px] text-muted-foreground">
+                      {site.mission !== undefined && (
+                        <span className="rounded-sm bg-bright px-1.5 font-medium text-background">
+                          {site.mission}
+                        </span>
+                      )}
+                      {pairText !== null && <span className="font-mono tabular-nums">{pairText}</span>}
+                      {row.isCustom && (
+                        <>
+                          <span className="rounded-sm border border-line px-1 leading-none py-px">no terrain</span>
+                          <button
+                            type="button"
+                            aria-label={"Remove " + site.name}
+                            onClick={() => onRemoveCustom(site.id)}
+                            className="rounded-sm px-1 text-sm leading-none hover:text-bright"
+                          >
+                            ×
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Right: this month's totals, in hours. */}
-              <div className={cn(TOTAL_COLUMNS, "font-mono text-sm leading-none tabular-nums")}>
-                <span className="text-power">
-                  <span className="sr-only">Sun hours this month: </span>
-                  {formatHours(monthTotals.sunHours)}
-                </span>
-                <span className="text-comms">
-                  <span className="sr-only">Earth hours this month: </span>
-                  {formatHours(monthTotals.earthHours)}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                {/* Middle: the days of the month, or one opened day as 24 hours. */}
+                {!showHours && (
+                  <div className="grid h-full max-h-[22px] gap-px" style={dayColumns}>
+                    {monthDays.map((dayOfYear) => {
+                      const day = row.days[dayOfYear];
+                      let sunHours = 0;
+                      let earthHours = 0;
+                      if (day !== undefined) {
+                        sunHours = day.sun_hours;
+                        earthHours = day.earth_hours;
+                      }
+                      const hasRing = isSelected && dayOfYear === selectedDay;
+                      const tooltipDetail =
+                        formatHours(sunHours) +
+                        " h sunlight · " +
+                        formatHours(earthHours) +
+                        " h Earth in view";
+                      return (
+                        <button
+                          key={dayOfYear}
+                          type="button"
+                          aria-label={dayCellLabel(site.name, dayOfYear, sunHours, earthHours)}
+                          onClick={() => openDayCell(site.id, dayOfYear)}
+                          onMouseEnter={(event) =>
+                            showTooltip(event.currentTarget, formatDay(dayOfYear), tooltipDetail)
+                          }
+                          onFocus={(event) =>
+                            showTooltip(event.currentTarget, formatDay(dayOfYear), tooltipDetail)
+                          }
+                          onBlur={hideTooltip}
+                          className={cn(
+                            "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
+                            hasRing && "relative z-10 ring-2 ring-bright",
+                          )}
+                        >
+                          <Lanes
+                            power={laneOpacity(sunHours, HOURS_PER_DAY)}
+                            comms={laneOpacity(earthHours, HOURS_PER_DAY)}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {showHours && (
+                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-2">
+                    <span className="font-mono text-xs tabular-nums text-bright">
+                      {formatDay(selectedDay)}
+                    </span>
+
+                    {hourly === undefined && !hourlyFailed && (
+                      <span className="text-xs text-muted-foreground">Loading hours.</span>
+                    )}
+                    {hourly === undefined && hourlyFailed && (
+                      <span className="text-xs text-bright">
+                        Could not load the hours. Click the site name to retry.
+                      </span>
+                    )}
+
+                    {hourly !== undefined && (
+                      <div className="grid h-full max-h-[22px] gap-px" style={hourColumns}>
+                        {hoursOfDay(selectedDay).map((hourIndex) => {
+                          const sunUp = hourly.sun_visible[hourIndex];
+                          const earthUp = hourly.earth_visible[hourIndex];
+                          const stateText = hourStateText(sunUp, earthUp);
+                          const hasRing = isSelected && hourIndex === selectedHour;
+                          return (
+                            <button
+                              key={hourIndex}
+                              type="button"
+                              aria-label={site.name + ", " + formatHour(hourIndex) + ": " + stateText}
+                              onClick={() => onSelect(site.id, hourIndex)}
+                              onMouseEnter={(event) =>
+                                showTooltip(event.currentTarget, formatHour(hourIndex), stateText)
+                              }
+                              onFocus={(event) =>
+                                showTooltip(event.currentTarget, formatHour(hourIndex), stateText)
+                              }
+                              onBlur={hideTooltip}
+                              className={cn(
+                                "flex h-full max-h-[22px] flex-col gap-px rounded-xs bg-neither p-px",
+                                hasRing && "relative z-10 ring-2 ring-bright",
+                              )}
+                            >
+                              <Lanes power={sunUp} comms={earthUp} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      aria-label={"Close " + formatDay(selectedDay)}
+                      onClick={closeDay}
+                      className="rounded-sm px-1.5 text-sm leading-none text-muted-foreground hover:text-bright"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+
+                {/* Right: this month's totals, in hours. */}
+                <div className={cn(TOTAL_COLUMNS, "font-mono text-sm leading-none tabular-nums")}>
+                  <span className="text-power">
+                    <span className="sr-only">Sun hours this month: </span>
+                    {formatHours(monthTotals.sunHours)}
+                  </span>
+                  <span className="text-comms">
+                    <span className="sr-only">Earth hours this month: </span>
+                    {formatHours(monthTotals.earthHours)}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
 
       {/* The one shared tooltip. It never catches the pointer. */}
       {tooltip !== null && (

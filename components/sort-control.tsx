@@ -27,7 +27,8 @@ export function SortControl({ sortKey, onChangeSort }: SortControlProps) {
             aria-pressed={isSelected}
             onClick={() => onChangeSort(option.key)}
             className={cn(
-              "rounded-md bg-neither px-2.5 py-1 text-sm",
+              // min-h-10 makes the button 40 px tall on a narrow screen, big enough for a thumb.
+              "min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm lg:min-h-0",
               // Same selection style as the month chips: bright ring and label.
               isSelected && "font-medium text-bright ring-2 ring-bright",
             )}

@@ -85,9 +85,11 @@ function Panel({
         className,
       )}
     >
-      <div className="mb-1.5 flex items-baseline gap-3">
+      {/* On a narrow screen a long caption wraps under the title. From lg up
+          it stays on the title's line and is cut short. */}
+      <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 lg:flex-nowrap lg:gap-3">
         <h2 className="shrink-0 text-sm font-medium text-bright">{title}</h2>
-        <p className="min-w-0 truncate text-xs text-muted-foreground" title={caption}>
+        <p className="min-w-0 text-xs text-muted-foreground lg:truncate" title={caption}>
           {caption}
         </p>
       </div>
@@ -409,8 +411,11 @@ export function Navigator() {
   }
 
   return (
-    <div className="flex h-dvh flex-col">
-      <header className="flex items-center gap-6 border-b border-line px-4 py-2">
+    // Below lg (1024 px) the page is as tall as its panels and scrolls. From lg
+    // up it is exactly one screen tall.
+    <div className="flex flex-col lg:h-dvh">
+      {/* On a narrow screen the header wraps onto as many lines as it needs. */}
+      <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 lg:flex-nowrap lg:gap-6">
         <h1 className="text-lg font-medium text-bright">
           Lunar Landing Site Navigator
         </h1>
@@ -431,35 +436,40 @@ export function Navigator() {
           />
         </div>
 
-        <div className="ml-auto flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:ml-auto lg:flex-nowrap lg:gap-4">
           <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
+          {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
           <button
             type="button"
             onClick={() => showTourStep(0)}
-            className="rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background"
+            className="min-h-10 rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
           >
             Take the tour
           </button>
           <button
             type="button"
             onClick={() => setIsAboutOpen(true)}
-            className="rounded-md bg-neither px-2.5 py-1 text-sm text-bright"
+            className="min-h-10 rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
           >
             About
           </button>
         </div>
       </header>
 
-      {/* The page is exactly one screen tall. Each column fills the space under
-          the header: the Sites panel and the map take what the other panels
-          leave, so the rows and the map shrink instead of the page scrolling. */}
-      <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_380px] grid-rows-[minmax(0,1fr)] gap-3 p-3">
-        <div className="flex min-h-0 flex-col gap-3">
+      {/* Below lg the panels stack in one column, in the order they are written
+          here: Sites, Selected site, South pole, Custom point.
+          From lg up the page is exactly one screen tall. Each column fills the
+          space under the header: the Sites panel and the map take what the other
+          panels leave, so the rows and the map shrink instead of the page scrolling. */}
+      <main className="flex flex-col gap-3 p-3 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
+        <div className="flex flex-col gap-3 lg:min-h-0">
           <Panel
             title="Sites"
             caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
             isHighlighted={tourTarget === "sites"}
-            className="flex min-h-0 flex-1 flex-col"
+            // Stacked, a tooltip near the right edge is cut off at the panel's
+            // side, so it never makes the page scroll sideways.
+            className="flex flex-col overflow-x-clip lg:min-h-0 lg:flex-1 lg:overflow-x-visible"
           >
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
@@ -494,8 +504,9 @@ export function Navigator() {
             caption="One place at one hour: where the Sun and Earth are, and how long they stay."
             isHighlighted={tourTarget === "selected"}
           >
-            {/* Numbers on the left, the sky and the charts on the right. */}
-            <div className="grid grid-cols-[23rem_minmax(0,1fr)] gap-6">
+            {/* Numbers on the left, the sky and the charts on the right. On a
+                narrow screen the numbers sit above the sky and the charts. */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[23rem_minmax(0,1fr)]">
               <SelectedSite
                 row={selectedRow}
                 hourly={selectedHourly}
@@ -532,17 +543,19 @@ export function Navigator() {
           </Panel>
         </div>
 
-        <div className="flex min-h-0 flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:min-h-0">
 
           <Panel
             title="South pole"
             caption="Seen from above. Earth is towards the top."
             isHighlighted={false}
-            className="flex min-h-0 flex-1 flex-col"
+            className="flex flex-col lg:min-h-0 lg:flex-1"
           >
             {/* The small map is a locator: pins select, anything else opens
-                the big map, where points are picked. */}
-            <div className="relative min-h-0 flex-1 cursor-zoom-in">
+                the big map, where points are picked. Stacked, the grid no
+                longer gives the map a height, so it is a square as wide as
+                the panel, at most 480 px tall. */}
+            <div className="relative aspect-square max-h-[480px] cursor-zoom-in lg:aspect-auto lg:max-h-none lg:min-h-0 lg:flex-1">
               <SouthPoleMap
                 rows={mapRows}
                 selectedSiteId={selectedSiteId}

@@ -22,7 +22,8 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
   }
 
   return (
-    <ul className="flex gap-1.5">
+    // On a narrow screen the 12 chips wrap onto more lines.
+    <ul className="flex flex-wrap gap-1.5 lg:flex-nowrap">
       {MONTH_NAMES.map((name, month) => {
         const isSelected = month === visibleMonth;
 
@@ -45,7 +46,8 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
               aria-pressed={isSelected}
               onClick={() => onChangeMonth(month)}
               className={cn(
-                "flex flex-col items-stretch gap-1 rounded-md bg-neither px-2.5 pt-1 pb-1.5 text-sm",
+                // min-h-10 makes the chip 40 px tall on a narrow screen, big enough for a thumb.
+                "flex min-h-10 flex-col items-stretch justify-center gap-1 rounded-md bg-neither px-2.5 pt-1 pb-1.5 text-sm lg:min-h-0 lg:justify-start",
                 // Selection is a bright ring and a bright label. Other chips are never dimmed.
                 isSelected && "font-medium text-bright ring-2 ring-bright",
               )}

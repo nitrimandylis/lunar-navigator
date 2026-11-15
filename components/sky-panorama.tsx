@@ -179,7 +179,8 @@ export function SkyPanorama({ row, hourly, visibleMonth, selectedHour }: SkyPano
 
   return (
     <figure>
-      <figcaption className="flex items-baseline justify-between gap-4 text-sm text-foreground">
+      {/* On a narrow screen the directions wrap under the title. */}
+      <figcaption className="flex flex-wrap items-baseline justify-between gap-x-4 text-sm text-foreground lg:flex-nowrap lg:gap-4">
         <span>Sky all the way round, height stretched</span>
         <span className="font-mono text-xs tabular-nums text-muted-foreground">
           Sun {sunAz.toFixed(0)}° {compassWord(sunAz)} · Earth {earthAz.toFixed(0)}°{" "}
