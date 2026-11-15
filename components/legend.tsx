@@ -17,7 +17,7 @@ export function Legend() {
       </span>
       <span className="flex items-center gap-1.5">
         {/* shrink-0 keeps the tag on one line when the text beside it wraps. */}
-        <span aria-hidden="true" className="shrink-0 rounded-sm bg-bright px-1.5 text-[11px] font-medium text-background">
+        <span aria-hidden="true" className="shrink-0 rounded-sm bg-bright px-1.5 text-xs font-medium text-background">
           IM-2
         </span>
         Real mission target. Other sites are computed from LOLA terrain.

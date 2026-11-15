@@ -393,7 +393,7 @@ export function MissionPlanner({
         >
           <span className="truncate">{shortSiteName(site.name)}</span>
           {site.mission !== undefined && (
-            <span className="shrink-0 rounded-sm bg-bright px-1.5 text-[11px] font-medium text-background">
+            <span className="shrink-0 rounded-sm bg-bright px-1.5 text-xs font-medium text-background">
               {site.mission}
             </span>
           )}

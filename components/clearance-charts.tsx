@@ -101,7 +101,7 @@ function ClearanceChart({
           <text
             x={x + 2}
             y={HEIGHT - 4}
-            className="fill-muted-foreground font-mono text-[11px] tabular-nums"
+            className="fill-muted-foreground font-mono text-xs tabular-nums"
           >
             {day + 1}
           </text>
@@ -133,7 +133,7 @@ function ClearanceChart({
               x={LEFT - 6}
               y={yFor(tick) + 4}
               textAnchor="end"
-              className="fill-muted-foreground font-mono text-[11px] tabular-nums"
+              className="fill-muted-foreground font-mono text-xs tabular-nums"
             >
               {tick + "°"}
             </text>
