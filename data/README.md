@@ -272,6 +272,61 @@ files (`--write`); `build.py` copies it through, so no rebuild of the hourly fil
 data/.venv/Scripts/python data/slope.py --dem30 <30 m .tif> --dem5 <5 m .tif> --write
 ```
 
+## `psr_km`: distance to the nearest permanently shadowed region
+
+Every site has an optional number `psr_km`: the ground distance in km from the site to the edge of
+the nearest permanently shadowed region (PSR), rounded to 0.01 km, and 0 when the site lies inside
+a PSR. It is **a distance to the nearest PSR polygon edge, not time in shadow**: a site 0.3 km from a PSR
+can still have Sun for most of the year, and a site inside a PSR has no direct sunlight at all.
+`build.py` copies the field through `sites.json` unchanged (it copies the whole file), so no hourly,
+summary or ephemeris file depends on it.
+
+- **Source.** NASA PGDA, "A New View of the Lunar South Pole from LOLA" (product 90), file
+  `LPSR_80S_20MPP_ADJ_1km2.SHP` (shapefile of PSRs larger than 1 km2, 20 m LOLA grid, 80 S to the
+  pole, 20.7 MB; N = 1,531 polygons), https://pgda.gsfc.nasa.gov/products/90 ,
+  https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LPSR_80S_20MPP_ADJ_1km2.SHP . Barker et al. 2023, PSJ 4,
+  183; data DOI 10.60903/gsfcpgda-lola-spole. The method descends from Mazarico et al. 2011.
+- **PSR definition.** A PSR is ground that never receives direct sunlight, from horizon masks built
+  on LOLA topography and simulated over lunar precession cycles (18.6 years) with the Sun as a disc
+  (Mazarico et al. 2011, Icarus 211, 1066; NTRS 20120010094). The PGDA product page does not itself
+  state the time span or the Sun model; we took them from the papers and did not check them in the
+  product's label file. It is LOLA's product, not ours, and unlike our DEM-based hours it does not use
+  our 2 m observer height.
+- **Minimum area: 1 km2.** The file only has PSRs larger than 1 km2 (the PGDA's own cut; the full
+  20 m file has 506,349 polygons, mostly tiny). Smaller cold traps are not counted, so a site can be
+  closer to a sub-km2 shadow than `psr_km` says. For comparison, the Mazarico 2011 raster
+  (`LPSR_85S_060M_201608`, 60 m, 85 S to the pole, flags every shadowed pixel) puts the 14 sites south of 85 S within 0.02 to 3.75 km of some PSR pixel, e.g. `shackleton-shadow`
+  0.02 km, `haworth-candidate` 0.14 km, `shackleton-ridge` 0.34 km. The other four (`amundsen-candidate`,
+  `cabeus-candidate`, `nobile-candidate`, `im2-mons-mouton`) lie outside that raster.
+- **Method.** `psr_distance.py`: site (lat, lon) to `terrain.lonlat_to_xy` (south polar
+  stereographic, same projection as the shapefile), minimum point-to-segment distance to every
+  polygon ring, 0 if inside (even-odd, holes are not PSR), divided by `terrain.scale_factor` to give
+  ground distance. `data/psr_polygons.json` (1.7 MB) holds only the 72 polygons with an edge within
+  19.5 km of a site, in integer metres; every site's nearest PSR is within that radius and the script
+  refuses to run if one is not. The downloaded shapefile itself is not in git. To regenerate:
+
+```bash
+data/.venv/Scripts/python data/psr_distance.py shp <LPSR_80S_20MPP_ADJ_1km2.SHP>   # rebuild psr_polygons.json
+data/.venv/Scripts/python data/psr_distance.py sites --write                       # update both sites.json files
+```
+
+- **Caveats.** Positions of our computed sites are on the 5 m / 30 m DEM; the PSR edges come from a
+  20 m grid, so edges carry a few tens of metres of uncertainty. `shackleton-ridge` and
+  `shackleton-shadow` are not in the crater floor (they are rim-side points, 6 km from the 1 km2
+  PSRs); `artemis3-haworth` is the only site inside a PSR (0).
+
+Citation block (paste into slides or the video notes):
+
+> Distance to nearest permanently shadowed region: computed from the LOLA PSR map of the lunar south
+> pole (NASA PGDA, `LPSR_80S_20MPP_ADJ_1km2`, PSRs larger than 1 km2). Barker, M. K., et al. (2023),
+> Planetary Science Journal 4, 183, doi:10.3847/PSJ/acf3e1; data doi:10.60903/gsfcpgda-lola-spole.
+> PSR method: Mazarico, E., et al. (2011), Illumination conditions of the lunar polar regions using
+> LOLA topography, Icarus 211, 1066-1081, doi:10.1016/j.icarus.2010.10.030.
+
+If the PSR file could not be had, the fallback would be to derive PSRs from our own DEM (zero Sun
+hours over a long span from horizon masks) and label the result as derived, not LOLA's product. It
+was not needed.
+
 ## Known simplifications
 
 - Sun and Earth are discs, not points. A body is visible when any part of its disc is above the

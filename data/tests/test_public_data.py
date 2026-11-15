@@ -196,6 +196,10 @@ def test_source_site_fields(site):
         assert 0 <= v < 90, f"{name}: slope_deg {v} not in [0, 90)"
         assert 0 <= v <= 45, f"{name}: slope_deg {v} implausible for a 30 m LOLA cell (expected 0-45)"
 
+    if "psr_km" in site:
+        v = site["psr_km"]
+        assert isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0, f"{name}: psr_km must be a number >= 0"
+
 
 def test_slope_deg_public_matches_source():
     public = load(PUBLIC / "sites.json")
@@ -227,3 +231,8 @@ def test_sun_pct_10m_not_below_2m_percent(site):
     total = sum(n_hours(y) for y in YEARS)
     pct_2m = round(100.0 * visible / total, 1)
     assert site["sun_pct_10m"] >= pct_2m, f"{site['id']}: 10 m {site['sun_pct_10m']} < 2 m {pct_2m}"
+
+
+def test_psr_km_public_matches_source():
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("psr_km") for s in public] == [s.get("psr_km") for s in SITES]
