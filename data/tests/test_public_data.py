@@ -15,6 +15,8 @@ PUBLIC = ROOT / "public" / "data"
 
 # 2027 lives directly in public/data/; later years in public/data/<year>/ (same layout inside).
 YEARS = list(range(2027, 2041))
+# sun_pct_10m is defined over 2027-2030 only, whatever YEARS grows to.
+SUN_PCT_YEARS = (2027, 2028, 2029, 2030)
 
 
 def year_dir(year):
@@ -227,8 +229,8 @@ def test_sun_pct_10m_optional_number_in_range(site):
 def test_sun_pct_10m_not_below_2m_percent(site):
     if "sun_pct_10m" not in site:
         pytest.skip("no sun_pct_10m for this site")
-    visible = sum(sum(hourly(y, site["id"])["sun_visible"]) for y in YEARS)
-    total = sum(n_hours(y) for y in YEARS)
+    visible = sum(sum(hourly(y, site["id"])["sun_visible"]) for y in SUN_PCT_YEARS)
+    total = sum(n_hours(y) for y in SUN_PCT_YEARS)
     pct_2m = round(100.0 * visible / total, 1)
     assert site["sun_pct_10m"] >= pct_2m, f"{site['id']}: 10 m {site['sun_pct_10m']} < 2 m {pct_2m}"
 
