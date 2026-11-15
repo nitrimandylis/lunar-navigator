@@ -90,11 +90,13 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
               </>
             )}
             {site.slope_deg !== undefined && <>Slope {site.slope_deg.toFixed(1)}°. </>}
-            {/* psr_km only counts shadows larger than 1 km2, and is 0 inside one. */}
+            {/* psr_km is measured to the edge of the nearest permanently
+                shadowed region of at least 1 km2, and is 0 inside one. Smaller
+                shadows can be much closer, so the size is always named. */}
             {site.psr_km !== undefined && site.psr_km > 0 && (
-              <>Nearest large permanent shadow {site.psr_km.toFixed(1)} km away.</>
+              <>Nearest permanent shadow of 1 km² or more: {site.psr_km.toFixed(1)} km.</>
             )}
-            {site.psr_km === 0 && <>Inside a permanent shadow.</>}
+            {site.psr_km === 0 && <>Inside a permanent shadow of 1 km² or more.</>}
           </p>
         )}
       </div>

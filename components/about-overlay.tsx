@@ -29,6 +29,11 @@ const SOURCE_LINKS = [
     note: "the IM-2 coordinates",
   },
   {
+    href: "https://pgda.gsfc.nasa.gov/products/90",
+    label: "NASA PGDA, LOLA map of permanent shadow (Barker et al. 2023)",
+    note: "the permanently shadowed regions we measure distance to",
+  },
+  {
     href: "https://doi.org/10.1016/j.icarus.2014.08.013",
     label: "Glaser et al. 2014, Icarus 243",
     note: "the published sunlight figure we compare with",
@@ -214,9 +219,10 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 lander do not show.
               </li>
               <li>
-                Permanent shadow. The distance to the nearest ground that never sees the
-                Sun, where water ice may survive. Only shadows larger than 1 square
-                kilometre are counted, from NASA&apos;s LOLA map of them.
+                Permanent shadow. The distance to the edge of the nearest region that
+                never sees the Sun, where water ice may survive. Only regions of 1 square
+                kilometre or more are counted, from NASA&apos;s LOLA map of them. Smaller
+                shadows can be much closer.
               </li>
             </ul>
 
