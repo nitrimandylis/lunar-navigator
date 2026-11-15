@@ -44,20 +44,43 @@ test("a share link gives back the site and hour it was made from", () => {
   assert.deepEqual(parseShareQuery(query, KNOWN_IDS), {
     siteId: "shackleton-ridge",
     hour: 3240,
+    planPresetId: null,
   });
 });
 
 test("parseShareQuery ignores what it does not know", () => {
-  assert.deepEqual(parseShareQuery("", KNOWN_IDS), { siteId: null, hour: null });
+  assert.deepEqual(parseShareQuery("", KNOWN_IDS), {
+    siteId: null,
+    hour: null,
+    planPresetId: null,
+  });
   assert.deepEqual(parseShareQuery("?site=nowhere&time=soon", KNOWN_IDS), {
     siteId: null,
     hour: null,
+    planPresetId: null,
   });
   // One good part is kept even when the other is bad.
   assert.deepEqual(parseShareQuery("?site=ref-apollo-11&time=soon", KNOWN_IDS), {
     siteId: "ref-apollo-11",
     hour: null,
+    planPresetId: null,
   });
+});
+
+test("the plan part names a mission preset to open the planner on", () => {
+  assert.equal(parseShareQuery("", KNOWN_IDS).planPresetId, null);
+  assert.equal(parseShareQuery("?plan=rover", KNOWN_IDS).planPresetId, "rover");
+  assert.equal(parseShareQuery("?plan=crew", KNOWN_IDS).planPresetId, "crew");
+  // "1" or a name that is not a preset opens the first preset, Short lander.
+  assert.equal(parseShareQuery("?plan=1", KNOWN_IDS).planPresetId, "lander");
+  assert.equal(parseShareQuery("?plan=bogus", KNOWN_IDS).planPresetId, "lander");
+});
+
+test("the plan part works together with a site and a time", () => {
+  assert.deepEqual(
+    parseShareQuery("?plan=crew&site=shackleton-ridge&time=2027-05-16T00:00Z", KNOWN_IDS),
+    { siteId: "shackleton-ridge", hour: 3240, planPresetId: "crew" },
+  );
 });
 
 test("hourlyCsv writes a header and one line per hour", () => {

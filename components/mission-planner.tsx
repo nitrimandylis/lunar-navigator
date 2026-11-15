@@ -35,6 +35,8 @@ export type MissionPlannerProps = {
   // Shows a site at an hour on the main page.
   onSelect: (siteId: string, hour: number) => void;
   onClose: () => void;
+  // The mission preset the panel opens on, for example "rover".
+  initialPresetId: string;
 };
 
 // One site's answer for the mission on screen.
@@ -209,9 +211,17 @@ export function MissionPlanner({
   selectedHour,
   onSelect,
   onClose,
+  initialPresetId,
 }: MissionPlannerProps) {
-  const [presetId, setPresetId] = useState<string | null>(MISSION_PRESETS[0].id);
-  const [form, setForm] = useState<NeedsForm>(formFromNeeds(MISSION_PRESETS[0].needs));
+  // Start on the preset asked for, or the first one if the id is not known.
+  let initialPreset = MISSION_PRESETS[0];
+  for (const preset of MISSION_PRESETS) {
+    if (preset.id === initialPresetId) {
+      initialPreset = preset;
+    }
+  }
+  const [presetId, setPresetId] = useState<string | null>(initialPreset.id);
+  const [form, setForm] = useState<NeedsForm>(formFromNeeds(initialPreset.needs));
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
