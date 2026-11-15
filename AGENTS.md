@@ -89,8 +89,14 @@ Conventions:
   Computed candidates leave it out.
 - `note` is optional: a short caveat the app shows under the site, for example why a mission
   region centre gets no Sun.
-- `psr_km` is optional: distance in km to the nearest permanently shadowed region, from
-  LOLA/PGDA.
+- `psr_km` is optional: distance in km to the nearest permanently shadowed region larger
+  than 1 km2, from LOLA/PGDA. It is 0 when the site is inside one.
+- `sun_pct_10m` is optional: percent of all the hours of 2027 to 2030 with the Sun visible
+  from 10 m above the ground, 1 decimal. Every other number uses 2 m.
+- `slope_deg` is optional: slope of the ground at the site in degrees, 1 decimal, from the
+  30 m LOLA DEM (Horn 3x3), the same method for every site. It is the slope of a 30 m cell,
+  not of a lander footprint.
+- The app shows `sun_pct_10m`, `slope_deg` and `psr_km` on the site card when present.
 
 ### `sites/<id>.json`: hourly series for one site
 

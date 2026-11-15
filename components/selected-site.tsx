@@ -1,5 +1,6 @@
 import type { Hourly, SiteRow } from "@/lib/app-types";
 import { clearanceSeries, countdownText } from "@/lib/clearance";
+import { sunPercent } from "@/lib/data";
 import { daysOfMonth, shortSiteName } from "@/lib/grid";
 import { formatHour, monthName, monthOfHour } from "@/lib/time";
 import { monthVerdict } from "@/lib/verdict";
@@ -74,6 +75,27 @@ export function SelectedSite({ row, hourly, hourlyFailed, selectedHour }: Select
         )}
         {site.note !== undefined && (
           <p className="mt-1 text-muted-foreground">{site.note}</p>
+        )}
+        {/* Facts that do not change with the hour, from optional fields of
+            sites.json, in one paragraph to keep the card short. row.days
+            holds every day of 2027 to 2030, worked out from 2 m up. */}
+        {(site.sun_pct_10m !== undefined ||
+          site.slope_deg !== undefined ||
+          site.psr_km !== undefined) && (
+          <p className="text-muted-foreground">
+            {site.sun_pct_10m !== undefined && (
+              <>
+                Sun 2027 to 2030: {sunPercent(row.days).toFixed(1)}% at 2 m,{" "}
+                {site.sun_pct_10m.toFixed(1)}% at 10 m.{" "}
+              </>
+            )}
+            {site.slope_deg !== undefined && <>Slope {site.slope_deg.toFixed(1)}°. </>}
+            {/* psr_km only counts shadows larger than 1 km2, and is 0 inside one. */}
+            {site.psr_km !== undefined && site.psr_km > 0 && (
+              <>Nearest large permanent shadow {site.psr_km.toFixed(1)} km away.</>
+            )}
+            {site.psr_km === 0 && <>Inside a permanent shadow.</>}
+          </p>
         )}
       </div>
 

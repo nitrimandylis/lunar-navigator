@@ -22,9 +22,6 @@ export function Legend() {
         </span>
         Real mission target. Other sites are computed from LOLA terrain.
       </span>
-      <span className="text-muted-foreground">
-        Stronger colour means more hours that day. All times are UTC.
-      </span>
     </div>
   );
 }

@@ -203,6 +203,21 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 The Sun and Earth are discs, not points. A body counts as in view when any
                 part of its disc is above the ground.
               </li>
+              <li>
+                Sun at 10 m. The same sums with the solar panel 10 m up instead of 2 m.
+                Near the pole a few metres of height can clear a ridge, so the selected
+                site shows both.
+              </li>
+              <li>
+                Slope. The tilt of the ground at the site, from the 30 m LOLA terrain. It
+                is the average over a 30 m square, so boulders and small craters under a
+                lander do not show.
+              </li>
+              <li>
+                Permanent shadow. The distance to the nearest ground that never sees the
+                Sun, where water ice may survive. Only shadows larger than 1 square
+                kilometre are counted, from NASA&apos;s LOLA map of them.
+              </li>
             </ul>
 
             <h4 className="mt-2 text-bright">Checked against published numbers</h4>

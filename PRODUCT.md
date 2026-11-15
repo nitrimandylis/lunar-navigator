@@ -22,6 +22,10 @@ Built now:
   dark spell is cut at the first and last hour of each year, so the selected site's day
   totals are worked out again from its joined hours and a spell that crosses New Year is
   whole in the verdict line. A spell is still cut at the start of 2027 and the end of 2030.
+- Site facts on the selected site's card, from optional fields in `sites.json`: the Sun
+  share of 2027 to 2030 from a 10 m mast next to the 2 m figure (`sun_pct_10m`), the ground
+  slope of the 30 m LOLA cell (`slope_deg`) and the distance to the nearest permanent
+  shadow (`psr_km`). The About panel says what each one means.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
