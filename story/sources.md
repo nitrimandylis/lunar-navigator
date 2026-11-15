@@ -65,13 +65,12 @@ Both fonts load from their CDN stylesheets. No font files are in the repository.
 
 ## Slide deck
 
-- Built with pptxgenjs and sharp, converted to PDF with LibreOffice. Its screenshots were
-  taken from the live site with Playwright. Text is set in Helvetica Neue.
-- The layout helpers (functions that place text boxes and images) come from a slide kit one
-  team member wrote in October 2026, before the hackathon. No project code, data or content
-  comes from it.
+- One HTML file printed to PDF with headless Chromium, set in the site's fonts (Excon and
+  JetBrains Mono). Its screenshots were taken from the running site with Playwright.
 - The team logo on slide 1 was generated with GPT Image 2 and carries a visible
   "AI-generated" mark. It is the only AI-generated image in the project.
+- Selini, the astronaut tour guide on slides 1 and 7, is the site's own vector drawing
+  (`components/buddy.tsx`), written as code with Claude Code.
 
 ## AI assistance
 
@@ -80,7 +79,7 @@ Both fonts load from their CDN stylesheets. No font files are in the repository.
   request after the automated checks. Models: Claude Sonnet 5.5, Claude Opus 5.5 and
   Claude Fable 5.2.
 - **The slide deck was made with Claude.** We chose the story, the slide split and the
-  wording. Claude Code took the screenshots from the live site and laid out the slides.
+  wording. Claude Code took the screenshots from the site and laid out the slides.
 - **ChatGPT and Codex (OpenAI)** helped with reading the rules, drafting the submission text
   and keeping these notes. Model: GPT-6.1 Sol.
 - The site ranks, sorts and plans with plain arithmetic on NASA data. Nothing a user sees is
