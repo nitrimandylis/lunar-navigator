@@ -116,6 +116,7 @@
     "id": "artemis3-haworth",
     "name": "Haworth region centre",
     "mission": "Artemis III candidate",
+    "note": "Centre of NASA's Haworth region (15 km x 15 km). The centre is on the shadowed crater floor: the horizon is never below 3.7 deg and the Sun peaks at 4.1 deg, so it gets 0 h of Sun in 2027 (Earth is visible part of the time). A scan of the whole region on a 250 m grid found no lit point.",
     "lat": -87.45,
     "lon": -5.0,
     "elevation_m": -3318,

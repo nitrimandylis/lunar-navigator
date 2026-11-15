@@ -187,3 +187,12 @@ def test_source_site_fields(site):
     assert -180 <= site["lon"] <= 180, f"{name}: lon {site['lon']} not in -180..180"
     if "mission" in site:
         assert isinstance(site["mission"], str) and site["mission"], f"{name}: mission must be a non-empty string"
+    if "note" in site:
+        assert isinstance(site["note"], str) and site["note"], f"{name}: note must be a non-empty string"
+
+
+def test_only_haworth_has_note():
+    with_note = sorted(s["id"] for s in SITES if "note" in s)
+    assert with_note == ["artemis3-haworth"], with_note
+    public = load(PUBLIC / "sites.json")
+    assert [s.get("note") for s in public] == [s.get("note") for s in SITES]
