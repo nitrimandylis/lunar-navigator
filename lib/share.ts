@@ -2,12 +2,16 @@
 
 import type { Hourly } from "./app-types.ts";
 import { hourToIso, isoToHour } from "./time.ts";
+import { MISSION_PRESETS } from "./windows.ts";
 
 // What a share link carries: the selected site and hour. A part that is
 // missing or not valid is null, and the page keeps its usual start for it.
+// planPresetId says the link opens the mission planner on that preset. It is
+// null when the link has no plan part.
 export type SharedView = {
   siteId: string | null;
   hour: number | null;
+  planPresetId: string | null;
 };
 
 // The query part of a share link, for example
@@ -32,7 +36,20 @@ export function parseShareQuery(query: string, knownSiteIds: string[]): SharedVi
     hour = isoToHour(timeText);
   }
 
-  return { siteId: siteId, hour: hour };
+  // "?plan=rover" opens the planner on that preset. "?plan=1" or any value
+  // that is not a preset id opens it on the first preset.
+  let planPresetId: string | null = null;
+  const planText = params.get("plan");
+  if (planText !== null) {
+    planPresetId = MISSION_PRESETS[0].id;
+    for (const preset of MISSION_PRESETS) {
+      if (preset.id === planText) {
+        planPresetId = preset.id;
+      }
+    }
+  }
+
+  return { siteId: siteId, hour: hour, planPresetId: planPresetId };
 }
 
 const CSV_HEADER =

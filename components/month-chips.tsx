@@ -5,18 +5,18 @@ import { useEffect, useRef } from "react";
 import type { SiteRow } from "@/lib/app-types";
 import { totalsByMonth } from "@/lib/data";
 import { monthLaneStrengths } from "@/lib/grid";
-import { MONTH_NAMES } from "@/lib/time";
+import { MONTHS_PER_YEAR, firstMonthOfYear, monthName, yearOfMonth } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 export type MonthChipsProps = {
-  // The month shown in the grid. 0 = January.
+  // The month shown in the grid. 0 = January 2027 (see lib/time.ts).
   visibleMonth: number;
   // The selected site, or null. Its monthly hours can tint the chips.
   selectedRow: SiteRow | null;
   onChangeMonth: (month: number) => void;
 };
 
-// The 12 month buttons in the header. Each chip has two thin lanes under its
+// The 12 month buttons in the header, for the year of the month on screen. Each chip has two thin lanes under its
 // label: orange for the selected site's sunlight that month, blue for Earth.
 export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthChipsProps) {
   // Below lg the chips are one row that scrolls sideways. Keep the selected
@@ -28,7 +28,7 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
     if (list === null) {
       return;
     }
-    const chip = list.children[visibleMonth] as HTMLElement | undefined;
+    const chip = list.children[visibleMonth % MONTHS_PER_YEAR] as HTMLElement | undefined;
     if (chip === undefined) {
       return;
     }
@@ -41,6 +41,13 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
     monthTotals = totalsByMonth(selectedRow.days);
   }
 
+  // The month indexes of the 12 months of the year on screen.
+  const firstMonth = firstMonthOfYear(yearOfMonth(visibleMonth));
+  const months: number[] = [];
+  for (let i = 0; i < MONTHS_PER_YEAR; i++) {
+    months.push(firstMonth + i);
+  }
+
   return (
     // Below lg the 12 chips sit in one row that scrolls sideways. "relative"
     // makes each chip's offsetLeft count from the row. The padding keeps the
@@ -49,7 +56,8 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
       ref={listRef}
       className="relative flex min-w-0 gap-1.5 overflow-x-auto p-1 [scrollbar-width:none] lg:overflow-visible lg:p-0"
     >
-      {MONTH_NAMES.map((name, month) => {
+      {months.map((month) => {
+        const name = monthName(month);
         const isSelected = month === visibleMonth;
 
         let powerOpacity = 0;
@@ -65,7 +73,7 @@ export function MonthChips({ visibleMonth, selectedRow, onChangeMonth }: MonthCh
         }
 
         return (
-          <li key={name} className="shrink-0">
+          <li key={month} className="shrink-0">
             <button
               type="button"
               aria-pressed={isSelected}

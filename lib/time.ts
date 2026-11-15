@@ -1,13 +1,24 @@
-// Calendar helpers. The data covers calendar year 2027, one sample per hour,
-// and hour 0 is 2027-01-01 00:00 UTC. A month is a number from 0 (January)
-// to 11 (December).
+// Calendar helpers. The data covers the calendar years 2027 to 2030, one
+// sample per hour, joined into one timeline.
+//
+// - An hour index counts hours from 2027-01-01 00:00 UTC, which is hour 0.
+// - A day index counts days from 2027-01-01, which is day 0.
+// - A month index counts months from January 2027, which is month 0. So 11 is
+//   December 2027, 12 is January 2028 and 47 is December 2030.
 
-export const YEAR = 2027;
+// The years with data, in order. To add a year, add it here: everything else
+// in this file is worked out from this list.
+export const YEARS = [2027, 2028, 2029, 2030];
+
+export const FIRST_YEAR = YEARS[0];
+export const LAST_YEAR = YEARS[YEARS.length - 1];
+
+export const MONTHS_PER_YEAR = 12;
+
+// The last month index is one less than this.
+export const MONTH_COUNT = YEARS.length * MONTHS_PER_YEAR;
 
 export const HOURS_PER_DAY = 24;
-
-// 365 days of 24 hours. The last hour index is one less than this.
-export const HOURS_IN_YEAR = 8760;
 
 export const MONTH_NAMES = [
   "Jan",
@@ -24,85 +35,127 @@ export const MONTH_NAMES = [
   "Dec",
 ];
 
-// 2027 is not a leap year, so February has 28 days.
-export const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+// The days in each month of a year that is not a leap year.
+const DAYS_IN_PLAIN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-// The day of the year on which a month starts, counting 1 January as day 0.
-// January starts on day 0, February on day 31, March on day 59.
+// A leap year has 29 days in February. Every fourth year is one, except a
+// century year that cannot be divided by 400. Of our years only 2028 is.
+export function isLeapYear(year: number): boolean {
+  if (year % 400 === 0) {
+    return true;
+  }
+  if (year % 100 === 0) {
+    return false;
+  }
+  return year % 4 === 0;
+}
+
+// The calendar year a month index falls in. Month 13 gives 2028.
+export function yearOfMonth(month: number): number {
+  return FIRST_YEAR + Math.floor(month / MONTHS_PER_YEAR);
+}
+
+// The month index of January of a year. 2028 gives 12.
+export function firstMonthOfYear(year: number): number {
+  return (year - FIRST_YEAR) * MONTHS_PER_YEAR;
+}
+
+// The short name of a month index. Month 13 gives "Feb".
+export function monthName(month: number): string {
+  return MONTH_NAMES[month % MONTHS_PER_YEAR];
+}
+
+// How many days a month has. Month 1 (February 2027) gives 28, month 13
+// (February 2028) gives 29.
+export function daysInMonth(month: number): number {
+  const monthOfYear = month % MONTHS_PER_YEAR;
+  if (monthOfYear === 1 && isLeapYear(yearOfMonth(month))) {
+    return 29;
+  }
+  return DAYS_IN_PLAIN_MONTH[monthOfYear];
+}
+
+// The day index on which a month starts. January 2027 starts on day 0,
+// February 2027 on day 31, January 2028 on day 365.
 export function firstDayOfMonth(month: number): number {
   let day = 0;
   for (let earlierMonth = 0; earlierMonth < month; earlierMonth++) {
-    day += DAYS_IN_MONTH[earlierMonth];
+    day += daysInMonth(earlierMonth);
   }
   return day;
 }
 
-// Text for an hour index, for example "14 Mar 2027, 05:00 UTC".
-export function formatHour(hourIndex: number): string {
-  const dayOfYear = Math.floor(hourIndex / HOURS_PER_DAY);
-  const hourOfDay = hourIndex % HOURS_PER_DAY;
+// Every day of the four years: 365 + 366 + 365 + 365.
+export const TOTAL_DAYS = firstDayOfMonth(MONTH_COUNT);
 
+// Every hour of the four years. The last hour index is one less than this.
+export const TOTAL_HOURS = TOTAL_DAYS * HOURS_PER_DAY;
+
+// The month a day index falls in, and the day inside that month counted from
+// 0. Day 59 (1 March 2027) gives month 2 and dayOfMonth 0.
+function monthAndDay(dayIndex: number): { month: number; dayOfMonth: number } {
   // Walk through the months until the day falls inside one.
   let month = 0;
-  let dayOfMonth = dayOfYear;
-  while (month < 11 && dayOfMonth >= DAYS_IN_MONTH[month]) {
-    dayOfMonth -= DAYS_IN_MONTH[month];
+  let dayOfMonth = dayIndex;
+  while (month < MONTH_COUNT - 1 && dayOfMonth >= daysInMonth(month)) {
+    dayOfMonth -= daysInMonth(month);
     month += 1;
   }
+  return { month: month, dayOfMonth: dayOfMonth };
+}
+
+// Text for an hour index, for example "14 Mar 2027, 05:00 UTC".
+export function formatHour(hourIndex: number): string {
+  const dayIndex = Math.floor(hourIndex / HOURS_PER_DAY);
+  const hourOfDay = hourIndex % HOURS_PER_DAY;
+  const position = monthAndDay(dayIndex);
 
   const hourText = String(hourOfDay).padStart(2, "0");
   return (
-    dayOfMonth + 1 + " " + MONTH_NAMES[month] + " " + YEAR + ", " + hourText + ":00 UTC"
+    position.dayOfMonth +
+    1 +
+    " " +
+    monthName(position.month) +
+    " " +
+    yearOfMonth(position.month) +
+    ", " +
+    hourText +
+    ":00 UTC"
   );
 }
 
 // Moves an hour index into another month, keeping the day of the month and the
 // hour of the day. A day that the new month does not have becomes its last day:
-// 31 January 05:00, moved to February, gives 28 February 05:00.
+// 31 January 05:00, moved to February 2027, gives 28 February 05:00.
 export function moveHourToMonth(hourIndex: number, month: number): number {
-  const dayOfYear = Math.floor(hourIndex / HOURS_PER_DAY);
+  const dayIndex = Math.floor(hourIndex / HOURS_PER_DAY);
   const hourOfDay = hourIndex % HOURS_PER_DAY;
 
-  // Walk through the months until the day falls inside one (as in formatHour).
-  let oldMonth = 0;
-  let dayOfMonth = dayOfYear;
-  while (oldMonth < 11 && dayOfMonth >= DAYS_IN_MONTH[oldMonth]) {
-    dayOfMonth -= DAYS_IN_MONTH[oldMonth];
-    oldMonth += 1;
-  }
-
-  const lastDayOfNewMonth = DAYS_IN_MONTH[month] - 1;
+  let dayOfMonth = monthAndDay(dayIndex).dayOfMonth;
+  const lastDayOfNewMonth = daysInMonth(month) - 1;
   if (dayOfMonth > lastDayOfNewMonth) {
     dayOfMonth = lastDayOfNewMonth;
   }
 
-  const newDayOfYear = firstDayOfMonth(month) + dayOfMonth;
-  return newDayOfYear * HOURS_PER_DAY + hourOfDay;
+  const newDayIndex = firstDayOfMonth(month) + dayOfMonth;
+  return newDayIndex * HOURS_PER_DAY + hourOfDay;
 }
 
-// The month an hour index falls in. 0 = January.
+// The month an hour index falls in. 0 = January 2027.
 export function monthOfHour(hourIndex: number): number {
-  const dayOfYear = Math.floor(hourIndex / HOURS_PER_DAY);
-
-  // Walk through the months until the day falls inside one (as in formatHour).
-  let month = 0;
-  let dayOfMonth = dayOfYear;
-  while (month < 11 && dayOfMonth >= DAYS_IN_MONTH[month]) {
-    dayOfMonth -= DAYS_IN_MONTH[month];
-    month += 1;
-  }
-  return month;
+  const dayIndex = Math.floor(hourIndex / HOURS_PER_DAY);
+  return monthAndDay(dayIndex).month;
 }
 
 // Moves an hour index by a number of hours (negative goes back), stopping at
-// the first and the last hour of the year.
+// the first and the last hour of the data.
 export function stepHour(hourIndex: number, hours: number): number {
   const moved = hourIndex + hours;
   if (moved < 0) {
     return 0;
   }
-  if (moved > HOURS_IN_YEAR - 1) {
-    return HOURS_IN_YEAR - 1;
+  if (moved > TOTAL_HOURS - 1) {
+    return TOTAL_HOURS - 1;
   }
   return moved;
 }
@@ -110,25 +163,30 @@ export function stepHour(hourIndex: number, hours: number): number {
 const MS_PER_HOUR = 3_600_000;
 
 // Hour 0 as a timestamp: 2027-01-01 00:00 UTC.
-const YEAR_START_MS = Date.UTC(YEAR, 0, 1);
+const FIRST_HOUR_MS = Date.UTC(FIRST_YEAR, 0, 1);
 
 // An hour index as ISO 8601 text, for example "2027-03-14T05:00Z".
 // Used in share links and in the CSV export.
 export function hourToIso(hourIndex: number): string {
-  const date = new Date(YEAR_START_MS + hourIndex * MS_PER_HOUR);
+  const date = new Date(FIRST_HOUR_MS + hourIndex * MS_PER_HOUR);
   // "2027-03-14T05:00:00.000Z" cut down to "2027-03-14T05:00", then "Z" again.
   return date.toISOString().slice(0, 16) + "Z";
 }
 
-// The opposite of hourToIso. Returns null unless the text is a whole hour of
-// 2027 written exactly like "2027-03-14T05:00Z".
+// The opposite of hourToIso. Returns null unless the text is a whole hour
+// inside the data, written exactly like "2027-03-14T05:00Z".
 export function isoToHour(text: string): number | null {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:00Z$/.test(text)) {
     return null;
   }
-  const hourIndex = (Date.parse(text) - YEAR_START_MS) / MS_PER_HOUR;
+  const hourIndex = (Date.parse(text) - FIRST_HOUR_MS) / MS_PER_HOUR;
   // Date.parse gives NaN for a date that does not exist, like month 13.
-  if (!Number.isInteger(hourIndex) || hourIndex < 0 || hourIndex > HOURS_IN_YEAR - 1) {
+  if (!Number.isInteger(hourIndex) || hourIndex < 0 || hourIndex > TOTAL_HOURS - 1) {
+    return null;
+  }
+  // A day that does not exist, like 29 February 2027, is quietly moved to the
+  // next real day by Date.parse. Writing the hour back out shows the change.
+  if (hourToIso(hourIndex) !== text) {
     return null;
   }
   return hourIndex;

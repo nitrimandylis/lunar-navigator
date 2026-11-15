@@ -29,15 +29,29 @@ const SOURCE_LINKS = [
     note: "the IM-2 coordinates",
   },
   {
-    href: "https://elib.dlr.de/94242",
+    href: "https://doi.org/10.1016/j.icarus.2014.08.013",
     label: "Glaser et al. 2014, Icarus 243",
     note: "the published sunlight figure we compare with",
+  },
+  {
+    href: "https://elib.dlr.de/94242",
+    label: "Glaser et al. 2014, EPSC abstract",
+    note: "the coordinates of the four spots we check",
   },
   {
     href: "https://github.com/nitrimandylis/lunar-navigator",
     label: "Source code and data",
     note: "everything behind this page",
   },
+];
+
+// Our Sun % against Glaser et al. 2014, copied from data/KNOWN-ANSWERS.md.
+const GLASER_CHECKS = [
+  { point: "Connecting Ridge, our best point", height: "2 m", ours: "91.26", glaser: "92.27", difference: "-1.01" },
+  { point: "Glaser spot 4", height: "10 m", ours: "95.97", glaser: "95.66", difference: "+0.31" },
+  { point: "Glaser spot 3", height: "10 m", ours: "95.95", glaser: "95.6", difference: "+0.35" },
+  { point: "Glaser spot 2", height: "2 m", ours: "86.66", glaser: "92.3", difference: "-5.64" },
+  { point: "Glaser spot 1", height: "2 m", ours: "83.92", glaser: "92", difference: "-8.08" },
 ];
 
 // One titled part of the About text.
@@ -115,8 +129,8 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 day hour by hour.
               </li>
               <li>
-                <span className="text-bright">Months.</span> The buttons at the top change
-                the month. A later launch date means a different month, and often a
+                <span className="text-bright">Years and months.</span> The list and the
+                buttons at the top change the year and the month. A later launch date means a different month, and often a
                 different answer.
               </li>
               <li>
@@ -133,7 +147,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
               <li>
                 <span className="text-bright">Plan a mission.</span> Pick a kind of
                 mission and how much Sun and Earth it needs. Every site is then checked
-                hour by hour for the whole year, and ranked by how many days have a
+                hour by hour for all four years, and ranked by how many days have a
                 landing time that works. Click a site or a day to see it on the main page.
               </li>
               <li>
@@ -176,8 +190,8 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
           <Part title="Where the numbers come from">
             <ul className="flex list-disc flex-col gap-1.5 pl-5">
               <li>
-                Sun and Earth positions come from NASA/JPL Horizons, for every hour of
-                2027, as seen from each site.
+                Sun and Earth positions come from NASA/JPL Horizons, for every hour from
+                2027 to 2030, as seen from each site.
               </li>
               <li>
                 The ground comes from the LOLA laser altimeter on NASA&apos;s Lunar
@@ -189,13 +203,64 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 The Sun and Earth are discs, not points. A body counts as in view when any
                 part of its disc is above the ground.
               </li>
-              <li>
-                As a check, our best-lit point on the Connecting Ridge is sunlit for 91.3
-                percent of 2027. A published study (Glaser et al. 2014) reports about 92
-                percent for the same ridge over 19 years. The two agree in size. It is a
-                plausibility check, not a replication.
-              </li>
             </ul>
+
+            <h4 className="mt-2 text-bright">Checked against published numbers</h4>
+            <p>
+              Sunlit share of the year at five points, ours against the lit share in Glaser et al. 2014.
+              Their spot coordinates come from their EPSC abstract.
+            </p>
+            <div className="overflow-x-auto rounded-md border border-line">
+              <table className="w-full text-left text-xs tabular-nums sm:text-sm">
+                <thead className="whitespace-nowrap text-muted-foreground">
+                  <tr className="border-b border-line">
+                    <th className="px-2 py-1.5 sm:px-3 font-normal">Point</th>
+                    <th className="px-2 py-1.5 sm:px-3 font-normal">Height</th>
+                    <th className="px-2 py-1.5 sm:px-3 text-right font-normal">Ours %</th>
+                    <th className="px-2 py-1.5 sm:px-3 text-right font-normal">Glaser %</th>
+                    <th className="px-2 py-1.5 sm:px-3 text-right font-normal">Diff</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {GLASER_CHECKS.map((row) => (
+                    <tr key={row.point} className="border-b border-line last:border-b-0">
+                      <td className="px-2 py-1.5 sm:px-3">{row.point}</td>
+                      <td className="whitespace-nowrap px-2 py-1.5 sm:px-3">{row.height}</td>
+                      <td className="px-2 py-1.5 sm:px-3 text-right">{row.ours}</td>
+                      <td className="px-2 py-1.5 sm:px-3 text-right">{row.glaser}</td>
+                      <td className="px-2 py-1.5 sm:px-3 text-right">{row.difference}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              At 10 m we agree within half a point. At 2 m two spots read 6 to 8 points
+              lower. Results at 2 m are very sensitive to exactly which 5 to 20 m pixel a
+              point falls on, and Glaser simulate 19 years against our one. Malapert is
+              not checked, because we found no open published value for it.
+            </p>
+            <p className="text-muted-foreground">
+              Sources:{" "}
+              <a
+                href="https://doi.org/10.1016/j.icarus.2014.08.013"
+                target="_blank"
+                rel="noreferrer"
+                className="text-bright underline underline-offset-2"
+              >
+                Glaser et al. 2014, Icarus 243
+              </a>
+              ,{" "}
+              <a
+                href="https://elib.dlr.de/94242"
+                target="_blank"
+                rel="noreferrer"
+                className="text-bright underline underline-offset-2"
+              >
+                Glaser et al. 2014, EPSC abstract
+              </a>
+              .
+            </p>
           </Part>
 
           <Part title="What it does not tell you">
@@ -204,7 +269,7 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 It is geometry only: when the Sun and Earth are above the ground. It is not
                 a power budget, a temperature model or a radio link budget.
               </li>
-              <li>It covers 2027 only, one sample per hour, in UTC.</li>
+              <li>It covers 2027 to 2030, one sample per hour, in UTC.</li>
               <li>
                 Past landings and custom points use a smooth Moon with no terrain, so they
                 are shown apart and never ranked against the south pole sites.

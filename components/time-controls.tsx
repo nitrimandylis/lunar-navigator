@@ -1,9 +1,9 @@
 import { Pause, Play } from "lucide-react";
 
-import { DAYS_IN_MONTH, HOURS_PER_DAY, firstDayOfMonth, formatHour } from "@/lib/time";
+import { HOURS_PER_DAY, daysInMonth, firstDayOfMonth, formatHour } from "@/lib/time";
 
 export type TimeControlsProps = {
-  // The month on screen. 0 = January. The slider covers its hours.
+  // The month on screen. 0 = January 2027. The slider covers its hours.
   visibleMonth: number;
   // Hour index counted from 2027-01-01 00:00 UTC.
   selectedHour: number;
@@ -23,7 +23,7 @@ export function TimeControls({
   onChangeHour,
 }: TimeControlsProps) {
   const firstHour = firstDayOfMonth(visibleMonth) * HOURS_PER_DAY;
-  const lastHour = firstHour + DAYS_IN_MONTH[visibleMonth] * HOURS_PER_DAY - 1;
+  const lastHour = firstHour + daysInMonth(visibleMonth) * HOURS_PER_DAY - 1;
 
   return (
     <div className="flex items-center gap-3">

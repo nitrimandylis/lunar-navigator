@@ -6,7 +6,7 @@ import {
   yTicks,
   type Body,
 } from "@/lib/clearance";
-import { DAYS_IN_MONTH, HOURS_PER_DAY, firstDayOfMonth } from "@/lib/time";
+import { HOURS_PER_DAY, daysInMonth, firstDayOfMonth } from "@/lib/time";
 
 export type ClearanceChartsProps = {
   // The selected site, or null when nothing is selected.
@@ -48,7 +48,7 @@ function ClearanceChart({
   visibleMonth: number;
   selectedHour: number;
 }) {
-  const dayCount = DAYS_IN_MONTH[visibleMonth];
+  const dayCount = daysInMonth(visibleMonth);
   const startHour = firstDayOfMonth(visibleMonth) * HOURS_PER_DAY;
   const endHour = startHour + dayCount * HOURS_PER_DAY;
 

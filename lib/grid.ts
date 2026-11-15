@@ -2,7 +2,7 @@
 
 import type { Site } from "./data.ts";
 import { distanceKm } from "./geometry.ts";
-import { DAYS_IN_MONTH, HOURS_PER_DAY, firstDayOfMonth, formatHour } from "./time.ts";
+import { HOURS_PER_DAY, daysInMonth, firstDayOfMonth, formatHour } from "./time.ts";
 
 // How strong a lane is drawn, from 0 to 1. No hours gives 0, so an empty lane
 // stays empty. Any hours at all give at least MIN_LANE_OPACITY, so one hour of
@@ -31,12 +31,12 @@ export function shortSiteName(name: string): string {
   return name;
 }
 
-// The day-of-year numbers of every day in a month, in order.
-// February (month 1) gives [31, 32, ..., 58].
+// The day indexes of every day in a month, in order (see lib/time.ts).
+// February 2027 (month 1) gives [31, 32, ..., 58].
 export function daysOfMonth(month: number): number[] {
   const firstDay = firstDayOfMonth(month);
   const days: number[] = [];
-  for (let i = 0; i < DAYS_IN_MONTH[month]; i++) {
+  for (let i = 0; i < daysInMonth(month); i++) {
     days.push(firstDay + i);
   }
   return days;
@@ -124,13 +124,13 @@ export function pairPartnerId(siteId: string, pairs: string[][]): string | null 
 }
 
 // How strong the two lanes of a month chip are: that month's hours divided
-// by all the hours in the month. month is 0 for January.
+// by all the hours in the month. month is 0 for January 2027.
 export function monthLaneStrengths(
   month: number,
   sunHours: number,
   earthHours: number,
 ): { power: number; comms: number } {
-  const hoursInMonth = DAYS_IN_MONTH[month] * HOURS_PER_DAY;
+  const hoursInMonth = daysInMonth(month) * HOURS_PER_DAY;
   return {
     power: laneOpacity(sunHours, hoursInMonth),
     comms: laneOpacity(earthHours, hoursInMonth),

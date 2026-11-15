@@ -20,6 +20,7 @@ import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import { TourCard } from "@/components/tour-card";
+import { YearPicker } from "@/components/year-picker";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -27,27 +28,34 @@ import {
   type SiteRow,
 } from "@/lib/app-types";
 import { customSiteHourly, summarizeDays } from "@/lib/custom-site";
-import type {
-  DaySummary,
-  Ephemeris,
-  Site,
-  SiteHourly,
-  SiteSummary,
+import {
+  dataFolder,
+  joinEphemeris,
+  joinHourly,
+  type DaySummary,
+  type Ephemeris,
+  type Site,
+  type SiteHourly,
+  type SiteSummary,
 } from "@/lib/data";
 import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
 import { parseShareQuery } from "@/lib/share";
 import type { SortKey } from "@/lib/sort";
 import {
-  HOURS_IN_YEAR,
   HOURS_PER_DAY,
-  YEAR,
+  MONTHS_PER_YEAR,
+  TOTAL_HOURS,
+  YEARS,
   firstDayOfMonth,
+  firstMonthOfYear,
   monthOfHour,
   moveHourToMonth,
   stepHour,
+  yearOfMonth,
 } from "@/lib/time";
 import { TOUR_STEPS } from "@/lib/tour";
+import { MISSION_PRESETS } from "@/lib/windows";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -57,6 +65,17 @@ async function fetchJson(path: string): Promise<unknown> {
     throw new Error("Could not load " + path + " (status " + response.status + ")");
   }
   return response.json();
+}
+
+// Fetches the same file for every year and returns the parts in year order.
+// file is a path inside a year's folder, for example "summary/<id>.json".
+async function fetchEveryYear(file: string): Promise<unknown[]> {
+  return Promise.all(YEARS.map((year) => fetchJson(dataFolder(year) + file)));
+}
+
+// The Sun and Earth sub-points for every hour of every year, as one file.
+async function fetchEphemeris(): Promise<Ephemeris> {
+  return joinEphemeris((await fetchEveryYear("ephemeris.json")) as Ephemeris[]);
 }
 
 // How long one hour of data stays on screen while time is playing. At 80 ms
@@ -157,6 +176,8 @@ export function Navigator() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   // The mission planner is open.
   const [isPlannerOpen, setIsPlannerOpen] = useState(false);
+  // The mission preset the planner opens on.
+  const [plannerPresetId, setPlannerPresetId] = useState(MISSION_PRESETS[0].id);
   // The step of the guided tour on screen, or null when the tour is closed.
   const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
   // The panel on screen below lg. It opens on the selected site, so a visitor
@@ -178,7 +199,9 @@ export function Navigator() {
     setFailedHourlyIds((previous) => previous.filter((id) => id !== siteId));
 
     try {
-      const hourly = (await fetchJson("/data/sites/" + siteId + ".json")) as SiteHourly;
+      // One file per year, joined into one timeline.
+      const parts = (await fetchEveryYear("sites/" + siteId + ".json")) as SiteHourly[];
+      const hourly = joinHourly(parts);
       setHourlyBySite((previous) => ({ ...previous, [siteId]: hourly }));
     } catch {
       // Forget the request so a later click can try again, and say it failed.
@@ -194,18 +217,25 @@ export function Navigator() {
     async function loadSitesAndSummaries() {
       try {
         const loadedSites = (await fetchJson("/data/sites.json")) as Site[];
-        const summaryFiles = (await Promise.all(
-          loadedSites.map((site) => fetchJson("/data/summary/" + site.id + ".json")),
-        )) as SiteSummary[];
+        // For each site, one summary file per year.
+        const summaryParts = (await Promise.all(
+          loadedSites.map((site) => fetchEveryYear("summary/" + site.id + ".json")),
+        )) as SiteSummary[][];
 
+        // Put each site's years one after the other, so day 0 is 1 January
+        // 2027 and the days run on to the end of the last year.
         const loadedSummaries: Record<string, DaySummary[]> = {};
-        for (const file of summaryFiles) {
-          loadedSummaries[file.id] = file.days;
+        for (const parts of summaryParts) {
+          let days: DaySummary[] = [];
+          for (const part of parts) {
+            days = days.concat(part.days);
+          }
+          loadedSummaries[parts[0].id] = days;
         }
 
         // The reference landings have no data files. Work out their hours
         // from the ephemeris, the same way as a custom point.
-        const ephemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        const ephemeris = await fetchEphemeris();
         const referenceHourly: Record<string, Hourly> = {};
         for (const site of REFERENCE_SITES) {
           const hourly = customSiteHourly(site.lat, site.lon, ephemeris);
@@ -253,6 +283,18 @@ export function Navigator() {
         } else if (firstRows.length > 0) {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
+        }
+
+        // "?plan=rover" opens the planner on load. The sites state is not
+        // set yet at this point, so the hourly data is asked for from the
+        // loaded list. The tour and play are always off on load, so this
+        // does not need the rest of openPlanner.
+        if (shared.planPresetId !== null) {
+          setPlannerPresetId(shared.planPresetId);
+          setIsPlannerOpen(true);
+          for (const site of loadedSites) {
+            requestHourly(site.id);
+          }
         }
       } catch {
         if (!wasCancelled) {
@@ -309,14 +351,19 @@ export function Navigator() {
     setSelectedHour(moveHourToMonth(selectedHour, month));
   }
 
+  // Showing another year keeps the month of the year: May 2027 becomes May 2029.
+  function changeYear(year: number) {
+    changeMonth(firstMonthOfYear(year) + (visibleMonth % MONTHS_PER_YEAR));
+  }
+
   // While playing, move one hour forward every PLAY_STEP_MS. Each new hour
-  // starts the next wait, and the last hour of the year stops the play.
+  // starts the next wait, and the last hour of the data stops the play.
   useEffect(() => {
     if (!isPlaying) {
       return;
     }
     const timer = setTimeout(() => {
-      if (selectedHour >= HOURS_IN_YEAR - 1) {
+      if (selectedHour >= TOTAL_HOURS - 1) {
         setIsPlaying(false);
       } else {
         setSelectedHour(selectedHour + 1);
@@ -407,12 +454,14 @@ export function Navigator() {
 
   // The planner compares every site hour by hour, so opening it asks for the
   // hourly data of all of them. Time stops playing while it is open, and the
-  // guided tour closes.
-  function openPlanner() {
+  // guided tour closes. siteList is passed in because on page load the
+  // sites state is still empty.
+  function openPlanner(presetId: string, siteList: Site[]) {
     setTourStepIndex(null);
     setIsPlaying(false);
+    setPlannerPresetId(presetId);
     setIsPlannerOpen(true);
-    for (const site of sites) {
+    for (const site of siteList) {
       requestHourly(site.id);
     }
   }
@@ -427,7 +476,7 @@ export function Navigator() {
 
     try {
       if (ephemerisCache.current === null) {
-        ephemerisCache.current = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        ephemerisCache.current = await fetchEphemeris();
       }
       const ephemeris = ephemerisCache.current;
 
@@ -533,7 +582,7 @@ export function Navigator() {
       {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
       <button
         type="button"
-        onClick={openPlanner}
+        onClick={() => openPlanner(MISSION_PRESETS[0].id, sites)}
         className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
       >
         Plan a mission
@@ -571,9 +620,7 @@ export function Navigator() {
             isTourOpen && tourTarget !== "months" && TOUR_DIM,
           )}
         >
-          <span className="font-mono text-sm tabular-nums text-muted-foreground">
-            {YEAR}
-          </span>
+          <YearPicker visibleYear={yearOfMonth(visibleMonth)} onChangeYear={changeYear} />
           <MonthChips
             visibleMonth={visibleMonth}
             selectedRow={selectedRow}
@@ -809,8 +856,9 @@ export function Navigator() {
           rows={rows}
           hourlyBySite={hourlyBySite}
           selectedHour={selectedHour}
-          onSelect={selectSiteAndHour}
+          onSelect={pickSiteAndHour}
           onClose={() => setIsPlannerOpen(false)}
+          initialPresetId={plannerPresetId}
         />
       )}
 
