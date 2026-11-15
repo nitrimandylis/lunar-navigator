@@ -49,17 +49,17 @@ test("a month index counts months from January 2027", () => {
   assert.equal(yearOfMonth(0), 2027);
   assert.equal(yearOfMonth(11), 2027);
   assert.equal(yearOfMonth(12), 2028);
-  assert.equal(yearOfMonth(MONTH_COUNT - 1), 2030);
+  assert.equal(yearOfMonth(MONTH_COUNT - 1), 2040);
   assert.equal(firstMonthOfYear(2027), 0);
   assert.equal(firstMonthOfYear(2029), 24);
   assert.equal(monthName(0), "Jan");
   assert.equal(monthName(13), "Feb");
 });
 
-test("the four years add up to 1461 days", () => {
-  // 365 + 366 + 365 + 365.
-  assert.equal(TOTAL_DAYS, 1461);
-  assert.equal(TOTAL_HOURS, 1461 * 24);
+test("2027 to 2040 add up to 5114 days", () => {
+  // 14 years of 365 days, plus the leap days of 2028, 2032, 2036 and 2040.
+  assert.equal(TOTAL_DAYS, 5114);
+  assert.equal(TOTAL_HOURS, 5114 * 24);
 });
 
 // Known answer: the ephemeris files from JPL Horizons hold one sample per
@@ -80,7 +80,7 @@ test("the calendar carries on past 2027", () => {
   assert.equal(firstDayOfMonth(12), 365);
   assert.equal(formatHour(365 * 24), "1 Jan 2028, 00:00 UTC");
   assert.equal(formatHour((365 + 31 + 28) * 24 + 7), "29 Feb 2028, 07:00 UTC");
-  assert.equal(formatHour(TOTAL_HOURS - 1), "31 Dec 2030, 23:00 UTC");
+  assert.equal(formatHour(TOTAL_HOURS - 1), "31 Dec 2040, 23:00 UTC");
   assert.equal(monthOfHour(365 * 24), 12);
   assert.equal(monthOfHour(TOTAL_HOURS - 1), MONTH_COUNT - 1);
   // 31 Jan 2028 05:00 moved to February 2028 gives the 29th, a leap day.

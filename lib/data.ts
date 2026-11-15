@@ -89,7 +89,7 @@ export type MonthTotals = {
 };
 
 // Where a year's files live. 2027 sits directly in /data/. Each later year
-// has its own folder: /data/2028/, /data/2029/, /data/2030/.
+// has its own folder: /data/2028/ up to /data/2040/.
 export function dataFolder(year: number): string {
   if (year === FIRST_YEAR) {
     return "/data/";

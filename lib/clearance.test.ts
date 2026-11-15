@@ -114,10 +114,10 @@ test("countdownText picks set or rise and handles no change", () => {
   assert.equal(countdownText(visible, 0, "Sunset", "Sunrise"), "Sunset in 2 h");
   assert.equal(
     countdownText(visible, 2, "Sunset", "Sunrise"),
-    "No sunrise before the end of 2030",
+    "No sunrise before the end of 2040",
   );
   assert.equal(
     countdownText([1, 1], 0, "Earthset", "Earthrise"),
-    "No Earthset before the end of 2030",
+    "No Earthset before the end of 2040",
   );
 });

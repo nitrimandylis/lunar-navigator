@@ -29,10 +29,10 @@ function day(date: string, sunHours: number, earthHours: number, bothHours: numb
   };
 }
 
-test("totalsByMonth returns 48 months of zeros for no days", () => {
+test("totalsByMonth returns 168 months of zeros for no days", () => {
   const totals = totalsByMonth([]);
-  // 4 years of 12 months.
-  assert.equal(totals.length, 48);
+  // 14 years of 12 months.
+  assert.equal(totals.length, 168);
   for (const monthTotals of totals) {
     assert.deepEqual(monthTotals, { sunHours: 0, earthHours: 0, bothHours: 0 });
   }
@@ -161,7 +161,7 @@ test("joinEphemeris puts the years one after the other", () => {
 });
 
 // Known answer: the real files of one site, joined, cover every hour of the
-// four years, and the first hour of 2028 sits right after the last of 2027.
+// years, and the first hour of 2028 sits right after the last of 2027.
 test("the real yearly files of a site join into one timeline", () => {
   const parts: SiteHourly[] = [];
   const ephemerisParts: Ephemeris[] = [];
