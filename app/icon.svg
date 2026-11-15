@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Moon over a lunar horizon, with Earth (comms blue) above it. Colours from app/globals.css. -->
+  <rect width="32" height="32" rx="7" fill="#0f1a21"/>
+  <circle cx="14" cy="17" r="9" fill="#d7d7d7"/>
+  <circle cx="17.5" cy="15" r="8" fill="#0f1a21"/>
+  <circle cx="24" cy="8" r="3.2" fill="#4f8db0"/>
+  <rect x="4" y="25" width="24" height="2" rx="1" fill="#fe7743"/>
+</svg>
