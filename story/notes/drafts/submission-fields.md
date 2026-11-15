@@ -5,7 +5,7 @@
 Revised: 15 November 2026. Evidence snapshot: 10aa615, with Nick's latest coverage confirmation.
 Only the section between **DRAFT TEXT - START** and **END OF DRAFT TEXT** is proposed form content. Square brackets identify final identifiers/links still needed. Notes and remaining questions follow the boundary.
 
-The [summary](high-level-summary.md) and [detailed description](detailed-description.md) have their own files. The [slide-deck placeholder](slide-deck.md) remains empty.
+The [summary](high-level-summary.md) and [detailed description](detailed-description.md) have their own files.
 
 ---
 
@@ -148,6 +148,6 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 - Test final links while signed out, record a final revision and capture real screenshots. Replace all identifiers/link placeholders and obtain team agreement.
 - Apply [N02](../sources.md#n02), p. 8, for applicable AI indicators/metadata. The hidden form response does not replace visible project acknowledgements.
 - Make legal/original-work declarations only when accurate. Complete NASA's actual submission action and check confirmation.
-- The chosen demo is an English deck of at most seven slides; no video is being prepared. The empty Markdown file is a placeholder.
+- The chosen demo is an English deck of at most seven slides; no video is being prepared.
 
 Field/rule basis: [N02](../sources.md#n02), pp. 6-9 and 12; [N05](../sources.md#n05); [N01](../sources.md#n01), pp. 5-7; [submission-page guide](../submission-page-guide.md). The live form's required fields, options and limits govern the final hand-in.
