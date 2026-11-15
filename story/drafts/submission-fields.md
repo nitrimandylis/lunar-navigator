@@ -113,15 +113,23 @@ Please add `Answer - name, date:` below the relevant question. Leave the draft t
 
 2. **S2 - Trim (nitrimandylis):** What stable public website URL should judges open? Has it been checked while signed out, including shared links and CSV export? Please give the checked revision/date. Full-range implementation is recorded in F09; final screenshots are requested once as D1 in the detailed description.
 
-   Answer - Trim, date: Pending.
+   Answer - Trim, 2026-11-15: https://www.moonfrom.earth/ (the bare domain redirects to it). Checked signed out on 15 November 2026 with `main` at 799f550, in a headless Chromium with no cookies or login, run by Claude Code in my session. The page returns HTTP 200 and loads its data. Links in the Copy link format (`?site=<id>&time=<UTC hour>`) open the named site and hour: tested for `shackleton-shadow` at 2027-05-16T07:00Z and `shackleton-ridge` at 2040-05-16T07:00Z. Download CSV saved `shackleton-ridge-2027-2040.csv` with 122,736 hourly rows plus a header. Not tested: the Copy link button's own clipboard write, and the phone layout.
+
+   Deck link, not live yet: it will be https://github.com/nitrimandylis/lunar-navigator/blob/main/public/deck.pdf once the deck PR merges, with https://www.moonfrom.earth/deck.pdf as a second address for the same file.
 
 3. **S3 - Trim (nitrimandylis):** Are the app's final font, icon, package and other external-asset credits complete, and have applicable permissions/licence conditions been checked? Please name any resources added since the handoff. The source register now includes the supplied NASA-data and paper credits; this question concerns remaining final attribution confirmation.
 
-   Answer - Trim, date: Pending.
+   Answer - Trim, 2026-11-15: Nothing was added to the app since the handoff: `package.json` has not changed since 3a065ee, and A01 to A05 still cover the app's fonts, crater names, landing coordinates and map relief. Icons come from lucide-react (ISC). Licences declared in the packages' own `package.json` files: next, react, react-dom, @base-ui/react, shadcn, cn, tw-animate-css and tailwindcss are MIT, class-variance-authority is Apache-2.0, lucide-react is ISC. That is a read of the declared licence fields, not a legal audit, and I did not re-read the two font licence pages today. The repository itself is AGPL-3.0.
+
+   Added for the slide deck, outside the app: the team logo, generated with GPT Image 2 (see S4). The deck text is set in Helvetica Neue, a macOS system font, embedded as subsets in the PDF. The deck is built with pptxgenjs (MIT) and sharp (Apache-2.0), converted to PDF with LibreOffice, and its screenshots come from the live site through Playwright. Its layout helpers come from a slide kit I made for school in October 2026, before the hackathon. The kit only draws text boxes and images. No project code, data or content comes from it. Everything else in the deck is our own screenshots and text.
 
 4. **S4 - Trim (app/review workflow) and Gio (data work):** For your respective work, is the AI-use account above accurate, what human checking actually took place, and where are the required descriptive acknowledgements/metadata? Add any later assistance; do not invent model versions or imply that a review happened when it did not. A runtime AI provider belongs here only if that feature is delivered.
 
-   Answer - Trim, date: Pending.
+   Answer - Trim, 2026-11-15: The account above is accurate for the app and the review workflow, with one correction and one addition. Correction: "no AI-generated images" is no longer true. The team logo was generated with GPT Image 2. It appears only on slide 1 of the deck, with a visible "AI-generated" mark inside the image. Addition: Claude Code built the slide deck with me. It captured the screenshots from the live site, drafted and laid out the slides, and ran the signed-out checks in D1 and S2.
+
+   Human checking that actually took place: for the app, I directed the work and tested each feature in the browser. I did not read all the code, and I relied on the automated tests and the review bot for the rest. The review bot is Claude Code, not a human review. For the deck, I chose the story, the slide split and the wording one decision at a time, and reviewed the rendered slides.
+
+   Model versions: my commits carry no AI trailer, so the repository does not record them. Descriptive acknowledgements: the app's About panel and README do not mention AI assistance yet. The only AI mark in the deliverables is the one on the logo.
 
    Answer - Gio, 2026-11-15: The AI-use account above is accurate for the data work. Claude Code (Anthropic) wrote and ran the data scripts in `data/`, the tests, the documentation and the JSON in `public/data/`, working from my instructions. Several tasks ran in parallel as Claude Code sub-agents, each opening its own PR. The numbers themselves come from NASA JPL Horizons and the LRO LOLA DEM, computed by those scripts and not written by an AI.
 
