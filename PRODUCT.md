@@ -19,8 +19,9 @@ Built now:
   on screen, tinted by the selected site's monthly hours. The four years are one
   timeline of 1461 days, so Play, the slider and the arrow keys run straight from one year
   into the next. Each year's files are loaded and joined in the browser. In the data files a
-  dark spell is cut at the first and last hour of each year, so the verdict line can
-  understate a spell that crosses New Year.
+  dark spell is cut at the first and last hour of each year, so the selected site's day
+  totals are worked out again from its joined hours and a spell that crosses New Year is
+  whole in the verdict line. A spell is still cut at the start of 2027 and the end of 2030.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
