@@ -1,11 +1,16 @@
 // The homepage. It says what the tool is, sends each kind of visitor to the
 // part made for them, and explains where the numbers come from. It is drawn
-// on the server and ships no JavaScript of its own.
+// on the server. Its motion is CSS (app/home-motion.css, the hm- classes),
+// plus one small script for the parts that follow the pointer and the scroll
+// (components/home-motion.tsx).
 
 import { CalendarRange, GraduationCap, Telescope } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
+import { BuddyFigure } from "@/components/buddy";
+import { HomeMotion } from "@/components/home-motion";
 import { CRATERS } from "@/lib/craters";
 import type { DaySummary, Site } from "@/lib/data";
 import { laneOpacity, shortSiteName } from "@/lib/grid";
@@ -14,6 +19,8 @@ import { GLASER_CHECKS, SOURCE_LINKS } from "@/lib/method";
 import { MONTH_NAMES } from "@/lib/time";
 import sitesJson from "@/public/data/sites.json";
 import ribbonJson from "@/public/data/summary/shackleton-ridge.json";
+
+import "./home-motion.css";
 
 const SITES: Site[] = sitesJson;
 
@@ -82,16 +89,13 @@ const STEPS = [
 const TEXT_LINK =
   "text-bright underline decoration-muted-foreground underline-offset-4 hover:decoration-bright";
 
-// One load-in when the page opens: the text rises, then the relief settles.
-// Both start fast and slow down, and both are off when the system asks for
-// reduced motion.
-const LOAD_IN_EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
-const RISE =
-  "animate-in fade-in slide-in-from-bottom-3 duration-600 fill-mode-both motion-reduce:animate-none " +
-  LOAD_IN_EASE;
-const SETTLE =
-  "animate-in fade-in zoom-in-[0.97] duration-900 delay-100 fill-mode-both motion-reduce:animate-none " +
-  LOAD_IN_EASE;
+// The headline, shown one word at a time when the page opens.
+const HEADLINE = "Where to land at the Moon's south pole, and when.";
+
+// A CSS variable for one element: its place in a staggered animation.
+function stagger(name: "--i" | "--d", index: number): CSSProperties {
+  return { [name]: index } as CSSProperties;
+}
 
 export default function Home() {
   // The ribbon: the site's name, the year, and its hours of Sun and of Earth
@@ -121,9 +125,14 @@ export default function Home() {
   const ribbonTotalHours = RIBBON_DAYS.length * HOURS_PER_DAY;
 
   return (
-    <div className="flex flex-col">
-      <header className="flex items-center gap-6 border-b border-line px-4 py-3 lg:px-8">
-        <p className="font-medium text-bright">Lunar Landing Site Navigator</p>
+    <div className="hm-root flex flex-col">
+      <HomeMotion
+        year={Number(ribbonYear)}
+        sunHours={RIBBON_DAYS.map((day) => day.sun_hours)}
+        earthHours={RIBBON_DAYS.map((day) => day.earth_hours)}
+      />
+      <header className="hm-header flex items-center gap-6 border-b border-line px-4 py-3 lg:px-8">
+        <p className="font-medium text-bright">MoonFromEarth</p>
         {/* Hidden on a phone, where the same button sits just below. */}
         <nav className="ml-auto flex items-center gap-5 text-sm max-sm:hidden">
           <a href="#how" className="hover:text-bright">
@@ -141,21 +150,28 @@ export default function Home() {
       <main>
         {/* Hero. From lg up the relief hangs off the right edge, cut by the
             section. Below lg it sits under the text, with its lower part cut. */}
-        <section className="relative overflow-hidden border-b border-line lg:flex lg:min-h-[44rem] lg:items-center">
-          <div className={"relative z-10 px-4 pt-12 pb-10 lg:w-[42vw] lg:max-w-[36rem] lg:px-8 lg:py-20 " + RISE}>
+        <section className="hm-hero relative overflow-hidden border-b border-line lg:flex lg:min-h-[44rem] lg:items-center">
+          <canvas aria-hidden="true" className="hm-stars" />
+          <div className="relative z-10 px-4 pt-12 pb-10 lg:w-[42vw] lg:max-w-[36rem] lg:px-8 lg:py-20">
             <h1 className="text-[clamp(2.5rem,4.6vw,4.25rem)] leading-[1.04] font-medium tracking-tight text-bright">
-              Where to land at the Moon&apos;s south pole, and when.
+              {HEADLINE.split(" ").map((word, index) => (
+                <span key={index}>
+                  <span className="hm-word">
+                    <span style={stagger("--i", index)}>{word}</span>
+                  </span>{" "}
+                </span>
+              ))}
             </h1>
-            <p className="mt-6 max-w-[34rem] text-lg leading-relaxed">
+            <p className="hm-rise-1 mt-6 max-w-[34rem] text-lg leading-relaxed">
               Compare landing sites by{" "}
               <span className="text-power">hours of sunlight for power</span> and{" "}
               <span className="text-comms">hours of Earth in view for radio</span>. Every
               hour from 2027 to 2040, with real terrain.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="hm-rise-2 mt-8 flex flex-wrap gap-3">
               <Link
                 href="/app"
-                className="flex h-11 items-center rounded-md bg-bright px-5 font-medium text-background transition-[filter,transform] duration-150 ease-out hover:brightness-90 active:scale-[0.97] motion-reduce:transition-none"
+                className="hm-sheen flex h-11 items-center rounded-md bg-bright px-5 font-medium text-background transition-[filter,transform] duration-150 ease-out hover:brightness-90 active:scale-[0.97] motion-reduce:transition-none"
               >
                 Open the navigator
               </Link>
@@ -165,6 +181,18 @@ export default function Home() {
               >
                 Take the tour
               </Link>
+              {/* The guide from the tour, standing by a line that starts it. */}
+              <Link
+                href="/app?tour=1"
+                className="group flex basis-full items-center gap-3 pt-3 text-sm"
+              >
+                <span aria-hidden="true" className="block w-11 shrink-0">
+                  <BuddyFigure looksUp={false} isGreeting={false} />
+                </span>
+                <span className="underline decoration-muted-foreground underline-offset-4 group-hover:decoration-bright">
+                  New here? Selini, our guide, walks you through it in five steps.
+                </span>
+              </Link>
             </div>
           </div>
 
@@ -172,7 +200,9 @@ export default function Home() {
             {/* Below lg this box cuts off the lower part of the relief. */}
             <div className="max-lg:h-[82vw] max-lg:overflow-hidden">
               <div className="relative aspect-square max-lg:mx-[-8%] lg:absolute lg:top-1/2 lg:right-[-6vw] lg:w-[min(60vw,54rem)] lg:-translate-y-1/2">
-                <div className={"absolute inset-0 " + SETTLE}>
+                {/* hm-tilt leans with the pointer; hm-settle plays once on load. */}
+                <div className="hm-tilt absolute inset-0">
+                <div className="hm-settle absolute inset-0">
                   <Image
                     src="/data/basemap.png"
                     alt="Shaded relief of the Moon's south pole, with craters, seen from above."
@@ -181,7 +211,10 @@ export default function Home() {
                     loading="eager"
                     className="opacity-70"
                   />
-                  <svg viewBox={RELIEF_VIEW_BOX} className="absolute inset-0 size-full">
+                  <div aria-hidden="true" className="hm-light">
+                    <i />
+                  </div>
+                  <svg viewBox={RELIEF_VIEW_BOX} className="hm-map absolute inset-0 size-full">
                     <circle
                       aria-hidden="true"
                       cx={0}
@@ -208,7 +241,7 @@ export default function Home() {
                               cx={0}
                               cy={0}
                               r={ringRadius}
-                              className="fill-none stroke-bright/45"
+                              className="hm-ring fill-none stroke-bright/45"
                               strokeWidth={0.4}
                               strokeDasharray="1.5 1.5"
                             />
@@ -255,7 +288,7 @@ export default function Home() {
                       })}
                     </g>
 
-                    {SITES.map((site) => {
+                    {SITES.map((site, siteIndex) => {
                       const spot = projectForMap(site.lat, site.lon, RELIEF_RADIUS, RELIEF_EDGE_LAT);
                       const isMission = site.mission !== undefined;
                       return (
@@ -263,7 +296,9 @@ export default function Home() {
                           key={site.id}
                           href={"/app?site=" + site.id}
                           aria-label={"Open " + site.name}
-                          className="group outline-none"
+                          data-name={site.name}
+                          style={stagger("--i", siteIndex)}
+                          className="hm-site group outline-none"
                         >
                           <title>{site.name}</title>
                           {/* A bigger, unseen circle so the dot is easy to hit. */}
@@ -278,6 +313,7 @@ export default function Home() {
                             strokeDasharray="1.5 1.5"
                           />
                           {/* Real mission targets are ringed, as on the map in the tool. */}
+                          {isMission && <circle cx={spot.x} cy={spot.y} r={1.7} className="hm-pulse" />}
                           {isMission && (
                             <circle
                               cx={spot.x}
@@ -291,42 +327,49 @@ export default function Home() {
                             cx={spot.x}
                             cy={spot.y}
                             r={1.7}
-                            className="fill-power stroke-background group-hover:fill-bright"
+                            className="hm-dot fill-power stroke-background group-hover:fill-bright"
                             strokeWidth={0.4}
                           />
                         </Link>
                       );
                     })}
                   </svg>
+                  <div aria-hidden="true" className="hm-sun">
+                    <i />
+                  </div>
+                </div>
                 </div>
               </div>
             </div>
-            <figcaption className="z-10 px-4 py-3 text-xs text-muted-foreground lg:absolute lg:bottom-5 lg:left-8 lg:max-w-[34rem] lg:p-0">
+            <figcaption className="hm-caption z-10 px-4 py-3 text-xs text-muted-foreground lg:absolute lg:bottom-5 lg:left-8 lg:max-w-[34rem] lg:p-0">
               LOLA terrain out to 82° S, seen from above with Earth towards the top. It
               is lit by a made-up light, not the real Sun. Each dot is a site in the
-              tool. Ringed dots are real mission targets.
+              tool. Ringed dots are real mission targets. The circling Sun is an
+              illustration of how it skims the horizon, not a real position.
             </figcaption>
           </figure>
         </section>
 
         {/* A year of real data for one site, drawn the way the tool draws a
             day: an orange lane for the Sun and a blue lane for Earth. */}
-        <section className="flex flex-col gap-3 border-b border-line bg-panel/50 px-4 py-6 lg:px-8">
+        <section className="hm-strip flex flex-col gap-3 border-b border-line bg-panel/50 px-4 py-6 lg:px-8">
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-1 text-sm">
             <p className="text-bright">
               {ribbonSiteName}, every day of {ribbonYear}
             </p>
             <p className="lg:ml-auto">
-              <span className="text-power">
+              <span className="hm-count text-power" data-count={Math.round(ribbonSunHours)}>
                 {Math.round(ribbonSunHours).toLocaleString("en-US")}
               </span>{" "}
               hours of Sun and{" "}
-              <span className="text-comms">
+              <span className="hm-count text-comms" data-count={Math.round(ribbonEarthHours)}>
                 {Math.round(ribbonEarthHours).toLocaleString("en-US")}
               </span>{" "}
               with Earth in view, out of {ribbonTotalHours.toLocaleString("en-US")}
             </p>
           </div>
+          {/* hm-chart holds the marker that follows the pointer. */}
+          <div className="hm-chart">
           <svg
             role="img"
             aria-label={
@@ -360,12 +403,14 @@ export default function Home() {
               );
             })}
           </svg>
+          <i aria-hidden="true" className="hm-scrub" />
+          </div>
           {/* Each month name is as wide as its days. */}
-          <div aria-hidden="true" className="flex text-xs text-muted-foreground">
+          <div aria-hidden="true" className="hm-months flex text-xs text-muted-foreground">
             {daysInMonth.map((days, monthIndex) => (
               <span
                 key={monthIndex}
-                style={{ flexGrow: days }}
+                style={{ flexGrow: days, ...stagger("--d", monthIndex) }}
                 className="basis-0 border-l border-line pl-1 max-sm:overflow-hidden"
               >
                 {MONTH_NAMES[monthIndex]}
@@ -376,16 +421,18 @@ export default function Home() {
 
         {/* One door per kind of visitor. The whole door is the link. */}
         <section className="grid divide-y divide-line border-b border-line lg:grid-cols-3 lg:divide-x lg:divide-y-0">
-          {DOORS.map((door) => (
+          {DOORS.map((door, doorIndex) => (
             <Link
               key={door.audience}
               href={door.href}
-              className="group flex flex-col gap-3 px-4 py-8 transition-colors duration-150 ease-out hover:bg-panel motion-reduce:transition-none lg:px-8 lg:py-10"
+              data-reveal
+              style={stagger("--d", doorIndex)}
+              className="hm-card group flex flex-col gap-3 px-4 py-8 transition-colors duration-150 ease-out hover:bg-panel motion-reduce:transition-none lg:px-8 lg:py-10"
             >
               <door.Icon aria-hidden="true" strokeWidth={1.5} className="size-6 text-power" />
               <h2 className="text-xl font-medium text-bright">{door.audience}</h2>
               <p className="max-w-[34rem] leading-relaxed">{door.text}</p>
-              <span className="mt-auto self-start pt-2 text-bright underline decoration-muted-foreground underline-offset-4 group-hover:decoration-power">
+              <span className="hm-arrow mt-auto self-start pt-2 text-bright underline decoration-muted-foreground underline-offset-4 group-hover:decoration-power">
                 {door.linkText}
               </span>
             </Link>
@@ -396,24 +443,26 @@ export default function Home() {
           id="how"
           className="grid gap-x-12 gap-y-6 border-b border-line px-4 py-12 lg:grid-cols-[14rem_minmax(0,44rem)] lg:px-8 lg:py-16"
         >
-          <h2 className="text-2xl font-medium text-bright">How it works</h2>
+          <h2 data-reveal className="text-2xl font-medium text-bright">
+            How it works
+          </h2>
           <div className="flex flex-col gap-8 leading-relaxed">
             {/* The steps are a sequence, so a line joins each number to the next. */}
             <ol className="flex flex-col">
               {STEPS.map((step, index) => (
-                <li key={step} className="flex gap-5">
+                <li key={step} data-reveal className="flex gap-5">
                   <div className="flex flex-col items-center">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-sm border border-line bg-panel font-mono text-sm text-bright">
+                    <span className="hm-num flex size-8 shrink-0 items-center justify-center rounded-sm border border-line bg-panel font-mono text-sm text-bright">
                       {index + 1}
                     </span>
-                    {index < STEPS.length - 1 && <span className="w-px flex-1 bg-line" />}
+                    {index < STEPS.length - 1 && <span className="hm-rail w-px flex-1 bg-line" />}
                   </div>
                   <p className="pt-1 pb-6">{step}</p>
                 </li>
               ))}
             </ol>
 
-            <p>
+            <p data-reveal>
               The Moon is tilted by only about 1.5 degrees, so near the south pole the Sun
               circles the horizon all month, a degree or two up. A hill a few kilometres
               away is enough to block it, which is why two places 2 km apart can have
@@ -422,13 +471,13 @@ export default function Home() {
               half of each month and drops it below for the rest.
             </p>
 
-            <p className="text-muted-foreground">
+            <p data-reveal className="text-muted-foreground">
               This is geometry only, not a power, temperature or radio budget. Sites
               marked computed are points our own terrain scan found, not official
               landing sites.
             </p>
 
-            <div>
+            <div data-reveal>
               <details className="border-t border-line py-4">
                 <summary className="cursor-pointer text-bright">
                   Checked against published numbers
@@ -511,11 +560,13 @@ export default function Home() {
         id="sources"
         className="grid gap-x-12 gap-y-6 px-4 py-12 lg:grid-cols-[14rem_minmax(0,44rem)] lg:px-8 lg:py-16"
       >
-        <h2 className="text-2xl font-medium text-bright">Sources</h2>
+        <h2 data-reveal className="text-2xl font-medium text-bright">
+          Sources
+        </h2>
         <div className="flex flex-col gap-8 text-sm leading-relaxed">
           <ul className="flex flex-col gap-2">
-            {SOURCE_LINKS.map((link) => (
-              <li key={link.href}>
+            {SOURCE_LINKS.map((link, linkIndex) => (
+              <li key={link.href} data-reveal style={stagger("--d", linkIndex)}>
                 <a href={link.href} target="_blank" rel="noreferrer" className={TEXT_LINK}>
                   {link.label}
                 </a>
@@ -523,14 +574,14 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground">
+          <p data-reveal className="text-muted-foreground">
             Built for the NASA Space Apps Challenge 2026, Athens. The{" "}
             <a href="/deck.pdf" className={TEXT_LINK}>
               slide deck
             </a>{" "}
             is a PDF. The code is open under the AGPL-3.0 licence.
           </p>
-          <p className="text-muted-foreground">
+          <p data-reveal className="text-muted-foreground">
             We built this with AI coding tools: Claude Code wrote most of the code and tests
             from our instructions. The numbers come from NASA data and plain arithmetic, not
             from an AI model.

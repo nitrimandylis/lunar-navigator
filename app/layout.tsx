@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lunar Landing Site Navigator",
+  title: "MoonFromEarth",
   description:
     "Compare lunar south pole landing sites by hours of sunlight for power and hours of Earth visibility for comms.",
 };
