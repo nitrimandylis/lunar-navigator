@@ -31,7 +31,10 @@ Only edit files inside folders your human owns.
 | gio  | supergioo0    | `data/` (Python precompute), `public/data/` (JSON out) |
 | koum | FILL_IN       | `story/` (slides, video script, sources) |
 
-Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those by hand.
+Nobody's agent edits `.github/` or `CLAUDE.md`. Trim changes those by hand.
+
+Any agent may edit `AGENTS.md` to keep it true: record a contract change both owners agreed,
+or fix a fact that went stale. Put the edit in the PR for the change it describes.
 
 ## Stack
 
@@ -44,7 +47,14 @@ Nobody's agent edits `.github/`, `AGENTS.md` or `CLAUDE.md`. Trim changes those 
 The data shapes passed between folders. Change only when both owners agree.
 
 `data/build.py` writes the files below to `public/data/`. The app fetches them from `/data/...`.
-They cover calendar year 2027, one sample per hour: 8760 samples.
+They cover calendar years 2027 to 2030, one sample per hour.
+
+- 2027 lives at `/data/sites/<id>.json`, `/data/summary/<id>.json`, `/data/ephemeris.json`.
+- Other years live at `/data/<year>/sites/<id>.json`, `/data/<year>/summary/<id>.json`,
+  `/data/<year>/ephemeris.json`. There is one `sites.json` for all years.
+- `start_utc` is `<year>-01-01T00:00:00Z`. A year has 8760 hours and 365 days, a leap year
+  (2028) 8784 and 366. Never hardcode them: read `count` and `days.length`.
+- The examples below show 2027.
 
 Conventions:
 
@@ -77,6 +87,10 @@ Conventions:
 
 - `mission` is optional. Real mission targets carry it (`"IM-2"`, `"Artemis III candidate"`).
   Computed candidates leave it out.
+- `note` is optional: a short caveat the app shows under the site, for example why a mission
+  region centre gets no Sun.
+- `psr_km` is optional: distance in km to the nearest permanently shadowed region, from
+  LOLA/PGDA.
 
 ### `sites/<id>.json`: hourly series for one site
 
@@ -117,10 +131,10 @@ Conventions:
 }
 ```
 
-365 days, each a UTC day. `both_hours` counts the hours with the Sun and Earth both visible.
+One entry per UTC day of the year (365, or 366 in a leap year). `both_hours` counts the hours with the Sun and Earth both visible.
 `longest_sun_gap_hours` is the whole dark spell that touches that
 day, not just the part inside it, so it can be more than 24. A spell that touches the first
-or last day of 2027 is cut there.
+or last day of the year is cut there.
 
 ### `ephemeris.json`: where the Sun and Earth are overhead, for custom points
 
