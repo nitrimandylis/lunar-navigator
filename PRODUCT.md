@@ -14,8 +14,9 @@ Built now:
 
 - Sites grid: one row per site, two lanes per day (orange power, blue comms), one month at
   a time. Click a day to open its 24 hours; Escape or the close button shuts it.
-- Year and month chips in the header: four year buttons (2027 to 2030) and the 12 months of
-  the year on screen, tinted by the selected site's monthly hours. The four years are one
+- Year picker and month chips in the header: a drop-down list of the years with data (2027
+  to 2030 now, one line per year in `YEARS` in `lib/time.ts`) and the 12 months of the year
+  on screen, tinted by the selected site's monthly hours. The four years are one
   timeline of 1461 days, so Play, the slider and the arrow keys run straight from one year
   into the next. Each year's files are loaded and joined in the browser. In the data files a
   dark spell is cut at the first and last hour of each year, so the verdict line can

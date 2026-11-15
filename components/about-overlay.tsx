@@ -115,8 +115,8 @@ export function AboutOverlay({ onClose }: AboutOverlayProps) {
                 day hour by hour.
               </li>
               <li>
-                <span className="text-bright">Years and months.</span> The buttons at the
-                top change the year and the month. A later launch date means a different month, and often a
+                <span className="text-bright">Years and months.</span> The list and the
+                buttons at the top change the year and the month. A later launch date means a different month, and often a
                 different answer.
               </li>
               <li>
