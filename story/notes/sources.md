@@ -281,7 +281,7 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 
 **Trim's answers for the story questions.** Team-authored handoff, PR #49. **Internal evidence, not a live-site test.**
 
-- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/docs/trim-answers-for-story.md); local path docs/trim-answers-for-story.md.
+- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/docs/trim-answers-for-story.md); now at `story/notes/answers-trim.md`.
 - Answers read, including coordinates, custom-point separation, displayed metrics, original controls, assets and AI assistance. They describe code at 8d9c2e2.
 - Later F05 evidence supersedes the no-imagery, 2027-only and planner-unbuilt statements. Preserve the replies' original dates and verification limits.
 
@@ -289,7 +289,7 @@ The previous source list cited [Codex Cloud](https://developers.openai.com/codex
 
 **Gio's answers for the story questions.** Team-authored data handoff, PR #46. **Internal evidence, not an independent rebuild or live-site test.**
 
-- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/data/ANSWERS-FOR-STORY.md); local path data/ANSWERS-FOR-STORY.md.
+- [Snapshot](https://github.com/nitrimandylis/lunar-navigator/blob/3a065eedbcc39549afe5157bb2572e5eae66c303/data/ANSWERS-FOR-STORY.md); now at `story/notes/answers-gio.md`.
 - Answers read, including data/interface distinctions, the May example, coordinate provenance, tool/AI use and source limits. Most describe 035f289 and 2027.
 - Rights, final links, some human-review details and the original literature check were left unconfirmed. T04-T05/F05 resolve parts of the literature question and update coverage; do not treat every old Not yet confirmed as resolved.
 

@@ -68,7 +68,7 @@ found out why. The full comparison is in [`data/KNOWN-ANSWERS.md`](data/KNOWN-AN
 | `data/` | Python that builds the data from Horizons and LOLA, with its tests and method notes ([`data/README.md`](data/README.md)). |
 | `public/data/` | The built JSON the website reads: one folder per year, 2027 to 2040. |
 | `public/deck.pdf` | The demo deck. |
-| `story/` | [`sources.md`](story/sources.md): the sources we used and credit, and the team's working notes for the submission. |
+| `story/` | [`sources.md`](story/sources.md): everything we used and credit. [`submission.md`](story/submission.md): the project page text. `notes/`: working notes from the weekend. |
 | `docs/` | Screenshots of the live site, taken signed out, in `evidence/`. |
 | `AGENTS.md`, `CLAUDE.md` | The rules our AI coding agents and the review bot read: who owns which folder, and the data contract. |
 | `.github/` | The check and the AI review that run on every pull request. |

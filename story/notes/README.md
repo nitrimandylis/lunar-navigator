@@ -14,4 +14,5 @@ we submitted, read [`../submission.md`](../submission.md).
 | [submission-page-guide.md](submission-page-guide.md) | What goes in each field of the project page |
 | [demo-evidence.md](demo-evidence.md) | Which claims were checked, and how |
 | [sources.md](sources.md) | The dated log behind the drafts: rules read, handoffs between teammates, repository reviews |
+| [answers-trim.md](answers-trim.md), [answers-gio.md](answers-gio.md) | Each builder's answers to the questions in the drafts |
 | [drafts/](drafts/) | Summary, detailed description and remaining fields, with the team's questions and answers |
