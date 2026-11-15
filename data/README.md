@@ -79,7 +79,7 @@ defaults, so only change them to experiment. `--only` leaves `ephemeris.json` an
 Re-run `build.py` whenever `sites.json` or the horizon code changes, and commit the new files
 in `public/data/`. After adding or changing one site, `build.py --only <site id>` is enough.
 
-## Later years (2028, 2029, 2030)
+## Later years (2028 to 2040)
 
 2027 stays exactly where it was (`public/data/sites/`, `summary/`, `ephemeris.json`), and
 `public/data/sites.json` is still the one site list. Each later year has its own folder with the
@@ -91,6 +91,8 @@ public/data/2028/summary/<id>.json    per-day totals (366 days)
 public/data/2028/ephemeris.json       sub-solar / sub-Earth points
 public/data/2029/...                  8760 samples, 365 days
 public/data/2030/...                  8760 samples, 365 days
+public/data/2031/ ... 2040/           same layout; 2032, 2036 and 2040 are leap years (8784 samples, 366 days),
+                                      the others 8760 / 365
 ```
 
 `start_utc` is `<year>-01-01T00:00:00Z`; `count` is 24 x days in that year. Built with, per year
@@ -100,7 +102,12 @@ public/data/2030/...                  8760 samples, 365 days
 data/.venv/Scripts/python data/build.py --out public/data/2028 --start 2028-01-01 --days 366
 data/.venv/Scripts/python data/build.py --out public/data/2029 --start 2029-01-01 --days 365
 data/.venv/Scripts/python data/build.py --out public/data/2030 --start 2030-01-01 --days 365
+# ... and the same for 2031 to 2040 (--days 366 for 2032, 2036, 2040)
 ```
+
+The DEM paths default to `data/raw/`; pass `--dem5` and `--dem30` if the .tif files are elsewhere.
+Horizons serves these years from the DE441 kernel (checked through 2040-12-31 for the Sun and Earth
+as seen from the Moon). A full year takes about 18 minutes for all 18 sites.
 
 `build.py` also drops a copy of `sites.json` into `--out`; delete it from the year folder (it is
 not part of the layout, and `test_public_data.py` fails if it is there). Horizons limits rows per

@@ -14,7 +14,7 @@ SITES_SRC = ROOT / "data" / "sites.json"
 PUBLIC = ROOT / "public" / "data"
 
 # 2027 lives directly in public/data/; later years in public/data/<year>/ (same layout inside).
-YEARS = [2027, 2028, 2029, 2030]
+YEARS = list(range(2027, 2041))
 
 
 def year_dir(year):
