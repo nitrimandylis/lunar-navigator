@@ -22,6 +22,7 @@ import {
   landingDays,
   landingHours,
   nextLandingHour,
+  slipMargin,
   type MissionNeeds,
 } from "@/lib/windows";
 
@@ -356,11 +357,27 @@ export function MissionPlanner({
       nextText = formatHour(next);
     }
 
+    // How far a landing on the selected day can slip and stay in its window.
+    let slipText = "";
+    if (result.isLoaded && result.goodDays === 0) {
+      slipText = "never";
+    } else if (result.isLoaded) {
+      const margin = slipMargin(dayRuns(result.days), selectedDay);
+      if (margin.slipDays !== null) {
+        slipText = margin.slipDays + " d";
+      } else if (margin.nextGoodDay !== null) {
+        // A line break, so the date never splits over two lines.
+        slipText = "next window\n" + formatDay(margin.nextGoodDay);
+      } else {
+        slipText = "none";
+      }
+    }
+
     return (
       <li
         key={site.id}
         className={cn(
-          "grid grid-cols-[1.5rem_17rem_minmax(14rem,1fr)_3.5rem_13rem] items-center gap-x-3 py-1",
+          "grid grid-cols-[1.5rem_17rem_minmax(14rem,1fr)_3.5rem_13rem_6.5rem] items-center gap-x-3 py-1",
           result.isLoaded && result.goodDays === 0 && "opacity-50",
         )}
       >
@@ -392,6 +409,14 @@ export function MissionPlanner({
           {result.isLoaded ? result.goodDays : ""}
         </span>
         <span className="font-mono text-xs tabular-nums text-muted-foreground">{nextText}</span>
+        <span
+          className={cn(
+            "whitespace-pre-line font-mono text-xs tabular-nums",
+            slipText === "never" ? "text-muted-foreground" : "text-bright",
+          )}
+        >
+          {slipText}
+        </span>
       </li>
     );
   }
@@ -491,8 +516,8 @@ export function MissionPlanner({
               shrink-0 keeps it at its full height, so only the panel scrolls
               up and down. */}
           <div className="shrink-0 overflow-x-auto">
-            <div className="min-w-[50rem]">
-              <div className="grid grid-cols-[1.5rem_17rem_minmax(14rem,1fr)_3.5rem_13rem] items-end gap-x-3 pb-1 text-xs text-muted-foreground">
+            <div className="min-w-[60rem]">
+              <div className="grid grid-cols-[1.5rem_17rem_minmax(14rem,1fr)_3.5rem_13rem_6.5rem] items-end gap-x-3 pb-1 text-xs text-muted-foreground">
                 <span />
                 <span>Site</span>
                 {/* The years sit over the strips, each where its year starts. */}
@@ -509,6 +534,7 @@ export function MissionPlanner({
                 </span>
                 <span className="text-right">Days</span>
                 <span>Next landing</span>
+                <span>Slip margin</span>
               </div>
 
               <ol>{terrainResults.map((result, index) => renderRow(result, index + 1))}</ol>
@@ -530,7 +556,8 @@ export function MissionPlanner({
             day selected on the main page ({formatDay(selectedDay)}). A stay has to end
             before the data does, so long stays show nothing late in {LAST_YEAR}. The mission lengths
             come from real missions. The percentages are our own starting points, not
-            agency requirements: change them to fit your mission.
+            agency requirements: change them to fit your mission. Slip margin: how many
+            days the launch can slip from the picked day and still land in the same window.
           </p>
         </div>
       </div>
