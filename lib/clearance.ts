@@ -7,6 +7,7 @@
 
 import type { Hourly } from "./app-types.ts";
 import { hoursUntilChange } from "./data.ts";
+import { LAST_YEAR } from "./time.ts";
 
 // Apparent radius of the Sun's disc seen from the Moon, in degrees:
 // asin(695700 km / 1 AU). The Sun's distance barely changes, so one value is
@@ -165,7 +166,7 @@ export function countdownText(
     if (word === "Sunset" || word === "Sunrise") {
       wordInSentence = word.toLowerCase();
     }
-    return "No " + wordInSentence + " before the end of 2027";
+    return "No " + wordInSentence + " before the end of " + LAST_YEAR;
   }
   return word + " in " + formatWait(wait);
 }

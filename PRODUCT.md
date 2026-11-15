@@ -8,13 +8,24 @@ with terrain horizons, from JPL Horizons ephemerides and LOLA terrain.
 
 ## Where it is headed
 
-Hackathon build, 14-15 Nov 2026. South pole only, calendar year 2027, hourly, UTC.
+Hackathon build, 14-15 Nov 2026. South pole only, calendar years 2027 to 2030, hourly, UTC.
 
 Built now:
 
 - Sites grid: one row per site, two lanes per day (orange power, blue comms), one month at
   a time. Click a day to open its 24 hours; Escape or the close button shuts it.
-- Month chips in the header, tinted by the selected site's monthly hours.
+- Year picker and month chips in the header: a drop-down list of the years with data (2027
+  to 2030 now, one line per year in `YEARS` in `lib/time.ts`) and the 12 months of the year
+  on screen, tinted by the selected site's monthly hours. The four years are one
+  timeline of 1461 days, so Play, the slider and the arrow keys run straight from one year
+  into the next. Each year's files are loaded and joined in the browser. In the data files a
+  dark spell is cut at the first and last hour of each year, so the selected site's day
+  totals are worked out again from its joined hours and a spell that crosses New Year is
+  whole in the verdict line. A spell is still cut at the start of 2027 and the end of 2030.
+- Site facts on the selected site's card, from optional fields in `sites.json`: the Sun
+  share of 2027 to 2030 from a 10 m mast next to the 2 m figure (`sun_pct_10m`), the ground
+  slope of the 30 m LOLA cell (`slope_deg`) and the distance to the nearest permanent
+  shadow (`psr_km`). The About panel says what each one means.
 - Sort by power (Sun hours), comms (Earth hours) or both at once, for the month on screen.
 - Real mission targets (IM-2, Artemis III candidate regions) next to computed candidates,
   marked with a mission tag.
@@ -54,7 +65,8 @@ Built now:
 
 - Share link and CSV: under the selected site, "Copy link" copies a link that opens the
   page on the same site and hour (`?site=<id>&time=2027-05-16T07:00Z`), and "Download CSV"
-  saves the site's 8760 hourly rows (Sun and Earth elevation, azimuth and visibility).
+  saves the site's 35,064 hourly rows, 2027 to 2030 (Sun and Earth elevation, azimuth and
+  visibility).
   Custom points have no link, because they only exist in the browser tab.
 
 - Guided tour: five steps from a header button, telling one story (two places 2.1 km apart
@@ -62,21 +74,26 @@ Built now:
   selects the site and month it talks about. A test recomputes every number in the tour
   text from the data files. The part of the page a step points at stays lit and the rest
   dims to 30% and cannot be clicked, fading between steps. Right and Left arrows move
-  between steps, Escape closes, and on a phone each step scrolls its target into view.
+  between steps, Escape closes, and on a phone each step opens the tab its target is on.
 
 - Mission planner: a header button opens a panel that answers "where and when can this
   mission land?" for every site at once. Three starting missions (short lander 14 days,
   crewed stay 7 days, long rover 100 days with at most 50 h of dark, as planned for VIPER),
   each with editable needs: length of stay, share of the stay with the Sun and with Earth
-  in view, longest dark spell. Every site is checked hour by hour for all of 2027 and
-  ranked by the number of days with a landing time that works, with a year strip per site
+  in view, longest dark spell. Every site is checked hour by hour from 2027 to 2030 and
+  ranked by the number of days with a landing time that works, with a four-year strip per site
   and its next landing time. Clicking a site or a day shows it on the main page. Past
   landings and custom points are listed apart, not ranked.
 
-- Phone and tablet layout: below 1024 px the page scrolls and the panels stack (Sites,
-  Selected site, South pole map, Custom point). The Sites grid scrolls sideways inside its
-  panel, the header wraps, and the header and play buttons are 40 px tall. The desktop
-  layout is unchanged.
+- Phone and tablet layout: below 1024 px a tab bar at the bottom shows one panel at a
+  time: Sites, Selected site (opens first) or Map (with the custom point form). The header
+  is two lines: the title with Tour and About, then the months in one row that scrolls
+  sideways. Sort and Plan a mission sit at the top of the Sites tab. Each site is two lines,
+  name and totals, then all the days of the month, so nothing scrolls sideways. Picking a
+  site in the grid or on the map opens the Selected site tab, which runs: name and verdict,
+  play and slider (sticky), a taller sky panorama drawn for the phone, the two numbers,
+  then the Sun and Earth charts one per row. Buttons are 40 px tall. The desktop layout is
+  unchanged.
 
 Still open:
 

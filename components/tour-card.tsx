@@ -21,10 +21,11 @@ export function TourCard({ step, stepIndex, stepCount, onBack, onNext, onClose }
   const isLast = stepIndex === stepCount - 1;
 
   return (
+    // Below lg it sits just above the tab bar.
     <aside
       aria-label="Guided tour"
       aria-live="polite"
-      className="fixed right-3 bottom-3 z-40 flex animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none w-[min(380px,calc(100vw-1.5rem))] flex-col gap-2 rounded-lg border-2 border-bright bg-panel px-4 py-3 text-sm shadow-xl"
+      className="fixed right-3 bottom-[4.25rem] z-40 lg:bottom-3 flex animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none w-[min(380px,calc(100vw-1.5rem))] flex-col gap-2 rounded-lg border-2 border-bright bg-panel px-4 py-3 text-sm shadow-xl"
     >
       <div className="flex items-baseline gap-3">
         <p className="font-mono text-xs tabular-nums text-muted-foreground">

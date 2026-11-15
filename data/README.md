@@ -175,6 +175,24 @@ tests/                          pytest checks, including test_public_data.py and
 - `build.py` uses the 5 m terrain where the whole 25 km search area fits inside it (very near
   the pole) and the 30 m terrain everywhere else.
 
+## `sun_pct_10m` (optional site field)
+
+`sun_pct_10m` in `sites.json` (both copies) is the percent of all hours of 2027 to 2030 (35,064
+hours) with any part of the Sun's disc above the horizon seen from a 10 m observer height,
+rounded to 1 decimal. The 2 m figures are in the hourly files (`sun_visible`); later years are not
+included. It is computed by `data/sun_pct_10m.py`, which reuses `build.py`'s rule exactly (same
+DEM choice and ranges, 1 degree horizon, nearest-azimuth lookup, Sun as a disc, no refraction)
+with only the observer height changed, and the Sun az/el from the committed hourly files:
+
+```bash
+data/.venv/Scripts/python data/sun_pct_10m.py --validate   # 2 m check against committed sun_visible
+data/.venv/Scripts/python data/sun_pct_10m.py --write      # compute at 10 m and update both sites.json
+```
+
+`--validate` reproduces the committed 2027 `sun_visible` exactly for most sites; a site can differ
+by an hour or two where the Sun sits on the horizon edge, because the committed az/el are rounded.
+It does not change `terrain.DEFAULT_OBSERVER_HEIGHT_M`, which stays at 2 m.
+
 ## Where the sites come from
 
 `sites.json` has three kinds of site. It is not a NASA list of landing sites.
@@ -226,8 +244,95 @@ data/.venv/Scripts/python data/repick_pair.py --dem5 data/raw/LRO_LOLA_DEM_SPole
 
 `rim_candidates.json` keeps the scan results behind the computed sites (its `note` says which
 were re-scanned). To change the site list, edit `sites.json` by hand (id, name, lat, lon,
-elevation, source, and `mission` for a real mission site, left out otherwise), then run
+elevation, source, `mission` for a real mission site, the optional `slope_deg` and the optional `note`, left out otherwise), then run
 `build.py`. Read `elevation_m` from the terrain file.
+
+An optional `note` string may carry a caveat the app shows with the site. Only `artemis3-haworth` has one
+(its centre is on the shadowed crater floor and gets 0 h of Sun). It goes after `mission` in `sites.json`,
+`build.py` copies it through to `public/data/sites.json`, and the data tests require it to be a non-empty
+string when present.
+
+## Ground slope (`slope_deg`)
+
+An optional number on every site: the ground slope at the site in degrees, 0 to under 90, rounded to
+1 decimal. The app shows it on the site card. `slope.py` computes it and can write both `sites.json`
+files (`--write`); `build.py` copies it through, so no rebuild of the hourly files is needed.
+
+- **DEM**: LRO LOLA DEM v4 S Pole, 30 m per pixel (75 deg to the pole). One method for all sites, so
+  the numbers are comparable. The 5 m DEM only reaches 87.5 S, so 9 of the 18 sites have no 5 m cover.
+- **Method**: Horn (1981) 3x3 slope on the 30 m DEM, so the baseline is the 30 m pixel spacing. The
+  gradient is worked out at the four pixel centres around the site and blended bilinearly to the exact
+  point.
+- **Scale**: pixel spacing is the true ground distance, `30 m / terrain.scale_factor(lat)`, as in
+  `terrain.py` (the factor is 1.0 at the pole and about 1.002 at 85 S).
+- **Cross-check** (`slope.py --dem5 ...`): the 5 m DEM averaged into 30 m cells centred on the site,
+  then the same Horn formula. For the 9 sites both DEMs cover, it differs from the 30 m method by
+  0.15 to 1.02 degrees (mean absolute 0.53; largest: `shackleton-shadow` 3.61 vs 2.59 and
+  `shackleton-ridge` 0.97 vs 1.59). Both read the same terrain, so the gap is mostly where the 30 m
+  cell grid falls, and it shows how uncertain a slope this small is. `elevation_m` agrees with the
+  DEM height to a few metres.
+- **Caveat**: this is the slope of a 30 m cell, not of a lander footprint (a few metres). Boulders,
+  small craters and rough ground inside the cell are averaged out, so the slope under a lander can
+  be much steeper or flatter. It also inherits the DEM's error (LOLA data through September 2011).
+
+```bash
+data/.venv/Scripts/python data/slope.py --dem30 <30 m .tif> --dem5 <5 m .tif> --write
+```
+
+## `psr_km`: distance to the nearest permanently shadowed region
+
+Every site has an optional number `psr_km`: the ground distance in km from the site to the edge of
+the nearest permanently shadowed region (PSR), rounded to 0.01 km, and 0 when the site lies inside
+a PSR. It is **a distance to the nearest PSR polygon edge, not time in shadow**: a site 0.3 km from a PSR
+can still have Sun for most of the year, and a site inside a PSR has no direct sunlight at all.
+`build.py` copies the field through `sites.json` unchanged (it copies the whole file), so no hourly,
+summary or ephemeris file depends on it.
+
+- **Source.** NASA PGDA, "A New View of the Lunar South Pole from LOLA" (product 90), file
+  `LPSR_80S_20MPP_ADJ_1km2.SHP` (shapefile of PSRs larger than 1 km2, 20 m LOLA grid, 80 S to the
+  pole, 20.7 MB; N = 1,531 polygons), https://pgda.gsfc.nasa.gov/products/90 ,
+  https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LPSR_80S_20MPP_ADJ_1km2.SHP . Barker et al. 2023, PSJ 4,
+  183; data DOI 10.60903/gsfcpgda-lola-spole. The method descends from Mazarico et al. 2011.
+- **PSR definition.** A PSR is ground that never receives direct sunlight, from horizon masks built
+  on LOLA topography and simulated over lunar precession cycles (18.6 years) with the Sun as a disc
+  (Mazarico et al. 2011, Icarus 211, 1066; NTRS 20120010094). The PGDA product page does not itself
+  state the time span or the Sun model; we took them from the papers and did not check them in the
+  product's label file. It is LOLA's product, not ours, and unlike our DEM-based hours it does not use
+  our 2 m observer height.
+- **Minimum area: 1 km2.** The file only has PSRs larger than 1 km2 (the PGDA's own cut; the full
+  20 m file has 506,349 polygons, mostly tiny). Smaller cold traps are not counted, so a site can be
+  closer to a sub-km2 shadow than `psr_km` says. For comparison, the Mazarico 2011 raster
+  (`LPSR_85S_060M_201608`, 60 m, 85 S to the pole, flags every shadowed pixel) puts the 14 sites south of 85 S within 0.02 to 3.75 km of some PSR pixel, e.g. `shackleton-shadow`
+  0.02 km, `haworth-candidate` 0.14 km, `shackleton-ridge` 0.34 km. The other four (`amundsen-candidate`,
+  `cabeus-candidate`, `nobile-candidate`, `im2-mons-mouton`) lie outside that raster.
+- **Method.** `psr_distance.py`: site (lat, lon) to `terrain.lonlat_to_xy` (south polar
+  stereographic, same projection as the shapefile), minimum point-to-segment distance to every
+  polygon ring, 0 if inside (even-odd, holes are not PSR), divided by `terrain.scale_factor` to give
+  ground distance. `data/psr_polygons.json` (1.7 MB) holds only the 72 polygons with an edge within
+  19.5 km of a site, in integer metres; every site's nearest PSR is within that radius and the script
+  refuses to run if one is not. The downloaded shapefile itself is not in git. To regenerate:
+
+```bash
+data/.venv/Scripts/python data/psr_distance.py shp <LPSR_80S_20MPP_ADJ_1km2.SHP>   # rebuild psr_polygons.json
+data/.venv/Scripts/python data/psr_distance.py sites --write                       # update both sites.json files
+```
+
+- **Caveats.** Positions of our computed sites are on the 5 m / 30 m DEM; the PSR edges come from a
+  20 m grid, so edges carry a few tens of metres of uncertainty. `shackleton-ridge` and
+  `shackleton-shadow` are not in the crater floor (they are rim-side points, 6 km from the 1 km2
+  PSRs); `artemis3-haworth` is the only site inside a PSR (0).
+
+Citation block (paste into slides or the video notes):
+
+> Distance to nearest permanently shadowed region: computed from the LOLA PSR map of the lunar south
+> pole (NASA PGDA, `LPSR_80S_20MPP_ADJ_1km2`, PSRs larger than 1 km2). Barker, M. K., et al. (2023),
+> Planetary Science Journal 4, 183, doi:10.3847/PSJ/acf3e1; data doi:10.60903/gsfcpgda-lola-spole.
+> PSR method: Mazarico, E., et al. (2011), Illumination conditions of the lunar polar regions using
+> LOLA topography, Icarus 211, 1066-1081, doi:10.1016/j.icarus.2010.10.030.
+
+If the PSR file could not be had, the fallback would be to derive PSRs from our own DEM (zero Sun
+hours over a long span from horizon masks) and label the result as derived, not LOLA's product. It
+was not needed.
 
 ## Known simplifications
 

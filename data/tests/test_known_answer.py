@@ -36,3 +36,23 @@ def test_connecting_ridge_sunlit_percent_near_glaser_2014():
     visible = series["sun_visible"]
     percent = 100.0 * sum(visible) / len(visible)
     assert abs(percent - GLASER_2014_PERCENT_2M) <= TOLERANCE_POINTS, percent
+
+
+# Second check: Glaser et al. 2014 spot 4 (the abstract of the EPSC 2014 conference version,
+# https://elib.dlr.de/94242, gives its coordinates 89.4544 S, 222.8445 E and 95.66 percent lit at
+# 10 m above ground, 19 years, 20 m DTM, Sun as a disc; the Icarus paper itself quotes 95.65).
+# We re-ran our pipeline at those coordinates with a 10 m observer (5 m LOLA DEM, 2027 only);
+# the hourly result is committed in data/known_answers_glaser_spots.json. See data/KNOWN-ANSWERS.md.
+GLASER_SPOTS = ROOT / "data" / "known_answers_glaser_spots.json"
+GLASER_2014_SPOT4_PERCENT_10M = 95.66
+SPOT4_TOLERANCE_POINTS = 3.0
+
+
+def test_glaser_2014_spot4_sunlit_percent_at_10m():
+    spots = {s["id"]: s for s in json.loads(GLASER_SPOTS.read_text())}
+    spot = spots["glaser-spot-4"]
+    assert spot["observer_height_m"] == 10
+    bits = spot["sun_visible"]
+    assert len(bits) == 8760
+    percent = 100.0 * bits.count("1") / len(bits)
+    assert abs(percent - GLASER_2014_SPOT4_PERCENT_10M) <= SPOT4_TOLERANCE_POINTS, percent

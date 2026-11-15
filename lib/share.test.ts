@@ -19,9 +19,19 @@ test("hourToIso and isoToHour agree on the real 2027 calendar", () => {
   assert.equal(isoToHour("2027-12-31T23:00Z"), 8759);
 });
 
-test("isoToHour rejects anything that is not a whole hour of 2027", () => {
+test("isoToHour reads the later years too", () => {
+  // 2028 starts 365 days after 2027. Its 29 February exists.
+  assert.equal(isoToHour("2028-01-01T00:00Z"), 365 * 24);
+  assert.equal(isoToHour("2028-02-29T07:00Z"), (365 + 31 + 28) * 24 + 7);
+  assert.equal(hourToIso((365 + 31 + 28) * 24 + 7), "2028-02-29T07:00Z");
+  assert.equal(isoToHour("2030-12-31T23:00Z"), 1461 * 24 - 1);
+});
+
+test("isoToHour rejects anything that is not a whole hour inside the data", () => {
   assert.equal(isoToHour("2026-12-31T23:00Z"), null);
-  assert.equal(isoToHour("2028-01-01T00:00Z"), null);
+  assert.equal(isoToHour("2031-01-01T00:00Z"), null);
+  // 2027 is not a leap year, so it has no 29 February.
+  assert.equal(isoToHour("2027-02-29T00:00Z"), null);
   assert.equal(isoToHour("2027-03-01T05:30Z"), null);
   assert.equal(isoToHour("2027-13-01T05:00Z"), null);
   assert.equal(isoToHour("2027-03-01"), null);
@@ -34,20 +44,43 @@ test("a share link gives back the site and hour it was made from", () => {
   assert.deepEqual(parseShareQuery(query, KNOWN_IDS), {
     siteId: "shackleton-ridge",
     hour: 3240,
+    planPresetId: null,
   });
 });
 
 test("parseShareQuery ignores what it does not know", () => {
-  assert.deepEqual(parseShareQuery("", KNOWN_IDS), { siteId: null, hour: null });
+  assert.deepEqual(parseShareQuery("", KNOWN_IDS), {
+    siteId: null,
+    hour: null,
+    planPresetId: null,
+  });
   assert.deepEqual(parseShareQuery("?site=nowhere&time=soon", KNOWN_IDS), {
     siteId: null,
     hour: null,
+    planPresetId: null,
   });
   // One good part is kept even when the other is bad.
   assert.deepEqual(parseShareQuery("?site=ref-apollo-11&time=soon", KNOWN_IDS), {
     siteId: "ref-apollo-11",
     hour: null,
+    planPresetId: null,
   });
+});
+
+test("the plan part names a mission preset to open the planner on", () => {
+  assert.equal(parseShareQuery("", KNOWN_IDS).planPresetId, null);
+  assert.equal(parseShareQuery("?plan=rover", KNOWN_IDS).planPresetId, "rover");
+  assert.equal(parseShareQuery("?plan=crew", KNOWN_IDS).planPresetId, "crew");
+  // "1" or a name that is not a preset opens the first preset, Short lander.
+  assert.equal(parseShareQuery("?plan=1", KNOWN_IDS).planPresetId, "lander");
+  assert.equal(parseShareQuery("?plan=bogus", KNOWN_IDS).planPresetId, "lander");
+});
+
+test("the plan part works together with a site and a time", () => {
+  assert.deepEqual(
+    parseShareQuery("?plan=crew&site=shackleton-ridge&time=2027-05-16T00:00Z", KNOWN_IDS),
+    { siteId: "shackleton-ridge", hour: 3240, planPresetId: "crew" },
+  );
 });
 
 test("hourlyCsv writes a header and one line per hour", () => {

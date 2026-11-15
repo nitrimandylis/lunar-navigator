@@ -11,6 +11,7 @@ import {
   landingHours,
   longestDarkSpell,
   nextLandingHour,
+  slipMargin,
   type MissionNeeds,
 } from "./windows.ts";
 
@@ -121,4 +122,35 @@ test("at Apollo 11 a fully sunlit stay fits in 14 days and not in 15", () => {
 
   assert.ok(countGoodDays(landingDays(worksFor14)) > 0);
   assert.equal(countGoodDays(landingDays(worksFor15)), 0);
+});
+
+// Worked by hand: days 2 to 6 are good, then days 9 and 10.
+test("slipMargin counts the days left in the run, or finds the next one", () => {
+  const runs = dayRuns([0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0]);
+  assert.deepEqual(slipMargin(runs, 2), { slipDays: 4, nextGoodDay: null });
+  assert.deepEqual(slipMargin(runs, 4), { slipDays: 2, nextGoodDay: null });
+  assert.deepEqual(slipMargin(runs, 6), { slipDays: 0, nextGoodDay: null });
+  assert.deepEqual(slipMargin(runs, 0), { slipDays: null, nextGoodDay: 2 });
+  assert.deepEqual(slipMargin(runs, 8), { slipDays: null, nextGoodDay: 9 });
+  assert.deepEqual(slipMargin(runs, 11), { slipDays: null, nextGoodDay: null });
+  assert.deepEqual(slipMargin([], 3), { slipDays: null, nextGoodDay: null });
+});
+
+// Known answer, from the same 29.53 day synodic period as above: at the
+// Apollo 11 site the Sun is up for about 14.77 days at a time. With a 1 hour
+// stay that only needs the Sun at touchdown, every sunlit day is a good day,
+// so landing on the first day of a run leaves 13 to 15 days to slip (a run
+// touches 14 to 16 UTC days, depending on when sunrise falls).
+test("at Apollo 11 a launch can slip about two weeks from sunrise", () => {
+  const ephemeris = JSON.parse(
+    readFileSync("public/data/ephemeris.json", "utf8"),
+  ) as Ephemeris;
+  const hourly = customSiteHourly(0.67416, 23.47314, ephemeris);
+  const works = landingHours(hourly.sun_visible, hourly.earth_visible, needsOfLength(1));
+  const runs = dayRuns(landingDays(works));
+
+  // The second run, so that it is not cut short by the start of the data.
+  const run = runs[1];
+  const margin = slipMargin(runs, run.startDay);
+  assert.ok(margin.slipDays !== null && margin.slipDays >= 13 && margin.slipDays <= 15);
 });

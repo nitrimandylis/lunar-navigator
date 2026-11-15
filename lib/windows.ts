@@ -1,4 +1,4 @@
-// Landing windows: the hours of the year at which a mission can land at a
+// Landing windows: the hours of the data at which a mission can land at a
 // site and get what it needs for its whole stay.
 //
 // Everything here works on the sun_visible and earth_visible arrays of one
@@ -106,7 +106,7 @@ function runningTotals(values: number[]): number[] {
   return totals;
 }
 
-// One value per hour of the year: 1 if a mission that lands at that hour gets
+// One value per hour of the data: 1 if a mission that lands at that hour gets
 // what it needs for its whole stay, 0 if not.
 //
 // A landing hour works when all of these hold:
@@ -206,4 +206,32 @@ export function dayRuns(days: number[]): DayRun[] {
     }
   }
   return runs;
+}
+
+// The answer for the slip margin column. When the picked day is a good day,
+// slipDays is how many days the launch can slip and still land in the same
+// run, and nextGoodDay is null. When it is not, slipDays is null and
+// nextGoodDay is the first good day after it, or null if there is none.
+export type SlipMargin = {
+  slipDays: number | null;
+  nextGoodDay: number | null;
+};
+
+// How far a landing on pickedDay can slip. runs is the result of dayRuns, and
+// pickedDay is a day index on the same timeline. With a run of days 2 to 6:
+// picked 2 gives a slip of 4, picked 6 a slip of 0, and picked 1 the next good
+// day 2.
+export function slipMargin(runs: DayRun[], pickedDay: number): SlipMargin {
+  for (const run of runs) {
+    const lastDay = run.startDay + run.dayCount - 1;
+    // The runs are in order, so the first one that ends on or after the picked
+    // day either holds it or is the next window.
+    if (lastDay >= pickedDay) {
+      if (run.startDay <= pickedDay) {
+        return { slipDays: lastDay - pickedDay, nextGoodDay: null };
+      }
+      return { slipDays: null, nextGoodDay: run.startDay };
+    }
+  }
+  return { slipDays: null, nextGoodDay: null };
 }

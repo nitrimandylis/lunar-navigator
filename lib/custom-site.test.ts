@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import {
@@ -8,6 +9,9 @@ import {
   elevationDeg,
   summarizeDays,
 } from "./custom-site.ts";
+import { dataFolder, joinHourly } from "./data.ts";
+import type { DaySummary, SiteHourly, SiteSummary } from "./data.ts";
+import { YEARS } from "./time.ts";
 
 const AU_KM = 149_597_870.7;
 
@@ -146,6 +150,50 @@ test("day summaries add up hours, the highest Sun and the longest gap", () => {
       longest_sun_gap_hours: 22,
     },
   ]);
+});
+
+test("day summaries from the joined years keep a dark spell whole across New Year", () => {
+  // Real files for the candidate near de Gerlache. Its Sun is down from
+  // 2027-12-28 11:00 to 2028-01-08 23:00 UTC: 85 hours in 2027 and 192 hours
+  // in 2028, which the per-year summary files report as two separate spells.
+  const siteId = "de-gerlache-candidate";
+  const hourlyParts: SiteHourly[] = [];
+  let fileDays: DaySummary[] = [];
+  for (const year of YEARS) {
+    const folder = "public" + dataFolder(year);
+    hourlyParts.push(JSON.parse(readFileSync(folder + "sites/" + siteId + ".json", "utf8")));
+    const summary: SiteSummary = JSON.parse(
+      readFileSync(folder + "summary/" + siteId + ".json", "utf8"),
+    );
+    fileDays = fileDays.concat(summary.days);
+  }
+  const hourly = joinHourly(hourlyParts);
+
+  const days = summarizeDays(
+    hourly.start_utc,
+    hourly.sun_elev_deg,
+    hourly.sun_visible,
+    hourly.earth_visible,
+  );
+
+  // The files cut the spell at New Year.
+  assert.equal(fileDays[364].date, "2027-12-31");
+  assert.equal(fileDays[364].longest_sun_gap_hours, 85);
+  assert.equal(fileDays[365].longest_sun_gap_hours, 192);
+  // Joined, both days carry the whole spell.
+  assert.equal(days[364].date, "2027-12-31");
+  assert.equal(days[364].longest_sun_gap_hours, 277);
+  assert.equal(days[365].date, "2028-01-01");
+  assert.equal(days[365].longest_sun_gap_hours, 277);
+
+  // Everything else the page reads is the same as in the files, every day.
+  assert.equal(days.length, fileDays.length);
+  for (let i = 0; i < days.length; i++) {
+    assert.equal(days[i].date, fileDays[i].date);
+    assert.equal(days[i].sun_hours, fileDays[i].sun_hours);
+    assert.equal(days[i].earth_hours, fileDays[i].earth_hours);
+    assert.equal(days[i].both_hours, fileDays[i].both_hours);
+  }
 });
 
 test("azimuthDeg points north, east, south and west", () => {

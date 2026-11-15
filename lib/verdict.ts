@@ -12,12 +12,16 @@ const CLEAR_GAP_PERCENT = 10;
 // From this percentage up, a body counts as in view "almost all month".
 const ALMOST_ALWAYS_PERCENT = 90;
 
-// days are the per-day totals of one month. monthName is like "May".
-// Returns for example: "In May the Sun is up 47% of the time and Earth is in
-// view 100%. Power is the limit here, not the radio link. Longest dark spell:
-// 13 d 17 h."
+// siteName is the site as shown on screen. days are the per-day totals of one
+// month. monthName is like "May".
+// Returns for example: "Apollo 11: Sun up 47% of May, Earth 100%. Power is the
+// limit here, not the radio link. Longest dark spell: 13 d 17 h."
 // Returns an empty string when there are no days.
-export function monthVerdict(days: DaySummary[], monthName: string): string {
+export function monthVerdict(
+  siteName: string,
+  days: DaySummary[],
+  monthName: string,
+): string {
   if (days.length === 0) {
     return "";
   }
@@ -40,11 +44,12 @@ export function monthVerdict(days: DaySummary[], monthName: string): string {
   const earthPercent = Math.round((earthHours / totalHours) * 100);
 
   const shares =
-    "In " +
-    monthName +
-    " the Sun is up " +
+    siteName +
+    ": Sun up " +
     sunPercent +
-    "% of the time and Earth is in view " +
+    "% of " +
+    monthName +
+    ", Earth " +
     earthPercent +
     "%.";
 
@@ -60,7 +65,9 @@ export function monthVerdict(days: DaySummary[], monthName: string): string {
     limit = "Power and the radio link both hold almost all month.";
   }
 
-  let dark = "The Sun never sets.";
+  // Says "stays up all of" rather than "never sets", which would clash with the
+  // sunset countdown for a Sun that does set after this month.
+  let dark = "The Sun stays up all of " + monthName + ".";
   if (longestDarkHours > 0) {
     dark = "Longest dark spell: " + formatWait(Math.round(longestDarkHours)) + ".";
   }

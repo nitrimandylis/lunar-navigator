@@ -20,6 +20,7 @@ import { MapOverlay } from "@/components/map-overlay";
 import { EDGE_LAT, SouthPoleMap } from "@/components/south-pole-map";
 import { TimeControls } from "@/components/time-controls";
 import { TourCard } from "@/components/tour-card";
+import { YearPicker } from "@/components/year-picker";
 import {
   MAX_CUSTOM_SITES,
   type Hourly,
@@ -27,27 +28,34 @@ import {
   type SiteRow,
 } from "@/lib/app-types";
 import { customSiteHourly, summarizeDays } from "@/lib/custom-site";
-import type {
-  DaySummary,
-  Ephemeris,
-  Site,
-  SiteHourly,
-  SiteSummary,
+import {
+  dataFolder,
+  joinEphemeris,
+  joinHourly,
+  type DaySummary,
+  type Ephemeris,
+  type Site,
+  type SiteHourly,
+  type SiteSummary,
 } from "@/lib/data";
 import { REFERENCE_SITES } from "@/lib/reference-sites";
 import { buildRows } from "@/lib/rows";
 import { parseShareQuery } from "@/lib/share";
 import type { SortKey } from "@/lib/sort";
 import {
-  HOURS_IN_YEAR,
   HOURS_PER_DAY,
-  YEAR,
+  MONTHS_PER_YEAR,
+  TOTAL_HOURS,
+  YEARS,
   firstDayOfMonth,
+  firstMonthOfYear,
   monthOfHour,
   moveHourToMonth,
   stepHour,
+  yearOfMonth,
 } from "@/lib/time";
 import { TOUR_STEPS } from "@/lib/tour";
+import { MISSION_PRESETS } from "@/lib/windows";
 import { cn } from "@/lib/utils";
 
 // Fetches one JSON file from public/data/. Throws if the file is missing.
@@ -57,6 +65,17 @@ async function fetchJson(path: string): Promise<unknown> {
     throw new Error("Could not load " + path + " (status " + response.status + ")");
   }
   return response.json();
+}
+
+// Fetches the same file for every year and returns the parts in year order.
+// file is a path inside a year's folder, for example "summary/<id>.json".
+async function fetchEveryYear(file: string): Promise<unknown[]> {
+  return Promise.all(YEARS.map((year) => fetchJson(dataFolder(year) + file)));
+}
+
+// The Sun and Earth sub-points for every hour of every year, as one file.
+async function fetchEphemeris(): Promise<Ephemeris> {
+  return joinEphemeris((await fetchEveryYear("ephemeris.json")) as Ephemeris[]);
 }
 
 // How long one hour of data stays on screen while time is playing. At 80 ms
@@ -70,10 +89,19 @@ const PLAY_STEP_MS = 80;
 const TOUR_FADE = "transition-[opacity,box-shadow] duration-300 motion-reduce:transition-none";
 const TOUR_DIM = "opacity-30";
 
+// Below lg the page shows one of these at a time, picked in the tab bar at
+// the bottom. From lg up every panel is on screen and the tabs are hidden.
+type PhoneTab = "sites" | "site" | "map";
+
+const PHONE_TABS: { tab: PhoneTab; label: string }[] = [
+  { tab: "sites", label: "Sites" },
+  { tab: "site", label: "Selected site" },
+  { tab: "map", label: "Map" },
+];
+
 // A titled box. Every panel on the page uses it. The caption is one plain
 // sentence, next to the title, that says what the panel shows.
 function Panel({
-  id,
   title,
   caption,
   isHighlighted,
@@ -81,8 +109,6 @@ function Panel({
   className,
   children,
 }: {
-  // Set on the panels the guided tour can point at, so it can scroll to them.
-  id?: string;
   title: string;
   caption: string;
   // True while the guided tour points at this panel.
@@ -94,7 +120,6 @@ function Panel({
 }) {
   return (
     <section
-      id={id}
       aria-label={title}
       inert={isDimmed}
       className={cn(
@@ -151,8 +176,13 @@ export function Navigator() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   // The mission planner is open.
   const [isPlannerOpen, setIsPlannerOpen] = useState(false);
+  // The mission preset the planner opens on.
+  const [plannerPresetId, setPlannerPresetId] = useState(MISSION_PRESETS[0].id);
   // The step of the guided tour on screen, or null when the tour is closed.
   const [tourStepIndex, setTourStepIndex] = useState<number | null>(null);
+  // The panel on screen below lg. It opens on the selected site, so a visitor
+  // sees the sky and the play button first.
+  const [phoneTab, setPhoneTab] = useState<PhoneTab>("site");
 
   // Things to remember that should not redraw the page when they change.
   const requestedHourlyIds = useRef<Set<string>>(new Set());
@@ -169,8 +199,20 @@ export function Navigator() {
     setFailedHourlyIds((previous) => previous.filter((id) => id !== siteId));
 
     try {
-      const hourly = (await fetchJson("/data/sites/" + siteId + ".json")) as SiteHourly;
+      // One file per year, joined into one timeline.
+      const parts = (await fetchEveryYear("sites/" + siteId + ".json")) as SiteHourly[];
+      const hourly = joinHourly(parts);
       setHourlyBySite((previous) => ({ ...previous, [siteId]: hourly }));
+      // The summary files cut a dark spell at the first and last hour of each
+      // year. Work the per-day totals out again from the joined hours, so a
+      // spell that crosses New Year is whole.
+      const wholeDays = summarizeDays(
+        hourly.start_utc,
+        hourly.sun_elev_deg,
+        hourly.sun_visible,
+        hourly.earth_visible,
+      );
+      setSummaries((previous) => ({ ...previous, [siteId]: wholeDays }));
     } catch {
       // Forget the request so a later click can try again, and say it failed.
       requestedHourlyIds.current.delete(siteId);
@@ -185,18 +227,25 @@ export function Navigator() {
     async function loadSitesAndSummaries() {
       try {
         const loadedSites = (await fetchJson("/data/sites.json")) as Site[];
-        const summaryFiles = (await Promise.all(
-          loadedSites.map((site) => fetchJson("/data/summary/" + site.id + ".json")),
-        )) as SiteSummary[];
+        // For each site, one summary file per year.
+        const summaryParts = (await Promise.all(
+          loadedSites.map((site) => fetchEveryYear("summary/" + site.id + ".json")),
+        )) as SiteSummary[][];
 
+        // Put each site's years one after the other, so day 0 is 1 January
+        // 2027 and the days run on to the end of the last year.
         const loadedSummaries: Record<string, DaySummary[]> = {};
-        for (const file of summaryFiles) {
-          loadedSummaries[file.id] = file.days;
+        for (const parts of summaryParts) {
+          let days: DaySummary[] = [];
+          for (const part of parts) {
+            days = days.concat(part.days);
+          }
+          loadedSummaries[parts[0].id] = days;
         }
 
         // The reference landings have no data files. Work out their hours
         // from the ephemeris, the same way as a custom point.
-        const ephemeris = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        const ephemeris = await fetchEphemeris();
         const referenceHourly: Record<string, Hourly> = {};
         for (const site of REFERENCE_SITES) {
           const hourly = customSiteHourly(site.lat, site.lon, ephemeris);
@@ -245,6 +294,18 @@ export function Navigator() {
           setSelectedSiteId(firstRows[0].site.id);
           requestHourly(firstRows[0].site.id);
         }
+
+        // "?plan=rover" opens the planner on load. The sites state is not
+        // set yet at this point, so the hourly data is asked for from the
+        // loaded list. The tour and play are always off on load, so this
+        // does not need the rest of openPlanner.
+        if (shared.planPresetId !== null) {
+          setPlannerPresetId(shared.planPresetId);
+          setIsPlannerOpen(true);
+          for (const site of loadedSites) {
+            requestHourly(site.id);
+          }
+        }
       } catch {
         if (!wasCancelled) {
           setLoadError("Could not load the site data. Reload the page to try again.");
@@ -274,20 +335,45 @@ export function Navigator() {
     setSelectedHour(hour);
   }
 
+  // Switches the panel on screen below lg and goes back to the top of the
+  // page. From lg up the tabs are hidden and the page never scrolls, so this
+  // changes nothing there.
+  function showTab(tab: PhoneTab) {
+    setPhoneTab(tab);
+    window.scrollTo({ top: 0 });
+  }
+
+  // Picking a site in the grid or on the small map shows it. Below lg that
+  // means the Selected site tab.
+  function pickSiteAndHour(siteId: string, hour: number) {
+    selectSiteAndHour(siteId, hour);
+    showTab("site");
+  }
+
+  function pickSite(siteId: string) {
+    selectSite(siteId);
+    showTab("site");
+  }
+
   // Showing another month moves the selected hour into that month, on the
   // same day of the month and hour of the day.
   function changeMonth(month: number) {
     setSelectedHour(moveHourToMonth(selectedHour, month));
   }
 
+  // Showing another year keeps the month of the year: May 2027 becomes May 2029.
+  function changeYear(year: number) {
+    changeMonth(firstMonthOfYear(year) + (visibleMonth % MONTHS_PER_YEAR));
+  }
+
   // While playing, move one hour forward every PLAY_STEP_MS. Each new hour
-  // starts the next wait, and the last hour of the year stops the play.
+  // starts the next wait, and the last hour of the data stops the play.
   useEffect(() => {
     if (!isPlaying) {
       return;
     }
     const timer = setTimeout(() => {
-      if (selectedHour >= HOURS_IN_YEAR - 1) {
+      if (selectedHour >= TOTAL_HOURS - 1) {
         setIsPlaying(false);
       } else {
         setSelectedHour(selectedHour + 1);
@@ -306,13 +392,18 @@ export function Navigator() {
     setSelectedHour(firstDayOfMonth(step.month) * HOURS_PER_DAY);
     setIsPlaying(step.isPlaying);
 
-    // On a narrow screen the page scrolls, so the step's target may be off
-    // screen. From lg up the page is one screen tall and this moves nothing.
-    const target = document.getElementById("tour-" + step.target);
-    if (target !== null) {
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    // Below lg the step opens the tab its target is on. The months are in the
+    // header, which every tab shows, so that step stays where it is.
+    if (step.target === "sites") {
+      setPhoneTab("sites");
     }
+    if (step.target === "selected") {
+      setPhoneTab("site");
+    }
+    // Every target sits at the top of its tab. From lg up the page is one
+    // screen tall and this moves nothing.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   }
 
   function closeTour() {
@@ -373,12 +464,14 @@ export function Navigator() {
 
   // The planner compares every site hour by hour, so opening it asks for the
   // hourly data of all of them. Time stops playing while it is open, and the
-  // guided tour closes.
-  function openPlanner() {
+  // guided tour closes. siteList is passed in because on page load the
+  // sites state is still empty.
+  function openPlanner(presetId: string, siteList: Site[]) {
     setTourStepIndex(null);
     setIsPlaying(false);
+    setPlannerPresetId(presetId);
     setIsPlannerOpen(true);
-    for (const site of sites) {
+    for (const site of siteList) {
       requestHourly(site.id);
     }
   }
@@ -393,7 +486,7 @@ export function Navigator() {
 
     try {
       if (ephemerisCache.current === null) {
-        ephemerisCache.current = (await fetchJson("/data/ephemeris.json")) as Ephemeris;
+        ephemerisCache.current = await fetchEphemeris();
       }
       const ephemeris = ephemerisCache.current;
 
@@ -424,6 +517,7 @@ export function Navigator() {
       setHourlyBySite((previous) => ({ ...previous, [id]: hourly }));
       setSelectedSiteId(id);
       setPickedPoint(null);
+      showTab("site");
     } catch {
       setCustomError("Could not load the Sun and Earth positions. Try again.");
     }
@@ -490,30 +584,53 @@ export function Navigator() {
   }
   const isTourOpen = tourStepIndex !== null;
 
+  // Sort and the planner only matter next to the grid. From lg up they sit in
+  // the header; below lg at the top of the Sites tab.
+  const sortAndPlan = (
+    <>
+      <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
+      {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
+      <button
+        type="button"
+        onClick={() => openPlanner(MISSION_PRESETS[0].id, sites)}
+        className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
+      >
+        Plan a mission
+      </button>
+    </>
+  );
+
   return (
     // Below lg (1024 px) the page is as tall as its panels and scrolls. From lg
     // up it is exactly one screen tall.
     <div className="flex flex-col lg:h-dvh">
       {/* The header wraps onto as many lines as it needs. Only from 2xl
-          (1536 px) up is the screen wide enough to hold it all on one line. */}
+          (1536 px) up is the screen wide enough to hold it all on one line.
+          Below lg it is two lines: the title with Tour and About, then the
+          months in one row that scrolls sideways. */}
       <header className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line px-4 py-2 2xl:flex-nowrap 2xl:gap-6">
-        <h1 className={cn("text-lg font-medium text-bright", TOUR_FADE, isTourOpen && TOUR_DIM)}>
+        {/* Below lg the title takes the room the buttons leave, and wraps
+            onto a second line rather than push them down. */}
+        <h1
+          className={cn(
+            "text-base font-medium text-bright max-lg:min-w-0 max-lg:flex-1 lg:text-lg",
+            TOUR_FADE,
+            isTourOpen && TOUR_DIM,
+          )}
+        >
           Lunar Landing Site Navigator
         </h1>
 
         <div
-          id="tour-months"
           inert={isTourOpen && tourTarget !== "months"}
           className={cn(
-            "flex items-center gap-3 rounded-lg",
+            "flex min-w-0 items-center gap-3 rounded-lg max-lg:order-1 max-lg:w-full",
             TOUR_FADE,
             tourTarget === "months" && "ring-2 ring-bright ring-offset-4 ring-offset-background",
             isTourOpen && tourTarget !== "months" && TOUR_DIM,
           )}
         >
-          <span className="font-mono text-sm tabular-nums text-muted-foreground">
-            {YEAR}
-          </span>
+          <YearPicker visibleYear={yearOfMonth(visibleMonth)} onChangeYear={changeYear} />
           <MonthChips
             visibleMonth={visibleMonth}
             selectedRow={selectedRow}
@@ -524,26 +641,19 @@ export function Navigator() {
         <div
           inert={isTourOpen}
           className={cn(
-            "flex flex-wrap items-center gap-x-4 gap-y-2 lg:ml-auto lg:flex-nowrap lg:gap-4",
+            "ml-auto flex shrink-0 items-center gap-2 lg:gap-4",
             TOUR_FADE,
             isTourOpen && TOUR_DIM,
           )}
         >
-          <SortControl sortKey={sortKey} onChangeSort={setSortKey} />
-          {/* min-h-10 makes the header buttons 40 px tall, big enough for a thumb. */}
-          <button
-            type="button"
-            onClick={openPlanner}
-            className="min-h-10 whitespace-nowrap rounded-md bg-bright px-2.5 py-1 text-sm font-medium text-background lg:min-h-0"
-          >
-            Plan a mission
-          </button>
+          <div className="contents max-lg:hidden">{sortAndPlan}</div>
           <button
             type="button"
             onClick={() => showTourStep(0)}
             className="min-h-10 whitespace-nowrap rounded-md bg-neither px-2.5 py-1 text-sm text-bright lg:min-h-0"
           >
-            Take the tour
+            <span className="lg:hidden">Tour</span>
+            <span className="max-lg:hidden">Take the tour</span>
           </button>
           <button
             type="button"
@@ -555,23 +665,27 @@ export function Navigator() {
         </div>
       </header>
 
-      {/* Below lg the panels stack in one column, in the order they are written
-          here: Sites, Selected site, South pole, Custom point.
+      {/* Below lg one tab shows at a time: Sites, Selected site, or the map
+          with the custom point form. The bottom padding keeps the last panel
+          clear of the tab bar.
           From lg up the page is exactly one screen tall. Each column fills the
           space under the header: the Sites panel and the map take what the other
           panels leave, so the rows and the map shrink instead of the page scrolling. */}
-      <main className="flex flex-col gap-3 p-3 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
-        <div className="flex flex-col gap-3 lg:min-h-0">
+      <main className="flex flex-col gap-3 p-3 max-lg:pb-20 lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_380px] lg:grid-rows-[minmax(0,1fr)]">
+        <div className={cn("flex flex-col gap-3 lg:min-h-0", phoneTab === "map" && "max-lg:hidden")}>
           <Panel
-            id="tour-sites"
             title="Sites"
-            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view."
+            caption="Each row is a place, each square a day: orange for sunlight, blue for Earth in view. Stronger colour means more hours. Times are UTC."
             isHighlighted={tourTarget === "sites"}
             isDimmed={isTourOpen && tourTarget !== "sites"}
             // Stacked, a tooltip near the right edge is cut off at the panel's
             // side, so it never makes the page scroll sideways.
-            className="flex flex-col overflow-x-clip lg:min-h-0 lg:flex-1 lg:overflow-x-visible"
+            className={cn(
+              "flex flex-col overflow-x-clip lg:min-h-0 lg:flex-1 lg:overflow-x-visible",
+              phoneTab !== "sites" && "max-lg:hidden",
+            )}
           >
+            <div className="mb-2 flex flex-wrap items-center gap-2 lg:hidden">{sortAndPlan}</div>
             {isLoading && (
               <p className="text-sm text-muted-foreground">Loading sites.</p>
             )}
@@ -589,7 +703,7 @@ export function Navigator() {
                   selectedHour={selectedHour}
                   hourlyBySite={hourlyBySite}
                   failedHourlyIds={failedHourlyIds}
-                  onSelect={selectSiteAndHour}
+                  onSelect={pickSiteAndHour}
                   onRequestHourly={requestHourly}
                   onRemoveCustom={removeCustomSite}
                 />
@@ -601,60 +715,72 @@ export function Navigator() {
           {/* The selected site's numbers sit next to its charts: both are
               about the same site and hour. */}
           <Panel
-            id="tour-selected"
             title="Selected site"
             caption="One place at one hour: where the Sun and Earth are, and how long they stay."
             isHighlighted={tourTarget === "selected"}
             isDimmed={isTourOpen && tourTarget !== "selected"}
+            className={cn(phoneTab !== "site" && "max-lg:hidden")}
           >
-            {/* Numbers on the left, the sky and the charts on the right. On a
-                narrow screen the numbers sit above the sky and the charts. */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[23rem_minmax(0,1fr)]">
-              <div className="flex flex-col gap-3">
+            {/* From lg: numbers on the left, the sky and the charts on the right.
+                Below lg the two columns dissolve ("contents") and the order
+                classes put everything in one column: name and verdict, time
+                controls, sky, the two numbers, charts, then the buttons. */}
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[23rem_minmax(0,1fr)] lg:gap-6">
+              <div className="flex flex-col gap-3 max-lg:contents">
                 <SelectedSite
                   row={selectedRow}
                   hourly={selectedHourly}
                   hourlyFailed={selectedHourlyFailed}
                   selectedHour={selectedHour}
                 />
-                <SiteActions
-                  site={selectedRow === null ? null : selectedRow.site}
-                  isCustom={selectedRow !== null && selectedRow.isCustom}
-                  hourly={selectedHourly}
-                  selectedHour={selectedHour}
-                />
+                <div className="max-lg:order-4">
+                  <SiteActions
+                    site={selectedRow === null ? null : selectedRow.site}
+                    isCustom={selectedRow !== null && selectedRow.isCustom}
+                    hourly={selectedHourly}
+                    selectedHour={selectedHour}
+                  />
+                </div>
               </div>
               {/* The time controls, then the sky at the selected hour, then
                   the month's clearance charts. */}
-              <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex min-w-0 flex-col gap-1 max-lg:contents">
                 {selectedHourly !== null && (
-                  <TimeControls
+                  // Below lg the page scrolls, so the controls stick to the
+                  // top of the screen and stay in reach of a thumb.
+                  <div className="max-lg:sticky max-lg:top-0 max-lg:z-10 max-lg:order-1 max-lg:-mx-4 max-lg:bg-panel max-lg:px-4 max-lg:py-1">
+                    <TimeControls
+                      visibleMonth={visibleMonth}
+                      selectedHour={selectedHour}
+                      isPlaying={isPlaying}
+                      onTogglePlay={() => setIsPlaying((playing) => !playing)}
+                      onChangeHour={setSelectedHour}
+                    />
+                  </div>
+                )}
+                <div className="min-w-0 max-lg:order-1">
+                  <SkyPanorama
+                    row={selectedRow}
+                    hourly={selectedHourly}
                     visibleMonth={visibleMonth}
                     selectedHour={selectedHour}
-                    isPlaying={isPlaying}
-                    onTogglePlay={() => setIsPlaying((playing) => !playing)}
-                    onChangeHour={setSelectedHour}
                   />
-                )}
-                <SkyPanorama
-                  row={selectedRow}
-                  hourly={selectedHourly}
-                  visibleMonth={visibleMonth}
-                  selectedHour={selectedHour}
-                />
-                <ClearanceCharts
-                  row={selectedRow}
-                  hourly={selectedHourly}
-                  hourlyFailed={selectedHourlyFailed}
-                  visibleMonth={visibleMonth}
-                  selectedHour={selectedHour}
-                />
+                </div>
+                <div className="min-w-0 max-lg:order-3">
+                  <ClearanceCharts
+                    row={selectedRow}
+                    hourly={selectedHourly}
+                    hourlyFailed={selectedHourlyFailed}
+                    visibleMonth={visibleMonth}
+                    selectedHour={selectedHour}
+                  />
+                </div>
               </div>
             </div>
           </Panel>
         </div>
 
-        <div className="flex flex-col gap-3 lg:min-h-0">
+        <div className={cn("flex flex-col gap-3 lg:min-h-0", phoneTab !== "map" && "max-lg:hidden")}>
 
           <Panel
             title="South pole"
@@ -672,7 +798,7 @@ export function Navigator() {
                 rows={mapRows}
                 selectedSiteId={selectedSiteId}
                 pickedPoint={pickedPoint}
-                onSelectSite={selectSite}
+                onSelectSite={pickSite}
                 onEmptyClick={() => setIsMapOpen(true)}
                 emptyClickHint="Click empty ground to open the big map and pick a point."
               />
@@ -702,6 +828,37 @@ export function Navigator() {
         </div>
       </main>
 
+      {/* The tab bar, below lg only. During the guided tour it is dimmed and
+          inert like the rest of the page: the tour picks the tab itself. */}
+      <nav
+        aria-label="Sections"
+        inert={isTourOpen}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-line bg-background lg:hidden",
+          TOUR_FADE,
+          isTourOpen && TOUR_DIM,
+        )}
+      >
+        {PHONE_TABS.map((item) => {
+          const isOpen = item.tab === phoneTab;
+          return (
+            <button
+              key={item.tab}
+              type="button"
+              aria-pressed={isOpen}
+              onClick={() => showTab(item.tab)}
+              className={cn(
+                "h-14 text-sm text-muted-foreground",
+                // The open tab has a bright label and a bright line on top.
+                isOpen && "font-medium text-bright shadow-[inset_0_2px_0_var(--bright)]",
+              )}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
       {isAboutOpen && <AboutOverlay onClose={() => setIsAboutOpen(false)} />}
 
       {isPlannerOpen && (
@@ -709,8 +866,9 @@ export function Navigator() {
           rows={rows}
           hourlyBySite={hourlyBySite}
           selectedHour={selectedHour}
-          onSelect={selectSiteAndHour}
+          onSelect={pickSiteAndHour}
           onClose={() => setIsPlannerOpen(false)}
+          initialPresetId={plannerPresetId}
         />
       )}
 

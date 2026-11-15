@@ -1,7 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { hoursUntilChange, totalsByMonth } from "./data.ts";
+import { readFileSync } from "node:fs";
+
+import {
+  dataFolder,
+  hoursUntilChange,
+  joinEphemeris,
+  joinHourly,
+  sunPercent,
+  totalsByMonth,
+  type Ephemeris,
+  type SiteSummary,
+  type SiteHourly,
+} from "./data.ts";
+import { TOTAL_HOURS, YEARS } from "./time.ts";
 
 // Builds one summary day. bothHours is 0 unless given. The two fields the
 // helpers do not read are zero.
@@ -16,9 +29,10 @@ function day(date: string, sunHours: number, earthHours: number, bothHours: numb
   };
 }
 
-test("totalsByMonth returns 12 months of zeros for no days", () => {
+test("totalsByMonth returns 48 months of zeros for no days", () => {
   const totals = totalsByMonth([]);
-  assert.equal(totals.length, 12);
+  // 4 years of 12 months.
+  assert.equal(totals.length, 48);
   for (const monthTotals of totals) {
     assert.deepEqual(monthTotals, { sunHours: 0, earthHours: 0, bothHours: 0 });
   }
@@ -64,6 +78,106 @@ test("totalsByMonth gives February 2027 its 28 days", () => {
   const totals = totalsByMonth(days);
   assert.deepEqual(totals[1], { sunHours: 28 * 24, earthHours: 28, bothHours: 0 });
   assert.deepEqual(totals[2], { sunHours: 2, earthHours: 2, bothHours: 0 });
+});
+
+test("totalsByMonth keeps the years apart", () => {
+  const days = [
+    day("2027-02-10", 5, 1),
+    day("2028-02-29", 7, 2),
+    day("2030-12-31", 3, 4),
+    // Outside the years with data: ignored.
+    day("2031-01-01", 9, 9),
+  ];
+  const totals = totalsByMonth(days);
+  assert.deepEqual(totals[1], { sunHours: 5, earthHours: 1, bothHours: 0 });
+  // February 2028 is month 12 + 1.
+  assert.deepEqual(totals[13], { sunHours: 7, earthHours: 2, bothHours: 0 });
+  assert.deepEqual(totals[47], { sunHours: 3, earthHours: 4, bothHours: 0 });
+});
+
+test("dataFolder keeps 2027 where it was and gives later years a folder", () => {
+  assert.equal(dataFolder(2027), "/data/");
+  assert.equal(dataFolder(2028), "/data/2028/");
+  assert.equal(dataFolder(2030), "/data/2030/");
+});
+
+// One hourly file with the same value in every array.
+function makeHourly(startUtc: string, values: number[]): SiteHourly {
+  return {
+    id: "test-site",
+    start_utc: startUtc,
+    step_minutes: 60,
+    count: values.length,
+    sun_elev_deg: values,
+    sun_az_deg: values,
+    earth_elev_deg: values,
+    earth_az_deg: values,
+    sun_visible: values,
+    earth_visible: values,
+    horizon: { az_step_deg: 1, elev_deg: [0.5] },
+  };
+}
+
+test("joinHourly puts the years one after the other", () => {
+  const joined = joinHourly([
+    makeHourly("2027-01-01T00:00:00Z", [1, 0]),
+    makeHourly("2028-01-01T00:00:00Z", [0, 1, 1]),
+  ]);
+  assert.equal(joined.id, "test-site");
+  assert.equal(joined.start_utc, "2027-01-01T00:00:00Z");
+  assert.equal(joined.count, 5);
+  assert.deepEqual(joined.sun_visible, [1, 0, 0, 1, 1]);
+  assert.deepEqual(joined.earth_az_deg, [1, 0, 0, 1, 1]);
+  assert.deepEqual(joined.horizon, { az_step_deg: 1, elev_deg: [0.5] });
+});
+
+test("joinEphemeris puts the years one after the other", () => {
+  const joined = joinEphemeris([
+    {
+      start_utc: "2027-01-01T00:00:00Z",
+      step_minutes: 60,
+      count: 1,
+      sub_solar_lon_deg: [1],
+      sub_solar_lat_deg: [2],
+      sub_earth_lon_deg: [3],
+      sub_earth_lat_deg: [4],
+      earth_distance_km: [5],
+    },
+    {
+      start_utc: "2028-01-01T00:00:00Z",
+      step_minutes: 60,
+      count: 2,
+      sub_solar_lon_deg: [6, 7],
+      sub_solar_lat_deg: [8, 9],
+      sub_earth_lon_deg: [10, 11],
+      sub_earth_lat_deg: [12, 13],
+      earth_distance_km: [14, 15],
+    },
+  ]);
+  assert.equal(joined.start_utc, "2027-01-01T00:00:00Z");
+  assert.equal(joined.count, 3);
+  assert.deepEqual(joined.sub_solar_lon_deg, [1, 6, 7]);
+  assert.deepEqual(joined.earth_distance_km, [5, 14, 15]);
+});
+
+// Known answer: the real files of one site, joined, cover every hour of the
+// four years, and the first hour of 2028 sits right after the last of 2027.
+test("the real yearly files of a site join into one timeline", () => {
+  const parts: SiteHourly[] = [];
+  const ephemerisParts: Ephemeris[] = [];
+  for (const year of YEARS) {
+    const folder = "public" + dataFolder(year);
+    parts.push(JSON.parse(readFileSync(folder + "sites/shackleton-ridge.json", "utf8")));
+    ephemerisParts.push(JSON.parse(readFileSync(folder + "ephemeris.json", "utf8")));
+  }
+
+  const joined = joinHourly(parts);
+  assert.equal(joined.count, TOTAL_HOURS);
+  assert.equal(joined.sun_visible.length, TOTAL_HOURS);
+  assert.equal(joined.sun_elev_deg[8760], parts[1].sun_elev_deg[0]);
+  assert.equal(joined.sun_elev_deg[8759], parts[0].sun_elev_deg[8759]);
+
+  assert.equal(joinEphemeris(ephemerisParts).earth_distance_km.length, TOTAL_HOURS);
 });
 
 test("totalsByMonth matches a real month of data", () => {
@@ -158,4 +272,19 @@ test("hoursUntilChange matches a real 48 hours of data", () => {
   assert.equal(hoursUntilChange(sunVisible, 29), 1);
   // From hour 30 on it stays down until the excerpt ends.
   assert.equal(hoursUntilChange(sunVisible, 30), null);
+});
+
+test("sunPercent is the share of all hours with the Sun in view", () => {
+  assert.equal(sunPercent([]), 0);
+  // 12 + 24 = 36 of 48 hours.
+  assert.equal(sunPercent([day("2027-01-01", 12, 0), day("2027-01-02", 24, 0)]), 75);
+});
+
+test("the lit ridge near Shackleton has the Sun for 90.6% of 2027", () => {
+  // data/FACTS-FOR-STORY.md: 7,936 of the 8,760 hours of 2027, which is 90.6%.
+  const summary: SiteSummary = JSON.parse(
+    readFileSync("public/data/summary/shackleton-ridge.json", "utf8"),
+  );
+  assert.equal(summary.days.length, 365);
+  assert.equal(sunPercent(summary.days).toFixed(1), "90.6");
 });

@@ -12,7 +12,7 @@ import type { Site } from "./data.ts";
 const SOURCE_NOTE =
   "Landing coordinates from the NASA NSSDCA Table of Anthropogenic Impacts and " +
   "Spacecraft on the Moon (https://nssdc.gsfc.nasa.gov/planetary/lunar/lunar_artifact_impacts.html). " +
-  "Smooth Moon, no terrain; Sun and Earth hours are for 2027.";
+  "Smooth Moon, no terrain; Sun and Earth hours are for 2027 to 2030.";
 
 export const REFERENCE_SITES: Site[] = [
   {
